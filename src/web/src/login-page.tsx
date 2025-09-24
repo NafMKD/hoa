@@ -1,9 +1,4 @@
 import { LoginForm } from "@/components/login-form"
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
 
 export default function LoginPage() {
   return (

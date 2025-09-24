@@ -43,8 +43,8 @@ const data = {
       url: "/users",
       icon: User2,
       items: [
-        { title: "All Users", url: "/users/all" },
         { title: "Add New", url: "/users/add" },
+        { title: "All Users", url: "/users/all" },
       ],
     },
     {

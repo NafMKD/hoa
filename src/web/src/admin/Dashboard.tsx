@@ -1,4 +1,5 @@
-import { AppSidebar } from "@/admin/components/app-sidebar"
+import { AppSidebar } from "@/admin/components/app-sidebar";
+import { ModeToggle } from "@/components/mode-toggle";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,15 +7,15 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { LogOut } from "lucide-react"
+} from "@/components/ui/sidebar";
+import { LogOut } from "lucide-react";
 
 export default function Dashboard() {
   return (
@@ -42,16 +43,8 @@ export default function Dashboard() {
               </BreadcrumbList>
             </Breadcrumb>
             <div className="flex-grow"></div>
-
-
-
-            {/* Add logout button on the right side */}
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-4 hidden sm:flex dark:text-foreground"
-            >
+            <ModeToggle/>
+            <Button variant="outline" className="ml-4 hidden sm:flex dark:text-foreground">
               <LogOut />
               Log out
             </Button>
@@ -67,5 +60,5 @@ export default function Dashboard() {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

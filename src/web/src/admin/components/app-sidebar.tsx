@@ -106,7 +106,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <Avatar className="h-6 w-6 mr-2">
-                  {/* If you have an image, place the src below */}
                   <AvatarImage src="" alt="NG" />
                   <AvatarFallback>NG</AvatarFallback>
                 </Avatar>

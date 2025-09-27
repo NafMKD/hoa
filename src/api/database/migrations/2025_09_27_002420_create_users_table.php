@@ -13,16 +13,25 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->string('phone')->unique();
+            $table->string('email')->nullable();
             $table->string('password');
+            $table->foreignId('id_file')->nullable()->constrained('documents');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->enum('role', ['admin','accountant','secretary','homeowner','tenant'])->default('tenant');
+            $table->dateTime('last_login_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
+
+            $table->index('role');
+            $table->index('last_login_at');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
+            $table->string('phone')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });

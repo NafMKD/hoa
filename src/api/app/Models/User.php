@@ -4,13 +4,17 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasApiTokens, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +22,14 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'phone',
         'email',
         'password',
+        'id_file',
+        'role',
+        'last_login_at',
     ];
 
     /**
@@ -44,5 +53,137 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the ID document.
+     * 
+     * @return BelongsTo
+     */
+    public function idFile(): BelongsTo
+    {
+        return $this->belongsTo(Document::class, 'id_file');
+    }
+
+    /**
+     * Get units owned by the user.
+     * 
+     * @return HasMany
+     */
+    public function ownedUnits(): HasMany
+    {
+        return $this->hasMany(Unit::class, 'owner_id');
+    }
+
+    /**
+     * Get units rented by the user.
+     * 
+     * @return BelongsTo|null
+     */
+    public function rentedUnits(): BelongsTo|null
+    {
+        return TenantLease::where(['tenant_id' => $this->id , 'status' => 'active'])->first()?->unit();
+    }
+
+    /**
+     * Get payments made by the user.
+     * 
+     * @return mixed
+     */
+    public function payments(): mixed
+    {
+        return Payment::whereHas('invoice', function ($query) {
+            $query->where('user_id', $this->id);
+        })->first();
+    }
+
+    /**
+     * Get invoices for the user.
+     * 
+     * @return HasMany
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * Get leases where the user is tenant.
+     * 
+     * @return HasMany
+     */
+    public function leases()
+    {
+        return $this->hasMany(TenantLease::class, 'tenant_id');
+    }
+
+    /**
+     * Get leases created by the user (staff).
+     * 
+     * @return HasMany
+     */
+    public function createdLeases(): HasMany
+    {
+        return $this->hasMany(TenantLease::class, 'created_by');
+    }
+
+    /**
+     * Get expense created by the user (staff).
+     * 
+     * @return HasMany
+     */
+    public function createdExpenses(): HasMany
+    {
+        return $this->hasMany(Expense::class, 'created_by');
+    }
+
+    /**
+     * Get stickers created by the user (staff).
+     * 
+     * @return HasMany
+     */
+    public function createdStickers(): HasMany
+    {
+        return $this->hasMany(StickerIssue::class, 'issued_by');
+    }
+
+    /**
+     * Get votes cast by the user.
+     * 
+     * @return HasMany
+     */
+    public function votes(): HasMany
+    {
+        return $this->hasMany(Vote::class);
+    }
+
+    /**
+     * Get vehicles owned by the user.
+     * 
+     * @return HasMany
+     */
+    public function vehicles(): HasMany
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
+    /**
+     * Get sticker issues issued by the user.
+     * 
+     * @return HasMany
+     */
+    public function issuedStickers(): HasMany
+    {
+        return $this->hasMany(StickerIssue::class, 'issued_by');
+    }
+
+    /**
+     * Get audit logs performed by the user.
+     * 
+     * @return HasMany
+     */
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class, 'actor_user_id');
     }
 }

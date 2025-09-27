@@ -12,7 +12,7 @@
 - file_name varchar(255) nullable
 - mime_type varchar(100) nullable
 - file_size int nullable
-- category varchar(100) nullable -- e.g., 'lease_agreement', 'vehicle_ownership', 'id_file'
+- category enum('users', 'payslip', 'payments', 'tenantLeases', 'vehicles', 'stickers') nullable
 - uploaded_at timestamp default current_timestamp
 - created_at timestamp
 - updated_at timestamp
@@ -64,7 +64,6 @@
 - name char(10) -- unique within building
 - floor_number int
 - owner_id int nullable (fk → users.id) -- primary owner 
-- tenant_id int nullable (fk → users.id) -- current tenant (nullable)
 - size_m2 decimal nullable
 - status enum('available','occupied','vacant','maintenance') default 'available'
 - created_at datetime
@@ -103,6 +102,8 @@
 - description text nullable
 - is_recurring boolean default false
 - recurring_period_months int nullable -- e.g., 1, 2, 3; null if not recurring
+- last_recurring_date datetime nullable
+- next_recurring_date datetime nullable
 - category enm('administrational', 'special_assessment')
 - amount decimal(12,2) not null
 - is_penalizable boolean default false
@@ -142,9 +143,8 @@
 - id int (pk)
 - payment_number varchar unique
 - invoice_id int nullable (fk → invoices.id) -- payments may be received unapplied
-- user_id int (fk → users.id) -- who made the payment
 - amount decimal(14,2)
-- method enum('cash','bank_transfer','mobile_money','card','other')
+- method enum('cash','bank_transfer')
 - reference varchar nullable -- bank tx id
 - status enum('pending','confirmed','failed','refunded') default 'pending'
 - processed_at datetime nullable
@@ -162,7 +162,7 @@
 
 ```
 - id int (pk)
-- invoice_id int (fk → invoices.id)
+- payment_id int (fk → payments.id)
 - period_start date -- start of recognition period (e.g., '2025-07-01')
 - period_end date -- end of recognition period (e.g., '2025-07-31')
 - amount decimal(14,2) -- amount to recognize in that period
@@ -186,7 +186,6 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 ```
 - id int (pk)
 - vendor_id int nullable (fk → vendors.id)
-- vendor_name varchar nullable
 - description text
 - amount decimal(14,2)
 - category enum('maintenance','utilities','supplies','other')

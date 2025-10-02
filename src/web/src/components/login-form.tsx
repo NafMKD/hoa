@@ -10,47 +10,66 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useAuthStore, type User } from "@/lib/store";
+import { useAuthStore } from "@/lib/store";
 import { useNavigate } from "react-router-dom";
+import api from "@/lib/api";
+import { type User } from "@/lib/store";
 
-export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const setUser = useAuthStore((state) => state.setUser);
+  const setAuth = useAuthStore((state) => state.setAuth);
   const navigate = useNavigate();
+
+  // Simple client-side validation
+  const validateForm = () => {
+    if (!phone) return "Phone is required";
+    if (!/^\+?[0-9]{10,15}$/.test(phone)) return "Phone number is invalid";
+    if (!password) return "Password is required";
+    if (password.length < 6) return "Password must be at least 6 characters";
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     setLoading(true);
-
     try {
-      // MOCK LOGIN: only for frontend testing
-      await new Promise((res) => setTimeout(res, 1000)); // simulate delay
+      const { data } = await api.post("/auth/login", { phone, password });
 
-      // Simple validation example
-      if (!phone || !password) {
-        throw new Error("Phone and password are required");
-      }
-
-      // Save user in Zustand + localStorage
-      const mockUser: User = {
-        id: 1,
-        name: "Test User",
-        phone: phone,
-        role: "admin", // or "user" depending on module
+      const user: User = {
+        id: data.user.id,
+        name: `${data.user.first_name} ${data.user.last_name}`,
+        phone: data.user.phone,
+        role: data.user.role,
       };
 
-      setUser(mockUser);
-      localStorage.setItem("access_token", "mock_token");
+      console.log("Logged in user:", user);
+      
+      // Save encrypted store
+      setAuth(user, data.token);
 
-      // redirect to dashboard
       navigate("/admin");
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      console.error(err);
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Login failed. Please check your credentials.");
+      }
     } finally {
       setLoading(false);
     }
@@ -65,6 +84,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-300 rounded-md text-sm">
+                {error}
+              </div>
+            )}
             <div className="grid gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="phone">Phone</Label>
@@ -75,23 +99,21 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  className={error.includes("Phone") ? "border-red-500" : ""}
                 />
               </div>
 
               <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className={error.includes("Password") ? "border-red-500" : ""}
                 />
               </div>
-
-              {error && <div className="text-red-500 text-sm">{error}</div>}
 
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Logging in..." : "Login"}

@@ -109,4 +109,19 @@ class AuthController extends Controller
     {
         return Str::lower($request->input('phone')).'|'.$request->ip();
     }
+
+
+    /**
+     * Get the authenticated user's details.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function me(Request $request): JsonResponse
+    {
+        return response()->json([
+            'status' => self::_SUCCESS,
+            'user'   => $request->user(),
+        ]);
+    }
 }

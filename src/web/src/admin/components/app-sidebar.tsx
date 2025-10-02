@@ -32,7 +32,7 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "",
+      url: "/admin",
       icon: Gauge,
       isActive: true,
       items: [],
@@ -43,8 +43,8 @@ const data = {
       url: "/users",
       icon: User2,
       items: [
-        { title: "Add New", url: "/users/add" },
-        { title: "All Users", url: "/users/all" },
+        { title: "Add New", url: "/admin/users/add" },
+        { title: "All Users", url: "/admin/users/all" },
       ],
     },
     {
@@ -52,9 +52,10 @@ const data = {
       url: "/financials",
       icon: DollarSign,
       items: [
-        { title: "Fees & Assessments", url: "/financials/fees" },
-        { title: "Payments & Reconciliation", url: "/financials/payments" },
-        { title: "Reports", url: "/financials/reports" },
+        { title: "Invoices", url: "/admin/financials/invoices" },
+        { title: "Payments", url: "/admin/financials/payments" },
+        { title: "Reconciliation ", url: "/admin/financials/reconciliation" },
+        { title: "Reports", url: "/admin/financials/reports" },
       ],
     },
     {
@@ -62,8 +63,8 @@ const data = {
       url: "/expenses",
       icon: BanknoteArrowDown,
       items: [
-        { title: "Expenses", url: "/expenses/list" },
-        { title: "Payroll", url: "/expenses/payroll" },
+        { title: "Expenses", url: "/admin/expenses/list" },
+        { title: "Payroll", url: "/admin/expenses/payroll" },
       ],
     },
     {
@@ -71,8 +72,9 @@ const data = {
       url: "/vehicles",
       icon: CarFront,
       items: [
-        { title: "Vehicles & Stickers", url: "/vehicles/list" },
-        { title: "Lost / Replacement", url: "/vehicles/replacement" },
+        { title: "Vehicles", url: "/admin/vehicles/list" },
+        { title: "Stickers", url: "/admin/vehicles/stickers" },
+        { title: "Lost / Replacement", url: "/admin/vehicles/replacement" },
       ],
     },
     {
@@ -80,21 +82,22 @@ const data = {
       url: "/settings",
       icon: Settings,
       items: [
-        { title: "Admin Users & Roles", url: "/settings/admins" },
-        { title: "Audit Logs", url: "/settings/logs" },
-        { title: "Integrations / Features", url: "/settings/integrations" },
+        { title: "Admin Roles", url: "/admin/settings/roles" },
+        { title: "Audit Logs", url: "/admin/settings/logs" },
       ],
     },
     {
       title: "Support",
       url: "/support",
       icon: BadgeInfo,
-      items: [{ title: "Documentation", url: "/support/docs" }],
+      items: [{ title: "Documentation", url: "/admin/support/docs" }],
     },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  console.log("Rendering AppSidebar");
+  
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

@@ -140,32 +140,30 @@ class UserController extends Controller
      * @param  User $user
      * @return JsonResponse
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $user): JsonResponse
     {
-        $data = $request->validate([
-            'first_name' => ['sometimes', 'string', 'max:255'],
-            'last_name'  => ['sometimes', 'string', 'max:255'],
-            'phone'      => ['sometimes', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
-            'email'      => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
-            'password'   => ['sometimes', 'string', 'min:8'],
-            'role'       => ['sometimes', 'string', Rule::in(self::_ROLES)],
-            'id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.self::_MAX_FILE_SIZE],
-        ]);
-
-        return $request;
-        // try {
-        //     $this->authorize('update', [User::class, $user]);
+        try {
+            $this->authorize('update', [User::class, $user]);
     
+            $data = $request->validate([
+                'first_name' => ['sometimes', 'string', 'max:255'],
+                'last_name'  => ['sometimes', 'string', 'max:255'],
+                'phone'      => ['sometimes', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
+                'email'      => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
+                'password'   => ['sometimes', 'string', 'min:8'],
+                'role'       => ['sometimes', 'string', Rule::in(self::_ROLES)],
+                'id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.self::_MAX_FILE_SIZE],
+            ]);
     
-        //     $updated = $this->users->update($user, $data);
+            $updated = $this->users->update($user, $data);
     
-        //     return response()->json(new UserResource($updated));
-        // } catch (AuthorizationException $e) {
-        //     return response()->json([
-        //         'status' => self::_ERROR,
-        //         'message' => self::_UNAUTHORIZED
-        //     ], 403);
-        // }
+            return response()->json(new UserResource($updated));
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED
+            ], 403);
+        }
     }
 
     /**

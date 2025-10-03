@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('file_name', 255)->nullable();
             $table->string('mime_type', 100)->nullable();
             $table->integer('file_size')->nullable();
-            $table->enum('category', ['users', 'payslip', 'payments', 'tenantLeases', 'vehicles', 'stickers'])->nullable();
+            $table->enum('category', ['id_files', 'payslip', 'payments', 'tenantLeases', 'vehicles', 'stickers'])->nullable();
             $table->timestamp('uploaded_at')->useCurrent();
             $table->timestamps();
             $table->softDeletes();

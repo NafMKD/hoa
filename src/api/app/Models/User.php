@@ -56,6 +56,18 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if the user has a specific role.
+     *
+     * @param string $role
+     * @return bool
+     */
+    public function hasRole(string $role): bool
+    {
+        return in_array($role, \App\Http\Controllers\Controller::_ROLES, true)
+            && $this->role === $role;
+    }
+
+    /**
      * Get the ID document.
      * 
      * @return BelongsTo
@@ -82,7 +94,7 @@ class User extends Authenticatable
      */
     public function rentedUnits(): BelongsTo|null
     {
-        return TenantLease::where(['tenant_id' => $this->id , 'status' => 'active'])->first()?->unit();
+        return TenantLease::where(['tenant_id' => $this->id, 'status' => 'active'])->first()?->unit();
     }
 
     /**

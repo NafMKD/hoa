@@ -20,5 +20,6 @@ abstract class Controller
     const _DEFAULT_PAGINATION = 10;
     const _UNAUTHORIZED = 'Unauthorized action.';
     const _MAX_FILE_SIZE = 5120; // in KB
+    const _DEFAULT_ADDRESS = 'Figga, Addis Ababa';
 
 }

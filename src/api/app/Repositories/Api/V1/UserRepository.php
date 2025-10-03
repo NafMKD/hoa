@@ -46,17 +46,6 @@ class UserRepository
     }
 
     /**
-     * Find user by ID.
-     * 
-     * @param  int  $id
-     * @return User|null
-     */
-    public function find(int $id): ?User
-    {
-        return User::find($id);
-    }
-
-    /**
      * Create new user.
      * 
      * @param  array<string, mixed>  $data
@@ -148,6 +137,7 @@ class UserRepository
                 }
                 $user->idFile->delete();
             }
+            // TODO: Unlink relationships (leases, payments, etc.) if necessary 
             return $user->delete();
         });
     }

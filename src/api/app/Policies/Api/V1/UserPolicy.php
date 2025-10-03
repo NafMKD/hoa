@@ -12,7 +12,7 @@ class UserPolicy
      */
     public function viewAny(User $authUser): bool
     {
-        return $authUser->role === Controller::_ROLES[0];
+        return $authUser->hasRole(Controller::_ROLES[0]);
     }
 
     /**
@@ -21,11 +21,11 @@ class UserPolicy
     public function viewByRole(User $authUser, string $role ): bool
     {
         // Accountant can view only 'homeowner' and 'tenant' roles
-        if ($authUser->role === Controller::_ROLES[1] || $authUser->role === Controller::_ROLES[2]) {
+        if ($authUser->hasRole(Controller::_ROLES[1]) || $authUser->hasRole(Controller::_ROLES[2])) {
             return in_array($role, Controller::_ROLES.slice(-2), true);
         }
         
-        return $authUser->role === Controller::_ROLES[0];
+        return $authUser->hasRole(Controller::_ROLES[0]);
     }
 
     /**
@@ -33,7 +33,7 @@ class UserPolicy
      */
     public function view(User $authUser, User $user): bool
     {
-        return $authUser->role === Controller::_ROLES[0] || $authUser->id === $user->id;
+        return $authUser->hasRole(Controller::_ROLES[0]) || $authUser->id === $user->id;
     }
 
     /**
@@ -41,7 +41,7 @@ class UserPolicy
      */
     public function create(User $authUser): bool
     {
-        return $authUser->role === Controller::_ROLES[0];
+        return $authUser->hasRole(Controller::_ROLES[0]);
     }
 
     /**
@@ -49,7 +49,7 @@ class UserPolicy
      */
     public function update(User $authUser, User $user): bool
     {
-        return $authUser->role === Controller::_ROLES[0] || $authUser->id === $user->id;
+        return $authUser->hasRole(Controller::_ROLES[0]) || $authUser->id === $user->id;
     }
 
     /**
@@ -57,6 +57,6 @@ class UserPolicy
      */
     public function delete(User $authUser): bool
     {
-        return $authUser->role === Controller::_ROLES[0];
+        return $authUser->hasRole(Controller::_ROLES[0]);
     }
 }

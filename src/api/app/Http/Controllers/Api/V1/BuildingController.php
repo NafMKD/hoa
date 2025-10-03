@@ -67,10 +67,7 @@ class BuildingController extends Controller
 
             $building = $this->buildings->create($data);
 
-            return response()->json([
-                'status' => self::_SUCCESS,
-                new BuildingResource($building),
-            ], 201);
+            return response()->json(new BuildingResource($building), 201);
         } catch (AuthorizationException $e) {
             return response()->json([
                 'status' => self::_ERROR,

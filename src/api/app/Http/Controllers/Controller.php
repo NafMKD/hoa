@@ -16,10 +16,12 @@ abstract class Controller
     /**
      * @var list<string>
      */
-    const _DOCUMENT_TYPES = ['id_files', 'payslip', 'payments', 'tenantLeases', 'vehicles', 'stickers'];
+    const _DOCUMENT_TYPES = ['id_files', 'ownership_files', 'payslip', 'payments', 'tenantLeases', 'vehicles', 'stickers'];
     const _DEFAULT_PAGINATION = 10;
     const _UNAUTHORIZED = 'Unauthorized action.';
     const _MAX_FILE_SIZE = 5120; // in KB
     const _DEFAULT_ADDRESS = 'Figga, Addis Ababa';
+    const _UNIT_STATUS = ['rented','owner_occupied','vacant'];
+    const _UNIT_TYPES = ['1','2','3','4'];
 
 }

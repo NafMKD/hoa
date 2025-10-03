@@ -99,10 +99,7 @@ class UserController extends Controller
     
             $user = $this->users->create($data);
     
-            return response()->json([
-                'status' => self::_SUCCESS,
-                new UserResource($user)
-            ], 201);
+            return response()->json(new UserResource($user), 201);
         } catch (AuthorizationException $e) {
             return response()->json([
                 'status' => self::_ERROR,

@@ -21,9 +21,9 @@ class BuildingResource extends JsonResource
             'units_per_floor'=> $this->units_per_floor,
             'address'        => $this->address,
             'notes'          => $this->notes,
-            // 'units'          => $this->whenLoaded('units', function () {
-            //     return new UnitResource($this->idFile);
-            // }),
+            'units'          => $this->whenLoaded('units', function () {
+                return UnitResource::collection($this->units);
+            }),
             'created_at'     => $this->created_at,
             'updated_at'     => $this->updated_at,
         ];

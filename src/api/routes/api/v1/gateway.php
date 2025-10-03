@@ -11,3 +11,6 @@ Route::prefix('users')->middleware('auth:sanctum')->name('api.v1.users.')->group
 Route::prefix('buildings')->middleware('auth:sanctum')->name('api.v1.buildings.')->group(function () { 
     require __DIR__.'/building.php';
 });
+Route::prefix('units')->middleware('auth:sanctum')->name('api.v1.units.')->group(function () { 
+    require __DIR__.'/unit.php';
+});

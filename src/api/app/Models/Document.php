@@ -92,4 +92,14 @@ class Document extends Model
     {
         return $this->hasMany(StickerIssue::class, 'qr_code_file_id');
     }
+
+    /**
+     * Get unit that have this document ownership document.
+     * 
+     * @return HasMany
+     */
+    public function ownership(): HasMany
+    {
+        return $this->hasMany(Unit::class, 'ownership_file_id');
+    }
 }

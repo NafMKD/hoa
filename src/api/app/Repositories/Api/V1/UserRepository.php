@@ -95,6 +95,7 @@ class UserRepository
                 // Delete old file if exists
                 if ($user->idFile->file_path && Storage::disk('public')->exists($user->idFile->file_path)) {
                     Storage::disk('public')->delete($user->idFile->file_path);
+                    $user->idFile->delete();
                 }
 
                 $path = $this->uploadIdFile($data['id_file']);

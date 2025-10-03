@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Controller;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,11 +15,13 @@ return new class extends Migration
         Schema::create('units', function (Blueprint $table) {
             $table->id();
             $table->foreignId('building_id')->constrained('buildings');
-            $table->char('name', 10);
+            $table->string('name');
             $table->integer('floor_number');
             $table->foreignId('owner_id')->nullable()->constrained('users');
+            $table->foreignId('ownership_file_id')->nullable()->constrained('documents');
+            $table->enum('unit_type', Controller::_UNIT_TYPES)->nullable();
             $table->decimal('size_m2', 8, 2)->nullable();
-            $table->enum('status', ['available','occupied','vacant','maintenance'])->default('available');
+            $table->enum('status', Controller::_UNIT_STATUS)->default('owner_occupied');
             $table->timestamps();
             $table->softDeletes();
 

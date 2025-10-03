@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Controller;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,7 +21,7 @@ return new class extends Migration
             $table->string('password');
             $table->foreignId('id_file')->nullable()->constrained('documents');
             $table->timestamp('email_verified_at')->nullable();
-            $table->enum('role', ['admin','accountant','secretary','homeowner','tenant'])->default('tenant');
+            $table->enum('role', Controller::_ROLES)->default('tenant');
             $table->dateTime('last_login_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

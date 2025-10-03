@@ -24,12 +24,34 @@ class DocumentResource extends JsonResource
             'uploaded_at'  => $this->uploaded_at?->toDateTimeString(),
 
             // Optionally include related models
-            'users'        => $this->whenLoaded('users'),
+            'users'         => $this->whenLoaded('users', function () {
+                return UserResource::collection($this->users);
+            }),
             'payslips'     => $this->whenLoaded('payslip'),
             'payments'     => $this->whenLoaded('payments'),
             'tenant_leases'=> $this->whenLoaded('tenantLeases'),
             'vehicles'     => $this->whenLoaded('vehicles'),
             'stickers'     => $this->whenLoaded('stickers'),
+            'ownership'    => $this->whenLoaded('ownership', function () {
+                return UnitResource::collection($this->ownership);
+            }),
+
+            
+            // 'payslips'      => $this->whenLoaded('payslips', function () {
+            //     return PayslipResource::collection($this->payslips);
+            // }),
+            // 'payments'      => $this->whenLoaded('payments', function () {
+            //     return PaymentResource::collection($this->payments);
+            // }),
+            // 'tenant_leases' => $this->whenLoaded('tenantLeases', function () {
+            //     return LeaseResource::collection($this->tenantLeases);
+            // }),
+            // 'vehicles'      => $this->whenLoaded('vehicles', function () {
+            //     return VehicleResource::collection($this->vehicles);
+            // }),
+            // 'stickers'      => $this->whenLoaded('stickers', function () {
+            //     return StickerResource::collection($this->stickers);
+            // }),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,6 +22,8 @@ class Unit extends Model
         'name',
         'floor_number',
         'owner_id',
+        'ownership_file_id',
+        'unit_type',
         'size_m2',
         'status',
     ];
@@ -33,6 +36,37 @@ class Unit extends Model
     public function building(): BelongsTo
     {
         return $this->belongsTo(Building::class);
+    }
+
+    /**
+     * Get the ownership file of the unit.
+     * 
+     * @return BelongsTo
+     */
+    public function ownershipFile(): BelongsTo
+    {
+        return $this->belongsTo(Document::class, 'ownership_file_id');
+    }
+
+    /**
+     * Get the type of the unit.
+     * 
+     * @return string
+     */
+    public function type(): string
+    {
+        switch ($this->unit_type) {
+            case Controller::_UNIT_TYPES[0]:
+                return '1 Bed Room';
+            case Controller::_UNIT_TYPES[1]:
+                return '2 Bed Room';
+            case Controller::_UNIT_TYPES[2]:
+                return '3 Bed Room';
+            case Controller::_UNIT_TYPES[3]:
+                return '4 Bed Room';
+            default:
+                return 'Unknown';
+        }
     }
 
     /**

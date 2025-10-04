@@ -9,6 +9,7 @@ abstract class Controller
     use AuthorizesRequests;
     const _SUCCESS = 'success';
     const _ERROR = 'error';
+    const _UNKNOWN_ERROR = 'An unknown error occurred. Please try again.';
     /**
      * @var list<string>
      */
@@ -23,5 +24,6 @@ abstract class Controller
     const _DEFAULT_ADDRESS = 'Figga, Addis Ababa';
     const _UNIT_STATUS = ['rented','owner_occupied','vacant'];
     const _UNIT_TYPES = ['1','2','3','4'];
+    const _DOCUMENT_TEMPLATE_CATEGORIES = ['lease_agreement', 'letter', 'reminder', 'other'];
 
 }

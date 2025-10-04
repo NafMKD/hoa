@@ -198,4 +198,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(AuditLog::class, 'actor_user_id');
     }
+
+    /**
+     * Get document templates created by the user.
+     * 
+     * @return HasMany
+     */
+    public function createdTemplates(): HasMany
+    {
+        return $this->hasMany(DocumentTemplate::class, 'created_by');
+    }
+
+    /**
+     * Get document templates updated by the user.
+     * 
+     * @return HasMany
+     */
+    public function updatedTemplates(): HasMany
+    {
+        return $this->hasMany(DocumentTemplate::class, 'updated_by');
+    }
 }

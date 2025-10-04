@@ -1,0 +1,235 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Request;
+use App\Repositories\Api\V1\DocumentTemplateRepository;
+use App\Http\Resources\Api\V1\DocumentTemplateResource;
+use App\Models\DocumentTemplate;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+
+class DocumentTemplateController extends Controller
+{
+    protected DocumentTemplateRepository $templates;
+
+    /**
+     * DocumentTemplateController constructor.
+     * 
+     * @param DocumentTemplateRepository $templates
+     */
+    public function __construct(DocumentTemplateRepository $templates)
+    {
+        $this->templates = $templates;
+    }
+
+    /**
+     * Display a listing of templates.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function index(Request $request): JsonResponse
+    {
+        try {
+            $this->authorize('viewAny', DocumentTemplate::class);
+
+            $perPage = (int) ($request->query('per_page', self::_DEFAULT_PAGINATION));
+            $templates = $this->templates->all($perPage);
+
+            return response()->json(DocumentTemplateResource::collection($templates));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (\Exception $e) {
+            // Log the exception 
+            Log::error('Error fetching document templates: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Store a newly created template.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        try {
+            $this->authorize('create', DocumentTemplate::class);
+
+            $validated = $request->validate([
+                'category'     => ['required', 'string', 'max:255'],
+                'sub_category' => ['required', 'string', 'max:255'],
+                'name'         => ['nullable', 'string', 'max:255'],
+                'description'  => ['nullable', 'string'],
+                'version'      => ['required', 'integer', 'min:1'],
+                'file'         => ['required', 'file', 'mimes:docx', 'max:' . self::_MAX_FILE_SIZE],
+            ]);
+
+            $validated['created_by'] = auth()->id();
+            $template = $this->templates->create($validated);
+
+            return response()->json(new DocumentTemplateResource($template), 201);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (\Exception $e) {
+            // Log the exception 
+            Log::error('Error creating document template: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Display the specified template.
+     * 
+     * @param DocumentTemplate $template
+     * @return JsonResponse
+     */
+    public function show(DocumentTemplate $template): JsonResponse
+    {
+        try {
+            $this->authorize('view', $template);
+
+            $template->load('creator', 'updater');
+            return response()->json(new DocumentTemplateResource($template));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (\Exception $e) {
+            // Log the exception 
+            Log::error('Error fetching document template: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Update the specified template.
+     * 
+     * @param Request $request
+     * @param DocumentTemplate $template
+     * @return JsonResponse
+     */
+    public function update(Request $request, DocumentTemplate $template): JsonResponse
+    {
+        try {
+            $this->authorize('update', $template);
+
+            $validated = $request->validate([
+                'category'     => ['sometimes', 'string', 'max:255'],
+                'sub_category' => ['sometimes', 'string', 'max:255'],
+                'name'         => ['nullable', 'string', 'max:255'],
+                'description'  => ['nullable', 'string'],
+                'version'      => ['sometimes', 'integer', 'min:1'],
+                'file'         => ['nullable', 'file', 'mimes:docx', 'max:' . self::_MAX_FILE_SIZE],
+            ]);
+
+            $validated['updated_by'] = auth()->id();
+            $template = $this->templates->update($template, $validated);
+
+            return response()->json(new DocumentTemplateResource($template));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (\Exception $e) {
+            // Log the exception 
+            Log::error('Error updating document template: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Remove the specified template (soft delete).
+     * 
+     * @param DocumentTemplate $template
+     * @return JsonResponse
+     */
+    public function destroy(DocumentTemplate $template): JsonResponse
+    {
+        try {
+            $this->authorize('delete', $template);
+
+            $this->templates->delete($template);
+
+            return response()->json([
+                'status' => self::_SUCCESS,
+                'message' => 'Template deleted successfully.',
+            ]);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (\Exception $e) {
+            // Log the exception 
+            Log::error('Error deleting document template: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Generate a document from a template using placeholders.
+     * 
+     * @param Request $request
+     * @param DocumentTemplate $template
+     * @return JsonResponse
+     */
+    public function generate(Request $request, DocumentTemplate $template): JsonResponse
+    {
+        try {
+            $this->authorize('generate', $template);
+
+            $data = $request->validate([
+                'placeholders' => ['required', 'array'],
+                'placeholders.*' => ['string'],
+            ]);
+
+            $filePath = $this->templates->generate($template, $data['placeholders']);
+
+            return response()->json([
+                'status' => self::_SUCCESS,
+                'message' => 'Document generated successfully.',
+                'path' => $filePath,
+            ]);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (\Exception $e) {
+            // Log the exception 
+            Log::error('Error generating document from template: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+}

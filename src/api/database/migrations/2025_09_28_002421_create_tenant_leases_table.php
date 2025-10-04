@@ -17,10 +17,13 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained('users');
             $table->decimal('agreement_amount', 12, 2);
             $table->integer('frequency');
+            $table->foreignId('lease_document_id')->nullable()->constrained('documents');
             $table->date('lease_start_date');
             $table->date('lease_end_date')->nullable();
             $table->foreignId('agreement_document_id')->nullable()->constrained('documents');
             $table->enum('status', ['active','terminated','expired','draft'])->default('active');
+            $table->string('witness_1_full_name')->nullable();
+            $table->string('witness_2_full_name')->nullable();
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();

@@ -20,10 +20,13 @@ class TenantLease extends Model
         'tenant_id',
         'agreement_amount',
         'frequency',
+        'lease_document_id',
         'lease_start_date',
         'lease_end_date',
         'agreement_document_id',
         'status',
+        'witness_1_full_name', 
+        'witness_2_full_name',
         'notes',
         'created_by',
     ];

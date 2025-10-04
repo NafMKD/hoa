@@ -16,7 +16,7 @@ abstract class Controller
     /**
      * @var list<string>
      */
-    const _DOCUMENT_TYPES = ['id_files', 'ownership_files', 'payslip', 'payments', 'tenantLeases', 'vehicles', 'stickers'];
+    const _DOCUMENT_TYPES = ['id_files', 'ownership_files', 'payslip', 'payments', 'tenantLeases', 'vehicles', 'stickers', 'lease_document'];
     const _DEFAULT_PAGINATION = 10;
     const _UNAUTHORIZED = 'Unauthorized action.';
     const _MAX_FILE_SIZE = 5120; // in KB

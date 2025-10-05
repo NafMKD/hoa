@@ -23,3 +23,6 @@ Route::prefix('tenant-leases')->middleware('auth:sanctum')->name('api.v1.tenant_
 Route::prefix('fees')->middleware('auth:sanctum')->name('api.v1.fees.')->group(function () { 
     require __DIR__.'/fee.php';
 });
+Route::prefix('invoices')->middleware('auth:sanctum')->name('api.v1.invoices.')->group(function () { 
+    require __DIR__.'/invoice.php';
+});

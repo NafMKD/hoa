@@ -30,4 +30,5 @@ abstract class Controller
     const _FEE_CATEGORIES = ['administrational','special_assessment', 'other'];
     const _DEFAULT_DUE_DAYS = 10;
     const _INVOICE_STATUSES = ['issued','partial','paid','overdue','cancelled'];
+    const _FEE_FIXED_PENALTY = 100;
 }

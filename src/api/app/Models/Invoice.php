@@ -83,8 +83,41 @@ class Invoice extends Model
      *
      * @return BelongsTo
      */
-    public function fee()
+    public function fee(): BelongsTo
     {
         return $this->belongsTo(Fee::class, 'source_id')->where('source_type', 'fee');
+    }
+
+    /**
+     * Check if the invoice is penalizable
+     * 
+     * @return bool
+     */
+    public function isPenalizable(): bool
+    {
+        if ($this->source_type === 'fee' && $this->fee) {
+            return $this->fee->is_penalizable;
+        }
+        return false;
+    }
+
+    /**
+     * Determine if the invoice is overdue.
+     * 
+     * @return bool
+     */
+    public function isOverdue(): bool
+    {
+        return $this->status === 'overdue' && $this->due_date < now()->toDateString();
+    }
+
+    /**
+     * Get the outstanding amount on the invoice.
+     * 
+     * @return float
+     */
+    public function outstandingAmount(): float
+    {
+        return max(0, $this->total_amount + $this->penalty_amount - $this->amount_paid);
     }
 }

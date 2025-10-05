@@ -85,6 +85,7 @@ class TenantLeaseRepository
      * @param TenantLease $lease
      * @param array<string, mixed> $data
      * @return TenantLease
+     * @throws RepositoryException
      */
     public function update(TenantLease $lease, array $data): TenantLease
     {

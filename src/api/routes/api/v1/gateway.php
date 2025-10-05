@@ -20,3 +20,6 @@ Route::prefix('document-templates')->middleware('auth:sanctum')->name('api.v1.do
 Route::prefix('tenant-leases')->middleware('auth:sanctum')->name('api.v1.tenant_leases.')->group(function () { 
     require __DIR__.'/tenant_lease.php';
 });
+Route::prefix('fees')->middleware('auth:sanctum')->name('api.v1.fees.')->group(function () { 
+    require __DIR__.'/fee.php';
+});

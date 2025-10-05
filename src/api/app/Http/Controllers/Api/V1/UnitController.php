@@ -67,7 +67,7 @@ class UnitController extends Controller
                 'ownership_file_id'=> ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.self::_MAX_FILE_SIZE],
                 'unit_type'        => ['required', 'string', Rule::in(Controller::_UNIT_TYPES)],
                 'size_m2'          => ['nullable', 'numeric', 'min:0'],
-                'status'           => ['nullable', 'string', Rule::in(Controller::_UNIT_STATUS)],
+                'status'           => ['nullable', 'string', Rule::in(Controller::_UNIT_STATUSES)],
             ]);
 
             $unit = $this->units->create($data);
@@ -92,7 +92,7 @@ class UnitController extends Controller
         try {
             $this->authorize('view', $unit);
 
-            $unit->load(['building', 'owner', 'leases', 'ownershipFile']);
+            $unit->load(['building', 'owner', 'leases', 'ownershipFile', 'tenant']);
 
             return response()->json(new UnitResource($unit));
         } catch (AuthorizationException $e) {
@@ -123,7 +123,7 @@ class UnitController extends Controller
                 'ownership_file_id'=> ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.self::_MAX_FILE_SIZE],
                 'unit_type'        => ['sometimes', 'string', Rule::in(Controller::_UNIT_TYPES)],
                 'size_m2'          => ['nullable', 'numeric', 'min:0'],
-                'status'           => ['nullable', 'string', Rule::in(Controller::_UNIT_STATUS)],
+                'status'           => ['nullable', 'string', Rule::in(Controller::_UNIT_STATUSES)],
             ]);
 
             $updated = $this->units->update($unit, $data);

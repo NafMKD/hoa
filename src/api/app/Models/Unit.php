@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Unit extends Model
@@ -82,11 +85,12 @@ class Unit extends Model
     /**
      * Get the tenant of the unit.
      * 
-     * @return mixed
+     * @return BelongsTo
      */
-    public function tenant(): mixed
-    {
-        return $this->leases()->where('status', 'active')->first();
+    public function tenant(): BelongsTo
+    {   
+        $activeLease = $this->leases()->where('status', 'active')->first();
+        return $activeLease ? $activeLease->tenant() : null;
     }
 
     /**

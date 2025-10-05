@@ -126,7 +126,7 @@ class User extends Authenticatable
      * 
      * @return HasMany
      */
-    public function leases()
+    public function leases(): HasMany
     {
         return $this->hasMany(TenantLease::class, 'tenant_id');
     }

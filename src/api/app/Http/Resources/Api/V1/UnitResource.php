@@ -15,7 +15,7 @@ class UnitResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $data =  [
             'id'               => $this->id,
             'building'        => $this->whenLoaded('building', function () {
                 return new BuildingResource($this->building);
@@ -25,10 +25,6 @@ class UnitResource extends JsonResource
             'owner'           => $this->whenLoaded('owner', function () {
                 return new UserResource($this->owner);
             }),
-            'tenant'           => function () {
-                if ($this->status === Controller::_UNIT_STATUS[0]) return new UserResource($this->tenant());
-                return null;
-            },
             'unit_type'        => $this->unit_type,
             'type_name'        => $this->type(),
             'size_m2'          => $this->size_m2,
@@ -40,5 +36,13 @@ class UnitResource extends JsonResource
             'created_at'       => $this->created_at,
             'updated_at'       => $this->updated_at,
         ];
+
+        if ($this->status === Controller::_UNIT_STATUSES[0]) {
+            $data['tenant']=$this->whenLoaded('tenant', function () {
+                return new UserResource($this->tenant);
+            });
+        }
+
+        return $data;
     }
 }

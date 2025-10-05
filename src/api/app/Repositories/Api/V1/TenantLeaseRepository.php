@@ -71,6 +71,13 @@ class TenantLeaseRepository
                 $lease = $this->generateLeaseDocument($lease, $data['placeholders']);
             }
 
+            // update unit status
+            $unit = $lease->unit;
+            if ($unit) {
+                $unit->status = Controller::_UNIT_STATUSES[0];
+                $unit->save();
+            }
+
             DB::commit();
             return $lease;
         } catch (\Throwable $e) {
@@ -242,6 +249,13 @@ class TenantLeaseRepository
                 $lease->lease_end_date = now();
             }
             $lease->save();
+
+            // update unit status
+            $unit = $lease->unit;
+            if ($unit) {
+                $unit->status = Controller::_UNIT_STATUSES[2];
+                $unit->save();
+            }
 
             DB::commit();
             return $lease;

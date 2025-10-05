@@ -7,7 +7,6 @@ use App\Models\Fee;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class FeeRepository
 {
@@ -41,7 +40,7 @@ class FeeRepository
             // Automatically calculate next recurring date if recurring
             if (!empty($data['is_recurring']) && !empty($data['recurring_period_months'])) {
                 $data['last_recurring_date'] = now();
-                $data['next_recurring_date'] = now()->addMonths($data['recurring_period_months']);
+                $data['next_recurring_date'] = now()->addMonths((int) $data['recurring_period_months']);
             }
 
             $fee = Fee::create($data);
@@ -70,7 +69,7 @@ class FeeRepository
             // Recalculate recurring dates if recurrence settings changed
             if (isset($data['is_recurring']) && $data['is_recurring']) {
                 if (!empty($data['recurring_period_months'])) {
-                    $data['next_recurring_date'] = now()->addMonths($data['recurring_period_months']);
+                    $data['next_recurring_date'] = now()->addMonths((int) $data['recurring_period_months']);
                 }
             } 
 
@@ -101,10 +100,10 @@ class FeeRepository
     /**
      * Generate recurring fees for the current date.
      * 
-     * @return int Number of fees updated
+     * @return Collection
      * @throws RepositoryException
      */
-    public function processRecurringFees(): int
+    public function processRecurringFees(): Collection
     {
         try {
             $now = now();
@@ -113,38 +112,9 @@ class FeeRepository
                 ->where('next_recurring_date', '<=', $now)
                 ->get();
 
-            foreach ($dueFees as $fee) {
-                // Update recurring cycle
-                $fee->last_recurring_date = $now;
-                $fee->next_recurring_date = Carbon::parse($now)->addMonths($fee->recurring_period_months);
-                $fee->save();
-
-                // Generate invoices for the recurring fee
-                $this->generateInvoiceForFee($fee);
-            }
-
-            return $dueFees->count();
+            return $dueFees;
         } catch (\Throwable $e) {
             throw new RepositoryException('Failed to process recurring fees: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Generate an invoice for a specific fee.
-     * 
-     * @param Fee $fee
-     * @return void
-     */
-    private function generateInvoiceForFee(Fee $fee): void
-    {
-        if (method_exists($fee, 'invoices')) {
-            $fee->invoices()->create([
-                'source_type' => 'fee',
-                'source_id'   => $fee->id,
-                'amount'      => $fee->amount,
-                'status'      => 'unpaid',
-                'issued_at'   => now(),
-            ]);
         }
     }
 }

@@ -39,6 +39,8 @@ return new class extends Migration
             $table->index('lease_start_date');
             $table->index('lease_end_date');
             $table->index('agreement_type');
+
+            // TODO: implement unique
         });
     }
 

@@ -112,6 +112,22 @@ class DocumentTemplateRepository
     }
 
     /**
+     * Get placeholders for a given template.
+     * 
+     * @param DocumentTemplate $template
+     * @return array<string>
+     * @throws RepositoryException
+     */
+    public function getPlaceholders(DocumentTemplate $template): array
+    {
+        try {
+            return $template->placeholders ?? [];
+        } catch (\Throwable $e) {
+            throw new RepositoryException('Failed to retrieve placeholders: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Soft delete a document template.
      * 
      * @param DocumentTemplate $template
@@ -187,7 +203,7 @@ class DocumentTemplateRepository
 
     /**
      * Generate a filled document from a template using placeholder data
-     * and save it as PDF.
+     * and save it directly as PDF.
      * 
      * @param DocumentTemplate $template
      * @param array<string, string> $data
@@ -196,38 +212,39 @@ class DocumentTemplateRepository
      */
     public function generate(DocumentTemplate $template, array $data): string
     {
-        // Correct path based on your upload structure
         $source = storage_path('app/public/' . $template->path);
-        $outputName = "{$template->sub_category}_v{$template->version}_filled_" . now()->timestamp . ".pdf";
-        $outputPath = "generated_documents/{$template->category}/{$outputName}";
+        $pdfOutputName = "{$template->sub_category}_v{$template->version}_filled_" . now()->timestamp . ".pdf";
+        $pdfOutputPath = "generated_documents/{$template->category}/{$pdfOutputName}";
 
         try {
-            $phpWord = \PhpOffice\PhpWord\IOFactory::load($source);
-
-            // Replace placeholders in all sections
-            foreach ($phpWord->getSections() as $section) {
-                $elements = $section->getElements();
-                foreach ($elements as $element) {
-                    if (method_exists($element, 'getText')) {
-                        $text = $element->getText();
-                        foreach ($data as $key => $value) {
-                            $text = str_replace('{{' . $key . '}}', $value, $text);
-                        }
-                        if (method_exists($element, 'setText')) {
-                            $element->setText($text);
-                        }
-                    }
-                }
+            // Load template
+            $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($source);
+            
+            // Replace placeholders
+            foreach ($data as $key => $value) {
+                $templateProcessor->setValue($key, $value);
             }
 
-            // Ensure folder exists
+            // Save to temporary DOCX (required by PhpWord PDF conversion)
+            $tempDocx = tempnam(sys_get_temp_dir(), 'tmp_docx_') . '.docx';
+            $templateProcessor->saveAs($tempDocx);
+
+            // Ensure output folder exists
             Storage::disk('public')->makeDirectory("generated_documents/{$template->category}");
 
-            // Save as PDF
-            $pdfWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'PDF');
-            $pdfWriter->save(storage_path("app/public/{$outputPath}"));
+            // Set PDF renderer
+            \PhpOffice\PhpWord\Settings::setPdfRendererName(\PhpOffice\PhpWord\Settings::PDF_RENDERER_DOMPDF);
+            \PhpOffice\PhpWord\Settings::setPdfRendererPath(base_path('vendor/dompdf/dompdf'));
 
-            return $outputPath;
+            // Load DOCX and save as PDF
+            $phpWord = \PhpOffice\PhpWord\IOFactory::load($tempDocx);
+            $pdfWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'PDF');
+            $pdfWriter->save(storage_path("app/public/{$pdfOutputPath}"));
+
+            // Delete temporary DOCX
+            unlink($tempDocx);
+
+            return $pdfOutputPath;
         } catch (\Throwable $e) {
             throw new RepositoryException('Failed to generate PDF: ' . $e->getMessage());
         }

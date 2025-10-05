@@ -18,15 +18,18 @@ class TenantLease extends Model
     protected $fillable = [
         'unit_id',
         'tenant_id',
+        'representative_id',
+        'representative_document_id',
+        'agreement_type',
         'agreement_amount',
-        'frequency',
+        'lease_template_id',
         'lease_document_id',
         'lease_start_date',
         'lease_end_date',
-        'agreement_document_id',
         'status',
-        'witness_1_full_name', 
+        'witness_1_full_name',
         'witness_2_full_name',
+        'witness_3_full_name',
         'notes',
         'created_by',
     ];
@@ -72,7 +75,7 @@ class TenantLease extends Model
      */
     public function document(): BelongsTo
     {
-        return $this->belongsTo(Document::class, 'agreement_document_id');
+        return $this->belongsTo(Document::class, 'lease_document_id');
     }
 
     /**
@@ -83,5 +86,35 @@ class TenantLease extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the representative of this lease.
+     *
+     * @return BelongsTo
+     */
+    public function representative(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'representative_id');
+    }
+
+    /**
+     * Get the representative document of this lease.
+     *
+     * @return BelongsTo
+     */
+    public function representativeDocument(): BelongsTo
+    {
+        return $this->belongsTo(Document::class, 'representative_document_id');
+    }
+
+    /**
+     * Get the lease template of this lease.
+     *
+     * @return BelongsTo
+     */
+    public function leaseTemplate(): BelongsTo
+    {
+        return $this->belongsTo(DocumentTemplate::class, 'lease_template_id');
     }
 }

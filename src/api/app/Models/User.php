@@ -218,4 +218,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(DocumentTemplate::class, 'updated_by');
     }
+
+    /**
+     * Get the leases where the user is a representative.
+     * 
+     * @return HasMany
+     */
+    public function representativeLeases(): HasMany
+    {
+        return $this->hasMany(TenantLease::class, 'representative_id');
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -9,7 +10,9 @@ use App\Repositories\Api\V1\DocumentTemplateRepository;
 use App\Http\Resources\Api\V1\DocumentTemplateResource;
 use App\Models\DocumentTemplate;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class DocumentTemplateController extends Controller
 {
@@ -45,6 +48,11 @@ class DocumentTemplateController extends Controller
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
         } catch (\Exception $e) {
             // Log the exception 
             Log::error('Error fetching document templates: ' . $e->getMessage());
@@ -75,7 +83,7 @@ class DocumentTemplateController extends Controller
                 'file'         => ['required', 'file', 'mimes:docx', 'max:' . self::_MAX_FILE_SIZE],
             ]);
 
-            $validated['created_by'] = auth()->id();
+            $validated['created_by'] = Auth::id();
             $template = $this->templates->create($validated);
 
             return response()->json(new DocumentTemplateResource($template), 201);
@@ -84,6 +92,18 @@ class DocumentTemplateController extends Controller
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (ValidationException $e) {
+            // Return validation errors in array format
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }  catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
         } catch (\Exception $e) {
             // Log the exception 
             Log::error('Error creating document template: ' . $e->getMessage());
@@ -112,6 +132,11 @@ class DocumentTemplateController extends Controller
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
         } catch (\Exception $e) {
             // Log the exception 
             Log::error('Error fetching document template: ' . $e->getMessage());
@@ -143,7 +168,7 @@ class DocumentTemplateController extends Controller
                 'file'         => ['nullable', 'file', 'mimes:docx', 'max:' . self::_MAX_FILE_SIZE],
             ]);
 
-            $validated['updated_by'] = auth()->id();
+            $validated['updated_by'] = Auth::id();
             $template = $this->templates->update($template, $validated);
 
             return response()->json(new DocumentTemplateResource($template));
@@ -152,9 +177,58 @@ class DocumentTemplateController extends Controller
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (ValidationException $e) {
+            // Return validation errors in array format
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }  catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
         } catch (\Exception $e) {
             // Log the exception 
             Log::error('Error updating document template: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Get the placeholders for a given template.
+     * 
+     * @param DocumentTemplate $template
+     * @return JsonResponse
+     */
+    public function placeholders(DocumentTemplate $template): JsonResponse
+    {
+        try {
+            $this->authorize('view', $template);
+
+            $placeholders = $this->templates->getPlaceholders($template);
+
+            return response()->json([
+                'status' => self::_SUCCESS,
+                'placeholders' => $placeholders,
+            ]);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            // Log the exception 
+            Log::error('Error fetching template placeholders: ' . $e->getMessage());
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNKNOWN_ERROR,
@@ -184,6 +258,11 @@ class DocumentTemplateController extends Controller
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
         } catch (\Exception $e) {
             // Log the exception 
             Log::error('Error deleting document template: ' . $e->getMessage());
@@ -223,6 +302,11 @@ class DocumentTemplateController extends Controller
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
         } catch (\Exception $e) {
             // Log the exception 
             Log::error('Error generating document from template: ' . $e->getMessage());

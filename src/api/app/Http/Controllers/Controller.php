@@ -13,11 +13,11 @@ abstract class Controller
     /**
      * @var list<string>
      */
-    const _ROLES = ['admin','accountant','secretary','homeowner','tenant'];
+    const _ROLES = ['admin','accountant','secretary','homeowner','tenant', 'representative'];
     /**
      * @var list<string>
      */
-    const _DOCUMENT_TYPES = ['id_files', 'ownership_files', 'payslip', 'payments', 'tenantLeases', 'vehicles', 'stickers', 'lease_document'];
+    const _DOCUMENT_TYPES = ['id_files', 'ownership_files', 'payslip', 'payments', 'lease_document', 'vehicles', 'stickers', 'representative_document'];
     const _DEFAULT_PAGINATION = 10;
     const _UNAUTHORIZED = 'Unauthorized action.';
     const _MAX_FILE_SIZE = 5120; // in KB
@@ -25,5 +25,7 @@ abstract class Controller
     const _UNIT_STATUS = ['rented','owner_occupied','vacant'];
     const _UNIT_TYPES = ['1','2','3','4'];
     const _DOCUMENT_TEMPLATE_CATEGORIES = ['lease_agreement', 'letter', 'reminder', 'other'];
+    const _LEASE_STATUS = ['active','terminated','expired','draft'];
+    const _LEASE_AGREEMENT_TYPES = ['owner','representative'];
 
 }

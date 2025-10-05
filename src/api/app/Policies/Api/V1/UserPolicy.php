@@ -22,7 +22,7 @@ class UserPolicy
     {
         // Accountant can view only 'homeowner' and 'tenant' roles
         if ($authUser->hasRole(Controller::_ROLES[1]) || $authUser->hasRole(Controller::_ROLES[2])) {
-            return in_array($role, Controller::_ROLES.slice(-2), true);
+            return in_array($role, Controller::_ROLES.slice(-3), true);
         }
         
         return $authUser->hasRole(Controller::_ROLES[0]);

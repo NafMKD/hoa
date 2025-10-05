@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DocumentTemplate extends Model
@@ -57,6 +58,16 @@ class DocumentTemplate extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Get the leases that use this template.
+     * 
+     * @return HasMany
+     */
+    public function leases(): HasMany
+    {
+        return $this->hasMany(TenantLease::class, 'lease_template_id');
     }
 
 }

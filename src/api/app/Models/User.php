@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -90,11 +89,14 @@ class User extends Authenticatable
     /**
      * Get units rented by the user.
      * 
-     * @return BelongsTo|null
+     * @return HasMany
      */
-    public function rentedUnits(): BelongsTo|null
+    public function rentedUnits(): HasMany
     {
-        return TenantLease::where(['tenant_id' => $this->id, 'status' => 'active'])->first()?->unit();
+        return $this->hasMany(Unit::class, 'owner_id')
+                ->whereHas('leases', function($query) {
+                    $query->where('status', 'active');
+                });
     }
 
     /**

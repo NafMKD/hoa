@@ -119,7 +119,7 @@ class UserController extends Controller
         try {
             $this->authorize('view', [User::class, $user]); 
 
-            $user->load('idFile');
+            $user->load(['idFile', 'ownedUnits', 'rentedUnits', 'leases', 'createdLeases', 'createdTemplates', 'updatedTemplates', 'representativeLeases']);
     
             return response()->json(new UserResource($user));
         } catch (AuthorizationException $e) {

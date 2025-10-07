@@ -23,8 +23,8 @@ class InvoiceResource extends JsonResource
             'unit'              => $this->whenLoaded('unit', function () {
                 return new UnitResource($this->unit);
             }),
-            'fee'               => $this->whenLoaded('fee', function () {
-                return new FeeResource($this->fee);
+            'source'               => $this->whenLoaded('source', function () {
+                return $this->resolveSourceResource($this->source);
             }),
             // 'payments'          => $this->whenLoaded('payments', function () {
             //     return PaymentResource::collection($this->payments);
@@ -41,5 +41,25 @@ class InvoiceResource extends JsonResource
             'created_at'        => $this->created_at,
             'updated_at'        => $this->updated_at,
         ];
+    }
+
+    /**
+     * Resolve the appropriate resource for the source relationship.
+     *
+     * @param  mixed  $model
+     * @return JsonResource|mixed
+     */
+    protected function resolveSourceResource($model)
+    {
+        if (!$model) {
+            return null;
+        }
+
+        $modelClass = class_basename($model);
+        $resourceClass = "App\\Http\\Resources\\Api\\V1\\{$modelClass}Resource";
+
+        return class_exists($resourceClass)
+            ? new $resourceClass($model)
+            : $model;
     }
 }

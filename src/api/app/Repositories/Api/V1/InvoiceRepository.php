@@ -218,7 +218,7 @@ class InvoiceRepository
             'total_amount' => $fee->amount,
             'amount_paid' => 0.00,
             'status' => Controller::_INVOICE_STATUSES[0], // issued
-            'source_type' => 'fee',
+            'source_type' => 'App\\Models\\Fee',
             'source_id' => $fee->id,
             'penalty_amount' => 0.00,
             'metadata' => ['generated_by' => 'system']

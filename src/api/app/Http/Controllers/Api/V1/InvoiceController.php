@@ -84,7 +84,7 @@ class InvoiceController extends Controller
                 'penalty_amount' => ['nullable', 'numeric', 'min:0'],
             ]);
 
-            $validated['metadata'] = ['created_by' => Auth::id()];
+            $validated['metadata'] = ['generated_by' => Auth::id()];
             $invoice = $this->invoices->create($validated);
 
             return response()->json(new InvoiceResource($invoice), 201);
@@ -124,7 +124,7 @@ class InvoiceController extends Controller
         try {
             $this->authorize('view', $invoice);
 
-            $invoice->load(['user', 'unit', 'fee', 'payments']);
+            $invoice->load(['user', 'unit', 'source', 'payments']);
             return response()->json(new InvoiceResource($invoice));
         } catch (AuthorizationException) {
             return response()->json([

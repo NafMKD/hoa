@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends Model
@@ -79,13 +80,13 @@ class Invoice extends Model
     }
 
     /**
-     * Get the fee that generated this invoice (if source_type is fee).
+     * Get the source model (fee, payment, etc.) that generated this invoice.
      *
-     * @return BelongsTo
+     * @return MorphTo
      */
-    public function fee(): BelongsTo
+    public function source(): MorphTo
     {
-        return $this->belongsTo(Fee::class, 'source_id')->where('source_type', 'fee');
+        return $this->morphTo();
     }
 
     /**

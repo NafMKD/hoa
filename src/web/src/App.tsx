@@ -20,6 +20,7 @@ import Stickers from "./admin/components/Vehicle-Management/Stickers";
 import Roles from "./admin/System-Settings/Roles";
 import AuditLogs from "./admin/System-Settings/Audit-Logs";
 import Documentation from "./admin/Support/Documentation";
+import PublicRoute from "./components/public-route";
 
 const queryClient = new QueryClient();
 
@@ -32,82 +33,62 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             {/* Public route */}
-            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <LoginPage />
+                </PublicRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/login" replace />} />
 
             {/* Admin protected routes */}
             <Route
-              path="/admin/*"
+              path="/admin"
               element={
                 <ProtectedRoute role="admin">
-                  <AdminLayout breadcrumb={breadcrumb}>
-                    <Routes>
-                      <Route
-                        index
-                        element={
-                          <AdminDashboard setBreadcrumb={setBreadcrumb} />
-                        }
-                      />
-                      <Route
-                        path="users/add"
-                        element={<AddUser setBreadcrumb={setBreadcrumb} />}
-                      />
-                      <Route
-                        path="users/all"
-                        element={<AllUsers setBreadcrumb={setBreadcrumb} />}
-                      />
-                      <Route
-                        path="financials/invoices"
-                        element={<Invoices setBreadcrumb={setBreadcrumb} />}
-                      />
-                      <Route
-                        path="financials/payments"
-                        element={<Payments setBreadcrumb={setBreadcrumb} />}
-                      />
-                      <Route
-                        path="financials/reconciliation"
-                        element={<Reconciliation setBreadcrumb={setBreadcrumb} />}
-                      />
-                      <Route
-                        path="financials/reports"
-                        element={<Reports />}
-                      />
-                      <Route
-                        path="expenses/list"
-                        element={<Expenses />}
-                      />
-                      <Route
-                        path="expenses/payroll"
-                        element={<Payroll />}
-                      />
-                      <Route
-                        path="vehicles/list"
-                        element={<Vehicles />}
-                      />
-                      <Route
-                        path="vehicles/stickers"
-                        element={<Stickers/>}
-                      />
-                      <Route
-                        path="vehicles/replacement"
-                        element={<LostReplacement />}
-                      />
-                      <Route
-                        path="settings/roles"
-                        element={<Roles />}
-                      />
-                      <Route
-                        path="settings/logs"
-                        element={<AuditLogs />}
-                      />
-                      <Route
-                        path="support/docs"
-                        element={<Documentation />}
-                      />
-                    </Routes>
-                  </AdminLayout>
+                  <AdminLayout breadcrumb={breadcrumb} />
                 </ProtectedRoute>
               }
-            />
+            >
+              <Route
+                index
+                element={<AdminDashboard setBreadcrumb={setBreadcrumb} />}
+              />
+              <Route
+                path="users/add"
+                element={<AddUser setBreadcrumb={setBreadcrumb} />}
+              />
+              <Route
+                path="users/all"
+                element={<AllUsers setBreadcrumb={setBreadcrumb} />}
+              />
+              <Route
+                path="financials/invoices"
+                element={<Invoices setBreadcrumb={setBreadcrumb} />}
+              />
+              <Route
+                path="financials/payments"
+                element={<Payments setBreadcrumb={setBreadcrumb} />}
+              />
+              <Route
+                path="financials/reconciliation"
+                element={<Reconciliation setBreadcrumb={setBreadcrumb} />}
+              />
+              <Route path="financials/reports" element={<Reports />} />
+              <Route path="expenses/list" element={<Expenses />} />
+              <Route path="expenses/payroll" element={<Payroll />} />
+              <Route path="vehicles/list" element={<Vehicles />} />
+              <Route path="vehicles/stickers" element={<Stickers />} />
+              <Route
+                path="vehicles/replacement"
+                element={<LostReplacement />}
+              />
+              <Route path="settings/roles" element={<Roles />} />
+              <Route path="settings/logs" element={<AuditLogs />} />
+              <Route path="support/docs" element={<Documentation />} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

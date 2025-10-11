@@ -22,31 +22,43 @@ export function LoginForm({
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+
+  const [errors, setErrors] = useState({
+    phone: "",
+    password: "",
+    general: "",
+  });
 
   const setAuth = useAuthStore((state) => state.setAuth);
   const navigate = useNavigate();
 
-  // Simple client-side validation
   const validateForm = () => {
-    if (!phone) return "Phone is required";
-    if (!/^\+?[0-9]{10,15}$/.test(phone)) return "Phone number is invalid";
-    if (!password) return "Password is required";
-    if (password.length < 6) return "Password must be at least 6 characters";
-    return null;
+    const newErrors = { phone: "", password: "", general: "" };
+
+    if (!phone) {
+      newErrors.phone = "Phone is required";
+    } else if (!/^\+?[0-9]{10,15}$/.test(phone)) {
+      newErrors.phone = "Phone number is invalid";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    setErrors(newErrors);
+    return !newErrors.phone && !newErrors.password;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setErrors({ phone: "", password: "", general: "" });
 
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
+
     try {
       const { data } = await api.post("/auth/login", { phone, password });
 
@@ -57,18 +69,41 @@ export function LoginForm({
         role: data.user.role,
       };
 
-      console.log("Logged in user:", user);
-      
-      // Save encrypted store
       setAuth(user, data.token);
-
       navigate("/admin");
     } catch (err: any) {
-      console.error(err);
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
+      console.error("Login error:", err);
+
+      if (err.response?.data) {
+        const { message, errors: apiErrors } = err.response.data;
+
+        // Extract specific field errors if present
+        const newErrors = { phone: "", password: "", general: "" };
+
+        if (apiErrors) {
+          if (apiErrors.phone?.length) newErrors.phone = apiErrors.phone[0];
+          if (apiErrors.password?.length)
+            newErrors.password = apiErrors.password[0];
+        }
+
+        // Set general error if message exists and isn't field-specific
+        if (message && !newErrors.phone && !newErrors.password) {
+          newErrors.general = message;
+        }
+
+        setErrors(newErrors);
+      } else if (err.request) {
+        setErrors({
+          phone: "",
+          password: "",
+          general: "No response from server. Please try again later.",
+        });
       } else {
-        setError("Login failed. Please check your credentials.");
+        setErrors({
+          phone: "",
+          password: "",
+          general: "An unexpected error occurred.",
+        });
       }
     } finally {
       setLoading(false);
@@ -80,17 +115,21 @@ export function LoginForm({
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome</CardTitle>
-          <CardDescription>Login to continue to your account</CardDescription>
+          <CardDescription>
+            Login to continue to your account
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
-            {error && (
+          <form onSubmit={handleSubmit} noValidate>
+            {errors.general && (
               <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-300 rounded-md text-sm">
-                {error}
+                {errors.general}
               </div>
             )}
+
             <div className="grid gap-6">
-              <div className="grid gap-3">
+              {/* Phone Field */}
+              <div className="grid gap-2">
                 <Label htmlFor="phone">Phone</Label>
                 <Input
                   id="phone"
@@ -98,21 +137,36 @@ export function LoginForm({
                   placeholder="0911......"
                   required
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={error.includes("Phone") ? "border-red-500" : ""}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    if (errors.phone)
+                      setErrors((prev) => ({ ...prev, phone: "" }));
+                  }}
+                  className={errors.phone ? "border-red-500" : ""}
                 />
+                {errors.phone && (
+                  <p className="text-xs text-red-500">{errors.phone}</p>
+                )}
               </div>
 
-              <div className="grid gap-3">
+              {/* Password Field */}
+              <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={error.includes("Password") ? "border-red-500" : ""}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password)
+                      setErrors((prev) => ({ ...prev, password: "" }));
+                  }}
+                  className={errors.password ? "border-red-500" : ""}
                 />
+                {errors.password && (
+                  <p className="text-xs text-red-500">{errors.password}</p>
+                )}
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
@@ -122,9 +176,17 @@ export function LoginForm({
           </form>
         </CardContent>
       </Card>
+
       <div className="text-muted-foreground text-center text-xs">
-        By using this system, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By using this system, you agree to our{" "}
+        <a href="#" className="underline">
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a href="#" className="underline">
+          Privacy Policy
+        </a>
+        .
       </div>
     </div>
   );

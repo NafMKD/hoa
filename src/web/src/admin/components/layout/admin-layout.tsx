@@ -8,17 +8,15 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "@/lib/store";
 import api from "@/lib/api";
 
-export default function AdminLayout({
-  children,
-  breadcrumb,
-}: {
-  children: React.ReactNode;
+interface AdminLayoutProps {
   breadcrumb?: React.ReactNode;
-}) {
+}
+
+export default function AdminLayout({ breadcrumb }: AdminLayoutProps) {
   const navigate = useNavigate();
   const resetAuth = useAuthStore((state) => state.logout);
 
@@ -37,10 +35,14 @@ export default function AdminLayout({
       // Optionally show a toast notification
     }
   };
+
   return (
     <SidebarProvider>
+      {/* Sidebar mounts once */}
       <AppSidebar />
+
       <SidebarInset>
+        {/* Header with breadcrumb */}
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger className="-ml-1 cursor-pointer" />
@@ -63,7 +65,12 @@ export default function AdminLayout({
             </Button>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
+
+        {/* Main content area */}
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          {/* Render child routes here without remounting the layout */}
+          <Outlet />
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

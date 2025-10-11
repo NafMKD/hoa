@@ -18,7 +18,7 @@ export default function ProtectedRoute({ role, children }: ProtectedRouteProps) 
     } else {
       setLoading(false);
     }
-  }, [user, initAuth]);
+  }, []);
 
   if (loading) {
     return (

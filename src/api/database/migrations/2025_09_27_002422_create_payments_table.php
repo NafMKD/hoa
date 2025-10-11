@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Controller;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,9 +17,9 @@ return new class extends Migration
             $table->string('payment_number')->unique();
             $table->foreignId('invoice_id')->nullable()->constrained('invoices');
             $table->decimal('amount', 14, 2);
-            $table->enum('method', ['cash','bank_transfer']);
+            $table->enum('method', Controller::_PAYMENT_METHODS);
             $table->string('reference')->nullable();
-            $table->enum('status', ['pending','confirmed','failed','refunded'])->default('pending');
+            $table->enum('status', Controller::_PAYMENT_STATUSES)->default('pending');
             $table->dateTime('processed_at')->nullable();
             $table->json('reconciliation_metadata')->nullable();
             $table->foreignId('payment_screen_shoot_id')->nullable()->constrained('documents');

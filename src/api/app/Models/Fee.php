@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Fee extends Model
@@ -44,12 +45,12 @@ class Fee extends Model
     }
 
     /**
-     * Get invoices generated from this fee.
+     * Get all invoices generated from this fee.
      *
-     * @return HasMany
+     * @return MorphMany
      */
-    public function invoices(): HasMany
+    public function invoices(): MorphMany
     {
-        return $this->hasMany(Invoice::class, 'source_id')->where('source_type', 'fee');
+        return $this->morphMany(Invoice::class, 'source');
     }
 }

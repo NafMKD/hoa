@@ -31,4 +31,6 @@ abstract class Controller
     const _DEFAULT_DUE_DAYS = 10;
     const _INVOICE_STATUSES = ['issued','partial','paid','overdue','cancelled'];
     const _FEE_FIXED_PENALTY = 100;
+    const _PAYMENT_STATUSES = ['pending','confirmed','failed','refunded'];
+    const _PAYMENT_METHODS = ['cash','bank_transfer', 'other'];
 }

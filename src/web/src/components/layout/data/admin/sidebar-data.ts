@@ -1,198 +1,220 @@
 import {
-  Construction,
   LayoutDashboard,
-  Monitor,
-  Bug,
-  ListTodo,
-  FileX,
-  HelpCircle,
-  Lock,
-  Bell,
-  Package,
-  Palette,
-  ServerOff,
-  Settings,
-  Wrench,
-  UserCog,
-  UserX,
   Users,
-  MessagesSquare,
-  ShieldCheck,
-  AudioWaveform,
-  Command,
-  GalleryVerticalEnd,
+  UserPlus,
+  Building,
+  Home,
+  FileText,
+  CreditCard,
+  Receipt,
+  DollarSign,
+  Wallet,
+  BarChart3,
+  Car,
+  PlusCircle,
+  Vote,
+  Inbox,
+  FileSignature,
+  MessageSquareWarning,
+  Settings,
+  UserCog,
+  Wrench,
+  Palette,
+  Bell,
+  Monitor,
+  HelpCircle,
+  List,
+  Sticker,
 } from 'lucide-react'
 import { type SidebarData } from '@/components/layout/types'
 
 export const sidebarData: SidebarData = {
   user: {
-    name: 'satnaing',
-    email: 'satnaingdev@gmail.com',
-    avatar: '/avatars/shadcn.jpg',
+    name: 'Admin User',
+    email: 'admin@hoa.com',
+    avatar: '/avatars/admin.jpg',
   },
-  teams: [
-    {
-      name: 'Shadcn Admin',
-      logo: Command,
-      plan: 'Vite + ShadcnUI',
-    },
-    {
-      name: 'Acme Inc',
-      logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
-      plan: 'Startup',
-    },
-  ],
   navGroups: [
     {
-      title: 'General',
+      title: 'Main',
       items: [
         {
           title: 'Dashboard',
           url: '/',
           icon: LayoutDashboard,
         },
-        {
-          title: 'Tasks',
-          url: '/tasks',
-          icon: ListTodo,
-        },
-        {
-          title: 'Apps',
-          url: '/apps',
-          icon: Package,
-        },
-        {
-          title: 'Chats',
-          url: '/chats',
-          badge: '3',
-          icon: MessagesSquare,
-        },
+      ],
+    },
+    {
+      title: 'Users & Properties',
+      items: [
         {
           title: 'Users',
-          url: '/users',
-          icon: Users,
-        },
-        {
-          title: 'Secured by Clerk',
           icon: Users,
           items: [
             {
-              title: 'Sign In',
-              url: '/clerk/sign-in',
+              title: 'All Users',
+              url: '/users',
+              icon: List,
             },
             {
-              title: 'Sign Up',
-              url: '/clerk/sign-up',
+              title: 'Add User',
+              url: '/users/add',
+              icon: UserPlus,
+            },
+          ],
+        },
+        {
+          title: 'Buildings',
+          icon: Building,
+          items: [
+            {
+              title: 'All Buildings',
+              url: '/buildings',
+              icon: List,
             },
             {
-              title: 'User Management',
-              url: '/clerk/user-management',
+              title: 'Add Building',
+              url: '/buildings/add',
+              icon: PlusCircle,
+            },
+          ],
+        },
+        {
+          title: 'Units',
+          icon: Home,
+          items: [
+            {
+              title: 'All Units',
+              url: '/units',
+              icon: List,
+            },
+            {
+              title: 'Add Unit',
+              url: '/units/add',
+              icon: PlusCircle,
             },
           ],
         },
       ],
     },
     {
-      title: 'Pages',
+      title: 'Financials',
       items: [
         {
-          title: 'Auth',
-          icon: ShieldCheck,
+          title: 'Fees',
+          url: '/financials/fees',
+          icon: CreditCard,
+        },
+        {
+          title: 'Invoices',
+          url: '/financials/invoices',
+          icon: FileText,
+        },
+        {
+          title: 'Payments',
+          url: '/financials/payments',
+          icon: Receipt,
+        },
+        {
+          title: 'Payment Reconciliation',
+          url: '/financials/reconciliation',
+          icon: DollarSign,
+        },
+        {
+          title: 'Expenses',
+          url: '/financials/expenses',
+          icon: Wallet,
+        },
+        {
+          title: 'Payroll',
+          url: '/financials/payroll',
+          icon: FileSignature,
+        },
+        {
+          title: 'Reports',
+          url: '/financials/reports',
+          icon: BarChart3,
+        },
+      ],
+    },
+    {
+      title: 'Community',
+      items: [
+        {
+          title: 'Vehicles',
+          icon: Car,
           items: [
             {
-              title: 'Sign In',
-              url: '/sign-in',
+              title: 'All Vehicles',
+              url: '/vehicles',
+              icon: List,
             },
             {
-              title: 'Sign In (2 Col)',
-              url: '/sign-in-2',
+              title: 'Add Vehicle',
+              url: '/vehicles/add',
+              icon: PlusCircle,
             },
             {
-              title: 'Sign Up',
-              url: '/sign-up',
-            },
-            {
-              title: 'Forgot Password',
-              url: '/forgot-password',
-            },
-            {
-              title: 'OTP',
-              url: '/otp',
+              title: 'Parking Stickers',
+              url: '/vehicles/stickers',
+              icon: Sticker,
             },
           ],
         },
         {
-          title: 'Errors',
-          icon: Bug,
+          title: 'Community Poll',
+          icon: Vote,
           items: [
             {
-              title: 'Unauthorized',
-              url: '/errors/unauthorized',
-              icon: Lock,
+              title: 'All Polls',
+              url: '/polls',
+              icon: List,
             },
             {
-              title: 'Forbidden',
-              url: '/errors/forbidden',
-              icon: UserX,
+              title: 'Create Poll',
+              url: '/polls/create',
+              icon: PlusCircle,
+            },
+          ],
+        },
+        {
+          title: 'Complaints',
+          icon: MessageSquareWarning,
+          items: [
+            {
+              title: 'All Complaints',
+              url: '/complaints',
+              icon: List,
             },
             {
-              title: 'Not Found',
-              url: '/errors/not-found',
-              icon: FileX,
+              title: 'Create Complaint',
+              url: '/complaints/create',
+              icon: PlusCircle,
+            },
+          ],
+        },
+        {
+          title: 'Letters',
+          icon: Inbox,
+          items: [
+            {
+              title: 'All Letters',
+              url: '/letters',
+              icon: List,
             },
             {
-              title: 'Internal Server Error',
-              url: '/errors/internal-server-error',
-              icon: ServerOff,
-            },
-            {
-              title: 'Maintenance Error',
-              url: '/errors/maintenance-error',
-              icon: Construction,
+              title: 'Create Letter',
+              url: '/letters/create',
+              icon: PlusCircle,
             },
           ],
         },
       ],
     },
     {
-      title: 'Other',
+      title: 'Support',
       items: [
-        {
-          title: 'Settings',
-          icon: Settings,
-          items: [
-            {
-              title: 'Profile',
-              url: '/settings',
-              icon: UserCog,
-            },
-            {
-              title: 'Account',
-              url: '/settings/account',
-              icon: Wrench,
-            },
-            {
-              title: 'Appearance',
-              url: '/settings/appearance',
-              icon: Palette,
-            },
-            {
-              title: 'Notifications',
-              url: '/settings/notifications',
-              icon: Bell,
-            },
-            {
-              title: 'Display',
-              url: '/settings/display',
-              icon: Monitor,
-            },
-          ],
-        },
         {
           title: 'Help Center',
           url: '/help-center',

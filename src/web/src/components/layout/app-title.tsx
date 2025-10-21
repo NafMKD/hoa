@@ -29,7 +29,7 @@ export function AppTitle() {
                 onClick={() => setOpenMobile(false)}
                 className="grid flex-1 text-start text-sm leading-tight ml-2"
               >
-                <span className="truncate font-bold">Noah Gardon HOA</span>
+                <span className="truncate font-bold">Noah Garden HOA</span>
                 <span className="truncate text-xs">Admin Dashboard</span>
               </Link>
             )}

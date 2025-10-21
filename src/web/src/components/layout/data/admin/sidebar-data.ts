@@ -31,7 +31,7 @@ import { type SidebarData } from '@/components/layout/types'
 export const sidebarData: SidebarData = {
   user: {
     name: 'Admin User',
-    email: 'admin@hoa.com',
+    email: 'admin@gmail.com',
     avatar: '/avatars/admin.jpg',
   },
   navGroups: [
@@ -40,7 +40,7 @@ export const sidebarData: SidebarData = {
       items: [
         {
           title: 'Dashboard',
-          url: '/',
+          url: '/admin',
           icon: LayoutDashboard,
         },
       ],

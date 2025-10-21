@@ -189,8 +189,8 @@ export function Dashboard() {
 
 const topNav = [
   {
-    title: 'Overview',
-    href: 'dashboard',
+    title: 'Payment Reconciliation',
+    href: 'financials/reconciliation',
     isActive: true,
     disabled: false,
   },

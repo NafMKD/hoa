@@ -7,12 +7,12 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Header } from '@/components/layout/admin/header'
-import { Main } from '@/components/layout/admin/main'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
 import { TopNav } from '@/components/layout/admin/top-nav'
-import { ProfileDropdown } from '@/components/admin/profile-dropdown'
-import { Search } from '@/components/admin/search'
-import { ThemeSwitch } from '@/components/admin/theme-switch'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
 
 export function Dashboard() {
   return (

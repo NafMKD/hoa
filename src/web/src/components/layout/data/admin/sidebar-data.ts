@@ -16,12 +16,6 @@ import {
   Inbox,
   FileSignature,
   MessageSquareWarning,
-  Settings,
-  UserCog,
-  Wrench,
-  Palette,
-  Bell,
-  Monitor,
   HelpCircle,
   List,
   Sticker,
@@ -54,12 +48,12 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: 'All Users',
-              url: '/users',
+              url: '/admin/users',
               icon: List,
             },
             {
               title: 'Add User',
-              url: '/users/add',
+              url: '/admin/users/add',
               icon: UserPlus,
             },
           ],
@@ -70,12 +64,12 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: 'All Buildings',
-              url: '/buildings',
+              url: '/admin/buildings',
               icon: List,
             },
             {
               title: 'Add Building',
-              url: '/buildings/add',
+              url: '/admin/buildings/add',
               icon: PlusCircle,
             },
           ],
@@ -86,12 +80,12 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: 'All Units',
-              url: '/units',
+              url: '/admin/units',
               icon: List,
             },
             {
               title: 'Add Unit',
-              url: '/units/add',
+              url: '/admin/units/add',
               icon: PlusCircle,
             },
           ],
@@ -103,37 +97,37 @@ export const sidebarData: SidebarData = {
       items: [
         {
           title: 'Fees',
-          url: '/financials/fees',
+          url: '/admin/financials/fees',
           icon: CreditCard,
         },
         {
           title: 'Invoices',
-          url: '/financials/invoices',
+          url: '/admin/financials/invoices',
           icon: FileText,
         },
         {
           title: 'Payments',
-          url: '/financials/payments',
+          url: '/admin/financials/payments',
           icon: Receipt,
         },
         {
           title: 'Payment Reconciliation',
-          url: '/financials/reconciliation',
+          url: '/admin/financials/reconciliation',
           icon: DollarSign,
         },
         {
           title: 'Expenses',
-          url: '/financials/expenses',
+          url: '/admin/financials/expenses',
           icon: Wallet,
         },
         {
           title: 'Payroll',
-          url: '/financials/payroll',
+          url: '/admin/financials/payroll',
           icon: FileSignature,
         },
         {
           title: 'Reports',
-          url: '/financials/reports',
+          url: '/admin/financials/reports',
           icon: BarChart3,
         },
       ],
@@ -147,17 +141,17 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: 'All Vehicles',
-              url: '/vehicles',
+              url: '/admin/vehicles',
               icon: List,
             },
             {
               title: 'Add Vehicle',
-              url: '/vehicles/add',
+              url: '/admin/vehicles/add',
               icon: PlusCircle,
             },
             {
               title: 'Parking Stickers',
-              url: '/vehicles/stickers',
+              url: '/admin/vehicles/stickers',
               icon: Sticker,
             },
           ],
@@ -168,12 +162,12 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: 'All Polls',
-              url: '/polls',
+              url: '/admin/polls',
               icon: List,
             },
             {
               title: 'Create Poll',
-              url: '/polls/create',
+              url: '/admin/polls/create',
               icon: PlusCircle,
             },
           ],
@@ -184,12 +178,12 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: 'All Complaints',
-              url: '/complaints',
+              url: '/admin/complaints',
               icon: List,
             },
             {
               title: 'Create Complaint',
-              url: '/complaints/create',
+              url: '/admin/complaints/create',
               icon: PlusCircle,
             },
           ],
@@ -200,12 +194,12 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: 'All Letters',
-              url: '/letters',
+              url: '/admin/letters',
               icon: List,
             },
             {
               title: 'Create Letter',
-              url: '/letters/create',
+              url: '/admin/letters/create',
               icon: PlusCircle,
             },
           ],

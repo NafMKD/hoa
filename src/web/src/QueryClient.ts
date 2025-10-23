@@ -51,11 +51,11 @@ const queryClient = new QueryClient({
 
       switch (status) {
         case 401: // Unauthorized
-          toast.error("Session expired! Please login again.");
+          { toast.error("Session expired! Please login again.");
           authStore.logout();
           const redirect = window.location.href;
           router.navigate({ to: "/sign-in", search: { redirect } });
-          break;
+          break; }
         case 403: // Forbidden
           router.navigate({ to: "/403" });
           break;

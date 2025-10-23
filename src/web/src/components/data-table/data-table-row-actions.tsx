@@ -10,8 +10,8 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useUsers } from '../context/users-context'
-import { type User } from '../data/schema'
+import { useUsers } from '../../features/admin/users/context/users-context'
+import { type User } from '../../features/admin/users/data/schema'
 
 interface DataTableRowActionsProps {
   row: Row<User>

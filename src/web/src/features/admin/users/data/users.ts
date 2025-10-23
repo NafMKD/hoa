@@ -1,254 +1,52 @@
-export const users = [
-  {
-    id: "1b2a9c10-ef3f-4a6a-bb8b-5c9f832f9f11",
-    firstName: "Noah",
-    lastName: "Mengistu",
-    username: "noah.mengistu",
-    email: "noah@example.com",
-    phoneNumber: "+251912345678",
-    status: "active",
-    role: "superadmin",
-    createdAt: "2024-06-15T10:25:00Z",
-    updatedAt: "2025-10-20T09:15:00Z",
-  },
-  {
-    id: "c21a0b3a-22f9-4db4-a30f-7f21b6b67154",
-    firstName: "Sara",
-    lastName: "Kebede",
-    username: "sara.kebede",
-    email: "sara@example.com",
-    phoneNumber: "+251911223344",
-    status: "active",
-    role: "manager",
-    createdAt: "2023-12-10T12:00:00Z",
-    updatedAt: "2025-10-21T08:50:00Z",
-  },
-  {
-    id: "e54d6c17-fbc5-4608-9e17-b72e3c6b9821",
-    firstName: "Abel",
-    lastName: "Tadesse",
-    username: "abel.tadesse",
-    email: "abel@example.com",
-    phoneNumber: "+251917223344",
-    status: "inactive",
-    role: "cashier",
-    createdAt: "2024-01-18T14:10:00Z",
-    updatedAt: "2025-10-19T10:00:00Z",
-  },
-  {
-    id: "9a2f5f3b-4c18-41c3-8a8c-0a1f8f28e9d3",
-    firstName: "Hanna",
-    lastName: "Tesfaye",
-    username: "hanna.tesfaye",
-    email: "hanna@example.com",
-    phoneNumber: "+251910334455",
-    status: "active",
-    role: "admin",
-    createdAt: "2024-03-25T11:30:00Z",
-    updatedAt: "2025-10-22T08:00:00Z",
-  },
-  {
-    id: "8f15c7b7-63a4-4bb2-b61a-8a79c3e6b40e",
-    firstName: "Martha",
-    lastName: "Yohannes",
-    username: "martha.yohannes",
-    email: "martha@example.com",
-    phoneNumber: "+251911556677",
-    status: "invited",
-    role: "cashier",
-    createdAt: "2023-11-05T13:00:00Z",
-    updatedAt: "2025-10-20T10:10:00Z",
-  },
-  {
-    id: "bb79c2da-8299-4d69-99dc-d70a9bbdf2c5",
-    firstName: "Elias",
-    lastName: "Bekele",
-    username: "elias.bekele",
-    email: "elias@example.com",
-    phoneNumber: "+251912334455",
-    status: "suspended",
-    role: "admin",
-    createdAt: "2024-02-10T09:40:00Z",
-    updatedAt: "2025-10-21T07:40:00Z",
-  },
-  {
-    id: "7d63cc82-2c6e-470a-8e9a-ff84f6df882f",
-    firstName: "Betty",
-    lastName: "Haile",
-    username: "betty.haile",
-    email: "betty@example.com",
-    phoneNumber: "+251911998877",
-    status: "active",
-    role: "manager",
-    createdAt: "2024-05-12T12:50:00Z",
-    updatedAt: "2025-10-22T09:45:00Z",
-  },
-  {
-    id: "8f61dc48-8d7c-47f8-bf8b-9d28a71a4e4e",
-    firstName: "Daniel",
-    lastName: "Asfaw",
-    username: "daniel.asfaw",
-    email: "daniel@example.com",
-    phoneNumber: "+251918445566",
-    status: "inactive",
-    role: "cashier",
-    createdAt: "2023-10-11T15:25:00Z",
-    updatedAt: "2025-10-19T08:30:00Z",
-  },
-  {
-    id: "b0f1a8b7-1ad0-4d91-a10b-61b43c5baf8f",
-    firstName: "Mikiyas",
-    lastName: "Abera",
-    username: "mikiyas.abera",
-    email: "mikiyas@example.com",
-    phoneNumber: "+251910665544",
-    status: "active",
-    role: "superadmin",
-    createdAt: "2024-04-18T16:00:00Z",
-    updatedAt: "2025-10-22T09:00:00Z",
-  },
-  {
-    id: "eb81d4b6-2a78-4629-b689-2384cf1243f4",
-    firstName: "Selam",
-    lastName: "Wolde",
-    username: "selam.wolde",
-    email: "selam@example.com",
-    phoneNumber: "+251913445566",
-    status: "invited",
-    role: "admin",
-    createdAt: "2024-07-25T11:15:00Z",
-    updatedAt: "2025-10-21T06:45:00Z",
-  },
-  {
-    id: "d41cc7f3-30d0-47a0-a2d4-fdc56fbc68e9",
-    firstName: "Yonatan",
-    lastName: "Lemma",
-    username: "yonatan.lemma",
-    email: "yonatan@example.com",
-    phoneNumber: "+251917776655",
-    status: "active",
-    role: "cashier",
-    createdAt: "2024-08-18T14:30:00Z",
-    updatedAt: "2025-10-22T09:30:00Z",
-  },
-  {
-    id: "c29e6a21-9a5d-4027-93a2-6bbde9c44b82",
-    firstName: "Rediet",
-    lastName: "Worku",
-    username: "rediet.worku",
-    email: "rediet@example.com",
-    phoneNumber: "+251914554433",
-    status: "suspended",
-    role: "manager",
-    createdAt: "2023-09-09T12:45:00Z",
-    updatedAt: "2025-10-20T10:20:00Z",
-  },
-  {
-    id: "6d35d31a-688d-4729-bd2e-7d42fef2c9b7",
-    firstName: "Nahom",
-    lastName: "Alemu",
-    username: "nahom.alemu",
-    email: "nahom@example.com",
-    phoneNumber: "+251919665544",
-    status: "active",
-    role: "cashier",
-    createdAt: "2024-02-22T09:00:00Z",
-    updatedAt: "2025-10-21T09:10:00Z",
-  },
-  {
-    id: "bdc4c9b8-76a9-46b5-86e2-26f1b482c6b4",
-    firstName: "Lily",
-    lastName: "Girma",
-    username: "lily.girma",
-    email: "lily@example.com",
-    phoneNumber: "+251911554433",
-    status: "inactive",
-    role: "admin",
-    createdAt: "2023-11-15T10:10:00Z",
-    updatedAt: "2025-10-22T08:10:00Z",
-  },
-  {
-    id: "7b62a199-8019-486a-b26f-bc50aee7a9d9",
-    firstName: "Samuel",
-    lastName: "Hailemariam",
-    username: "samuel.hailemariam",
-    email: "samuel@example.com",
-    phoneNumber: "+251915443322",
-    status: "active",
-    role: "manager",
-    createdAt: "2024-06-02T14:20:00Z",
-    updatedAt: "2025-10-20T09:20:00Z",
-  },
-  {
-    id: "bca6f764-d3a2-4d83-8263-c568f46f4edb",
-    firstName: "Feven",
-    lastName: "Mulu",
-    username: "feven.mulu",
-    email: "feven@example.com",
-    phoneNumber: "+251918776655",
-    status: "invited",
-    role: "cashier",
-    createdAt: "2023-12-22T08:45:00Z",
-    updatedAt: "2025-10-19T09:35:00Z",
-  },
-  {
-    id: "e531847c-47c1-445f-bf5a-126aa3ce64b7",
-    firstName: "Robel",
-    lastName: "Tameru",
-    username: "robel.tameru",
-    email: "robel@example.com",
-    phoneNumber: "+251912998877",
-    status: "suspended",
-    role: "admin",
-    createdAt: "2024-05-28T13:15:00Z",
-    updatedAt: "2025-10-21T07:15:00Z",
-  },
-  {
-    id: "f8e57b49-5ad6-43db-b43b-1cd7de53b60e",
-    firstName: "Meklit",
-    lastName: "Solomon",
-    username: "meklit.solomon",
-    email: "meklit@example.com",
-    phoneNumber: "+251919334455",
-    status: "active",
-    role: "manager",
-    createdAt: "2024-03-13T15:00:00Z",
-    updatedAt: "2025-10-22T08:40:00Z",
-  },
-  {
-    id: "1b0c62c3-9a9d-4d3e-b6d4-1fb226e2dbf1",
-    firstName: "Selamawit",
-    lastName: "Bekele",
-    username: "selamawit.bekele",
-    email: "selamawit@example.com",
-    phoneNumber: "+251913776655",
-    status: "inactive",
-    role: "cashier",
-    createdAt: "2023-10-10T09:10:00Z",
-    updatedAt: "2025-10-20T08:10:00Z",
-  },
-  {
-    id: "9fa7c0b3-38b3-4bcb-b5e2-3e2e91ffb5a2",
-    firstName: "Yordanos",
-    lastName: "Hailu",
-    username: "yordanos.hailu",
-    email: "yordanos@example.com",
-    phoneNumber: "+251912334422",
-    status: "active",
-    role: "superadmin",
-    createdAt: "2024-04-02T11:35:00Z",
-    updatedAt: "2025-10-22T09:25:00Z",
-  },
-  {
-    id: "2d19f45b-c71e-45a7-98e0-7125c474ac3f",
-    firstName: "Nathan",
-    lastName: "Mesfin",
-    username: "nathan.mesfin",
-    email: "nathan@example.com",
-    phoneNumber: "+251917221133",
-    status: "invited",
-    role: "manager",
-    createdAt: "2023-11-30T14:55:00Z",
-    updatedAt: "2025-10-19T09:55:00Z",
-  },
-]
+import api from "@/lib/api"; // adjust path based on your folder structure
+
+// Type definition for a user
+export interface User {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  status: string;
+  role: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Fetch all users
+export async function fetchUsers(): Promise<User[]> {
+  try {
+    const response = await api.get("/v1/users"); // Adjust endpoint if needed
+    return response.data; // assuming API returns an array of users
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+    throw error;
+  }
+}
+
+// Fetch a single user by ID
+export async function fetchUserById(id: string): Promise<User> {
+  try {
+    const response = await api.get(`/v1/users/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch user with id ${id}:`, error);
+    throw error;
+  }
+}
+
+// Optionally: create, update, and delete
+export async function createUser(userData: Partial<User>) {
+  const response = await api.post("/v1/users", userData);
+  return response.data;
+}
+
+export async function updateUser(id: string, userData: Partial<User>) {
+  const response = await api.put(`/v1/users/${id}`, userData);
+  return response.data;
+}
+
+export async function deleteUser(id: string) {
+  const response = await api.delete(`/v1/users/${id}`);
+  return response.data;
+}

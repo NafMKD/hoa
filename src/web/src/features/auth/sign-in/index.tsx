@@ -18,9 +18,13 @@ import { router } from '@/QueryClient';
       if (!user) {
         initAuth(); 
       } else {
-        router.navigate({ to: `/${user.role}` });
+        const params = new URLSearchParams(window.location.search);
+        const redirectParam = params.get('redirect');
+        const redirectPath = redirectParam || `/${user.role}`;
+
+        router.navigate({ to: redirectPath });
       }
-    }, []);
+    }, [user, initAuth]);
 
     return (
       <AuthLayout>

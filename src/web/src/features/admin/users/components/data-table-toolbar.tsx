@@ -3,8 +3,8 @@ import { type Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { userTypes } from '../data/data'
-import { DataTableFacetedFilter } from './data-table-faceted-filter'
-import { DataTableViewOptions } from './data-table-view-options'
+import { DataTableFacetedFilter } from '@/components/data-table/data-table-faceted-filter'
+import { DataTableViewOptions } from '@/components/data-table/data-table-view-options'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -21,10 +21,10 @@ export function DataTableToolbar<TData>({
         <Input
           placeholder='Filter users...'
           value={
-            (table.getColumn('username')?.getFilterValue() as string) ?? ''
+            (table.getColumn('fullName')?.getFilterValue() as string) ?? ''
           }
           onChange={(event) =>
-            table.getColumn('username')?.setFilterValue(event.target.value)
+            table.getColumn('fullName')?.setFilterValue(event.target.value)
           }
           className='h-8 w-[150px] lg:w-[250px]'
         />
@@ -36,7 +36,6 @@ export function DataTableToolbar<TData>({
               options={[
                 { label: 'Active', value: 'active' },
                 { label: 'Inactive', value: 'inactive' },
-                { label: 'Invited', value: 'invited' },
                 { label: 'Suspended', value: 'suspended' },
               ]}
             />

@@ -29,6 +29,7 @@ class User extends Authenticatable
         'id_file',
         'role',
         'last_login_at',
+        'status',
     ];
 
     /**

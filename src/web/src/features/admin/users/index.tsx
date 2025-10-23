@@ -9,11 +9,16 @@ import { UsersPrimaryButtons } from './components/users-primary-buttons'
 import { UsersTable } from './components/users-table'
 import UsersProvider from './context/users-context'
 import { userListSchema } from './data/schema'
-import { users } from './data/users'
+import { fetchUsers } from './data/users'
+import { useEffect, useState } from 'react'
 
 export function Users() {
   // Parse user list
-  const userList = userListSchema.parse(users)
+  // const userList = userListSchema.parse(users)
+  const [users, setUsers] = useState([]);
+  useEffect(() => {
+    fetchUsers().then(setUsers).catch(console.error);
+  }, []);
 
   return (
     <UsersProvider>
@@ -36,7 +41,7 @@ export function Users() {
           <UsersPrimaryButtons />
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12'>
-          <UsersTable data={userList} columns={columns} />
+          <UsersTable data={users} columns={columns} />
         </div>
       </Main>
 

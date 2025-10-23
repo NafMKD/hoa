@@ -1,5 +1,3 @@
-'use client'
-
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -29,62 +27,40 @@ import { type User } from '../data/schema'
 
 const formSchema = z
   .object({
-    firstName: z.string().min(1, { message: 'First Name is required.' }),
-    lastName: z.string().min(1, { message: 'Last Name is required.' }),
-    username: z.string().min(1, { message: 'Username is required.' }),
-    phoneNumber: z.string().min(1, { message: 'Phone number is required.' }),
+    first_name: z.string().min(1, { message: 'First name is required.' }),
+    last_name: z.string().min(1, { message: 'Last name is required.' }),
+    phone: z.string().min(1, { message: 'Phone number is required.' }),
     email: z
       .string()
-      .min(1, { message: 'Email is required.' })
-      .email({ message: 'Email is invalid.' }),
-    password: z.string().transform((pwd) => pwd.trim()),
+      .email({ message: 'Invalid email address.' })
+      .optional()
+      .or(z.literal('')),
+    password: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters long.' }),
     role: z.string().min(1, { message: 'Role is required.' }),
-    confirmPassword: z.string().transform((pwd) => pwd.trim()),
-    isEdit: z.boolean(),
+    id_file: z
+      .instanceof(File)
+      .optional()
+      .or(z.null())
+      .refine(
+        (file) =>
+          !file ||
+          ['image/jpeg', 'image/png', 'application/pdf'].includes(file.type),
+        'File must be jpg, jpeg, png, or pdf.'
+      ),
+    confirmPassword: z.string().min(1, { message: 'Confirm password required.' }),
   })
-  .superRefine(({ isEdit, password, confirmPassword }, ctx) => {
-    if (!isEdit || (isEdit && password !== '')) {
-      if (password === '') {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Password is required.',
-          path: ['password'],
-        })
-      }
-
-      if (password.length < 8) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Password must be at least 8 characters long.',
-          path: ['password'],
-        })
-      }
-
-      if (!password.match(/[a-z]/)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Password must contain at least one lowercase letter.',
-          path: ['password'],
-        })
-      }
-
-      if (!password.match(/\d/)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Password must contain at least one number.',
-          path: ['password'],
-        })
-      }
-
-      if (password !== confirmPassword) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Passwords don't match.",
-          path: ['confirmPassword'],
-        })
-      }
+  .superRefine(({ password, confirmPassword }, ctx) => {
+    if (password !== confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Passwords don't match.",
+        path: ['confirmPassword'],
+      })
     }
   })
+
 type UserForm = z.infer<typeof formSchema>
 
 interface Props {
@@ -95,35 +71,38 @@ interface Props {
 
 export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
   const isEdit = !!currentRow
+
   const form = useForm<UserForm>({
     resolver: zodResolver(formSchema),
-    defaultValues: isEdit
-      ? {
-          ...currentRow,
-          password: '',
-          confirmPassword: '',
-          isEdit,
-        }
-      : {
-          firstName: '',
-          lastName: '',
-          username: '',
-          email: '',
-          role: '',
-          phoneNumber: '',
-          password: '',
-          confirmPassword: '',
-          isEdit,
-        },
+    defaultValues: {
+      first_name: currentRow?.first_name ?? '',
+      last_name: currentRow?.last_name ?? '',
+      phone: currentRow?.phone ?? '',
+      email: currentRow?.email ?? '',
+      role: currentRow?.role ?? '',
+      password: '',
+      confirmPassword: '',
+      id_file: null,
+    },
   })
 
-  const onSubmit = (values: UserForm) => {
+  const onSubmit = async (values: UserForm) => {
+    const formData = new FormData()
+    Object.entries(values).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value)
+      }
+    })
+
+    // example placeholder - integrate your API endpoint here
+    // await axios.post('/api/users', formData, {
+    //   headers: { 'Content-Type': 'multipart/form-data' },
+    // })
+
+    showSubmittedData(Object.fromEntries(formData))
     form.reset()
-    showSubmittedData(values)
     onOpenChange(false)
   }
-
-  const isPasswordTouched = !!form.formState.dirtyFields.password
 
   return (
     <Dialog
@@ -137,10 +116,10 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
         <DialogHeader className='text-left'>
           <DialogTitle>{isEdit ? 'Edit User' : 'Add New User'}</DialogTitle>
           <DialogDescription>
-            {isEdit ? 'Update the user here. ' : 'Create new user here. '}
-            Click save when you&apos;re done.
+            {isEdit ? 'Update user details here.' : 'Create a new user.'}
           </DialogDescription>
         </DialogHeader>
+
         <div className='-mr-4 h-[26.25rem] w-full overflow-y-auto py-1 pr-4'>
           <Form {...form}>
             <form
@@ -148,158 +127,128 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
               onSubmit={form.handleSubmit(onSubmit)}
               className='space-y-4 p-0.5'
             >
+              {/* First Name */}
               <FormField
                 control={form.control}
-                name='firstName'
+                name='first_name'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      First Name
-                    </FormLabel>
+                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1'>
+                    <FormLabel className='col-span-2 text-right'>First Name</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder='John'
-                        className='col-span-4'
-                        autoComplete='off'
-                        {...field}
-                      />
+                      <Input placeholder='John' className='col-span-4' {...field} />
                     </FormControl>
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
                 )}
               />
+
+              {/* Last Name */}
               <FormField
                 control={form.control}
-                name='lastName'
+                name='last_name'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Last Name
-                    </FormLabel>
+                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1'>
+                    <FormLabel className='col-span-2 text-right'>Last Name</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder='Doe'
-                        className='col-span-4'
-                        autoComplete='off'
-                        {...field}
-                      />
+                      <Input placeholder='Doe' className='col-span-4' {...field} />
                     </FormControl>
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
                 )}
               />
+
+              {/* Phone */}
               <FormField
                 control={form.control}
-                name='username'
+                name='phone'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Username
-                    </FormLabel>
+                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1'>
+                    <FormLabel className='col-span-2 text-right'>Phone</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder='john_doe'
-                        className='col-span-4'
-                        {...field}
-                      />
+                      <Input placeholder='+123456789' className='col-span-4' {...field} />
                     </FormControl>
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
                 )}
               />
+
+              {/* Email */}
               <FormField
                 control={form.control}
                 name='email'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Email
-                    </FormLabel>
+                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1'>
+                    <FormLabel className='col-span-2 text-right'>Email</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder='john.doe@gmail.com'
-                        className='col-span-4'
-                        {...field}
-                      />
+                      <Input placeholder='example@gmail.com' className='col-span-4' {...field} />
                     </FormControl>
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='phoneNumber'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Phone Number
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='+123456789'
-                        className='col-span-4'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
+
+              {/* Role */}
               <FormField
                 control={form.control}
                 name='role'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Role
-                    </FormLabel>
+                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1'>
+                    <FormLabel className='col-span-2 text-right'>Role</FormLabel>
                     <SelectDropdown
                       defaultValue={field.value}
                       onValueChange={field.onChange}
                       placeholder='Select a role'
                       className='col-span-4'
-                      items={userTypes.map(({ label, value }) => ({
-                        label,
-                        value,
-                      }))}
+                      items={userTypes.map(({ label, value }) => ({ label, value }))}
                     />
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
                 )}
               />
+
+              {/* Password */}
               <FormField
                 control={form.control}
                 name='password'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Password
-                    </FormLabel>
+                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1'>
+                    <FormLabel className='col-span-2 text-right'>Password</FormLabel>
                     <FormControl>
-                      <PasswordInput
-                        placeholder='e.g., S3cur3P@ssw0rd'
-                        className='col-span-4'
-                        {...field}
-                      />
+                      <PasswordInput placeholder='********' className='col-span-4' {...field} />
                     </FormControl>
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
                 )}
               />
+
+              {/* Confirm Password */}
               <FormField
                 control={form.control}
                 name='confirmPassword'
                 render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-right'>
-                      Confirm Password
-                    </FormLabel>
+                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1'>
+                    <FormLabel className='col-span-2 text-right'>Confirm Password</FormLabel>
                     <FormControl>
-                      <PasswordInput
-                        disabled={!isPasswordTouched}
-                        placeholder='e.g., S3cur3P@ssw0rd'
+                      <PasswordInput placeholder='********' className='col-span-4' {...field} />
+                    </FormControl>
+                    <FormMessage className='col-span-4 col-start-3' />
+                  </FormItem>
+                )}
+              />
+
+              {/* ID File Upload */}
+              <FormField
+                control={form.control}
+                name='id_file'
+                render={({ field: { onChange } }) => (
+                  <FormItem className='grid grid-cols-6 items-center gap-x-4 gap-y-1'>
+                    <FormLabel className='col-span-2 text-right'>ID File</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='file'
+                        accept='.jpg,.jpeg,.png,.pdf'
                         className='col-span-4'
-                        {...field}
+                        onChange={(e) => onChange(e.target.files?.[0] || null)}
                       />
                     </FormControl>
                     <FormMessage className='col-span-4 col-start-3' />
@@ -309,6 +258,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
             </form>
           </Form>
         </div>
+
         <DialogFooter>
           <Button type='submit' form='user-form'>
             Save changes

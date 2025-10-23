@@ -45,7 +45,10 @@ export const useAuthStore = create<AuthState>((set) => ({
         role: data.user.role,
       };
       set({ user, token });
-      router.navigate({ to: `/${user.role}` });
+      const params = new URLSearchParams(window.location.search);
+      const redirectParam = params.get('redirect');
+      const redirectPath = redirectParam || `/${user.role}`;
+      router.navigate({ to: redirectPath });
     } catch {
       EncryptedStorage.removeItem("token");
       set({ user: null, token: undefined });

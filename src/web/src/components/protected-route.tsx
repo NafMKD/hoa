@@ -1,7 +1,7 @@
-import { Navigate } from "react-router-dom";
-import { useAuthStore } from "@/lib/store";
+import { useAuthStore } from "@/stores/auth-store";
 import { useEffect, useState } from "react";
 import { Loader as LucideLoader } from "lucide-react";
+import { Navigate } from "@tanstack/react-router";
 
 interface ProtectedRouteProps {
   role?: "admin" | "accountant" | "secretary" | "homeowner" | "tenant";
@@ -28,8 +28,9 @@ export default function ProtectedRoute({ role, children }: ProtectedRouteProps) 
     );
   }
 
-  if (!user) return <Navigate to="/login" replace />;
-  if (role && user.role !== role) return <Navigate to="/login" replace />;
+  if (!user || (role && user.role !== role)) {
+    return <Navigate to="/sign-in" replace />;
+  }
 
   return <>{children}</>;
 }

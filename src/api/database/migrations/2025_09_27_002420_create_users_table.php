@@ -23,6 +23,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('role', Controller::_ROLES)->default('tenant');
             $table->dateTime('last_login_at')->nullable();
+            $table->enum('status', Controller::_USER_STATUSES)->default('active');
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

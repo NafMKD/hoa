@@ -9,6 +9,7 @@ use App\Repositories\Api\V1\UserRepository;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -30,16 +31,16 @@ class UserController extends Controller
      * Display a listing of users.
      * 
      * @param  Request  $request
-     * @return JsonResponse
+     * @return AnonymousResourceCollection|JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $this->authorize('viewAny', User::class);
             $perPage = $request->query('per_page') ?? self::_DEFAULT_PAGINATION;
             $users = $this->users->all($perPage);
     
-            return response()->json(UserResource::collection($users));
+            return UserResource::collection($users);
         } catch (AuthorizationException $e) {
             return response()->json([
                 'status' => self::_ERROR,

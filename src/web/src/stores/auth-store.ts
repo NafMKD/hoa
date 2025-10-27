@@ -7,7 +7,7 @@ export interface User {
   id: number;
   name: string;
   phone: string;
-  role: "admin" | "accountant" | "secretary";
+  role: "admin" | "accountant" | "secretary" | "homeowner" | "tenant" | "representative";
 }
 
 interface AuthState {

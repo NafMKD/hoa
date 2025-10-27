@@ -3,8 +3,18 @@ import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { fetchUsers } from "./lib/users";
+import { columns } from "./data-table/columns";
+import { DataTable } from "./data-table/data-table";
+import { useQuery } from "@tanstack/react-query";
+
 
 export function Users() {
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+  });
+  
   return (
     <>
       <Header fixed>
@@ -23,7 +33,7 @@ export function Users() {
           </div>
         </div>
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          test
+          <DataTable columns={columns} data={data} />
         </div>
       </Main>
     </>

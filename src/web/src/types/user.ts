@@ -4,7 +4,7 @@ export type User = {
   last_name: string;
   phone: string | null;
   email: string;
-  role: string;
+  role: "admin" | "accountant" | "secretary" | "tenant" | "homeowner" | "representative";
   status: string;
 
 //   id_file?: DocumentResource | null;

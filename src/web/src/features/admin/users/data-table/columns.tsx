@@ -10,15 +10,21 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
+import { DataTableColumnHeader } from "./data-table-column-header"
+import { Badge } from "@/components/ui/badge"
 
 export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "id",
-    header: "Status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="ID" />
+    ),
   },
   {
     accessorKey: "full_name",
-    header: "Name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Full Name" />
+    ),
     cell: ({ row }) => `${row.original.first_name} ${row.original.last_name}`,
   },
   {
@@ -28,6 +34,15 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "phone",
     header: "Phone Number",
+  },
+  {
+    accessorKey: "role",
+    header: "Role",
+    cell: ({ row }) => {
+      // display role with badge
+      const role = row.original.role.charAt(0).toUpperCase() + row.original.role.slice(1)
+      return <Badge variant="outline">{role}</Badge>
+    }
   },
   {
     id: "actions",
@@ -44,13 +59,7 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user.id as string)}
-            >
-              Copy User ID
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
             <DropdownMenuItem>View User details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

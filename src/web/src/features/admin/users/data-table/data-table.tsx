@@ -1,9 +1,6 @@
 import {
-  type ColumnDef,
+  type Table as TanstackTable,
   flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -18,21 +15,13 @@ import { Input } from "@/components/ui/input";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableViewOptions } from "./data-table-view-options";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+interface DataTableProps<TData> {
+  table: TanstackTable<TData>
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-  });
+export function DataTable<TData>({
+  table
+}: DataTableProps<TData>) {
 
   return (
     <div className="flex w-full flex-col gap-2.5 overflow-auto">
@@ -87,7 +76,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getAllColumns().length}
                   className="h-24 text-center"
                 >
                   No results.

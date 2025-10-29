@@ -38,7 +38,13 @@ class UserController extends Controller
         try {
             $this->authorize('viewAny', User::class);
             $perPage = $request->query('per_page') ?? self::_DEFAULT_PAGINATION;
-            $users = $this->users->all($perPage);
+            $search = $request->query('search');
+            $role = $request->query('role');
+            $status = $request->query('status');
+
+            $filters = compact('search', 'role', 'status');
+
+            $users = $this->users->all($perPage, $filters);
     
             return UserResource::collection($users);
         } catch (AuthorizationException $e) {

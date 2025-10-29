@@ -14,24 +14,30 @@ import {
 import { Input } from "@/components/ui/input";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableViewOptions } from "./data-table-view-options";
+import { useState } from "react";
 
 interface DataTableProps<TData> {
   table: TanstackTable<TData>
+  onChange?: (value: string) => void
 }
 
 export function DataTable<TData>({
-  table
+  table,
+  onChange
 }: DataTableProps<TData>) {
+  const [value, setValue] = useState("")
 
   return (
     <div className="flex w-full flex-col gap-2.5 overflow-auto">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
+          type="text"
+          placeholder="Search users..."
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value)
+            onChange(e.target.value)
+          }}
           className="max-w-sm"
         />
         <DataTableViewOptions table={table} />

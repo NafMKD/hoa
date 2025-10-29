@@ -13,6 +13,7 @@ import {
   useReactTable,
   type PaginationState,
 } from "@tanstack/react-table";
+import { useDebounce } from "use-debounce"
 
 export function Users() {
   const [pagination, setPagination] = React.useState<PaginationState>({
@@ -22,13 +23,16 @@ export function Users() {
   const [pageCount, setPageCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 500)
 
   useEffect(() => {
     const fetchData = async () => {
       const page = pagination.pageIndex + 1;
       const res = await fetchUsers(
         page.toString(),
-        pagination.pageSize.toString()
+        pagination.pageSize.toString(),
+        debouncedSearch
       );
       setData(res.data);
       setPageCount(res.meta.last_page);
@@ -36,7 +40,7 @@ export function Users() {
     };
 
     fetchData();
-  }, [pagination.pageIndex, pagination.pageSize]);
+  }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
 
   const table = useReactTable({
     data: data,
@@ -70,7 +74,7 @@ export function Users() {
           </div>
         </div>
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          {isLoading ? <div>Loading...</div> : <DataTable table={table} />}
+          {isLoading ? <div>Loading...</div> : <DataTable table={table} onChange={setSearch}/>}
         </div>
       </Main>
     </>

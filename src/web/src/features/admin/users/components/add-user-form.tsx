@@ -66,12 +66,14 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
         ) {
           formData.append("id_file", value[0]);
         } else if (value !== undefined) {
-          formData.append(key, value as string);
+          if (key !== "id_file") formData.append(key, value as string);
         }
       }
 
       await createUser(formData);
-      toast.success("User added successfully!");
+      toast.success("User added successfully!", {
+        position: "top-right",
+      });
       onSuccess?.();
     } catch (error) {
       const err = error as ApiError;
@@ -87,7 +89,9 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
           });
         });
       } else {
-        toast.error(err.message || "Failed to add user");
+        toast.error(err.message || "Failed to add user", {
+          position: "top-right",
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -189,6 +193,11 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
                 accept=".jpg,.jpeg,.png,.pdf"
                 {...form.register("id_file")}
               />
+              {form.formState.errors.id_file && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.id_file.message}
+                </p>
+              )}
             </div>
           </div>
 

@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Users,
-  UserPlus,
   Building,
   Home,
   FileText,
@@ -44,19 +43,8 @@ export const sidebarData: SidebarData = {
       items: [
         {
           title: 'Users',
+          url: '/admin/users',
           icon: Users,
-          items: [
-            {
-              title: 'All Users',
-              url: '/admin/users',
-              icon: List,
-            },
-            {
-              title: 'Add User',
-              url: '/admin/users/add',
-              icon: UserPlus,
-            },
-          ],
         },
         {
           title: 'Buildings',

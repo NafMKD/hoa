@@ -20,13 +20,32 @@ class UserRepository
      * @param  int|null  $perPage
      * @return Collection|LengthAwarePaginator
      */
-    public function all(?int $perPage = null): Collection|LengthAwarePaginator
+    public function all(?int $perPage = null, array $filters = []): Collection|LengthAwarePaginator
     {
-        if ($perPage) {
-            return User::paginate($perPage);
+        $query = User::query();
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+            });
         }
 
-        return User::all();
+        if (!empty($filters['role'])) {
+            $query->where('role', $filters['role']);
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        return $perPage ? $query->paginate($perPage) : $query->get();;
     }
 
     /**
@@ -75,7 +94,7 @@ class UserRepository
             return $user;
         } catch (\Throwable $e) {
             DB::rollBack();
-            throw new RepositoryException('Failed to create user: '.$e->getMessage());
+            throw new RepositoryException('Failed to create user: ' . $e->getMessage());
         }
     }
 
@@ -109,7 +128,6 @@ class UserRepository
                 ]);
 
                 $data['id_file'] = $document->id;
-
             }
 
             $user->update($data);
@@ -118,7 +136,7 @@ class UserRepository
             return $user;
         } catch (\Throwable $e) {
             DB::rollBack();
-            throw new RepositoryException('Failed to update user: '.$e->getMessage());
+            throw new RepositoryException('Failed to update user: ' . $e->getMessage());
         }
     }
 

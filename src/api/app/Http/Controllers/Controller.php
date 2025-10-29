@@ -34,4 +34,5 @@ abstract class Controller
     const _PAYMENT_STATUSES = ['pending','confirmed','failed','refunded'];
     const _PAYMENT_METHODS = ['cash','bank_transfer', 'other'];
     const _USER_STATUSES = ['active','inactive','suspended'];
+    const _DEFAULT_PASSWORD = '12345678';
 }

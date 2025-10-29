@@ -38,7 +38,13 @@ class UserController extends Controller
         try {
             $this->authorize('viewAny', User::class);
             $perPage = $request->query('per_page') ?? self::_DEFAULT_PAGINATION;
-            $users = $this->users->all($perPage);
+            $search = $request->query('search');
+            $role = $request->query('role');
+            $status = $request->query('status');
+
+            $filters = compact('search', 'role', 'status');
+
+            $users = $this->users->all($perPage, $filters);
     
             return UserResource::collection($users);
         } catch (AuthorizationException $e) {
@@ -91,12 +97,22 @@ class UserController extends Controller
             $data = $request->validate([
                 'first_name' => ['required', 'string', 'max:255'],
                 'last_name'  => ['required', 'string', 'max:255'],
-                'phone'      => ['required', 'string', 'max:20', 'unique:users,phone'],
+                'phone'      => [
+                    'required',
+                    'string',
+                    'regex:/^0\d{9}$/', 
+                    'unique:users,phone',
+                ],  
                 'email'      => ['nullable', 'email', 'unique:users,email'],
-                'password'   => ['required', 'string', 'min:8'],
+                'password'   => ['nullable', 'string', 'min:8'],
                 'role'       => ['required', 'string', Rule::in(self::_ROLES)],
                 'id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.self::_MAX_FILE_SIZE], 
             ]);
+
+            // if password is not provided, generate a random one
+            if (empty($data['password'])) {
+                $data['password'] = self::_DEFAULT_PASSWORD; 
+            }
     
             $user = $this->users->create($data);
     

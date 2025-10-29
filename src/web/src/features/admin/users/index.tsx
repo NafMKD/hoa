@@ -1,51 +1,152 @@
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { columns } from './components/users-columns'
-import { UsersDialogs } from './components/users-dialogs'
-import { UsersPrimaryButtons } from './components/users-primary-buttons'
-import { UsersTable } from './components/users-table'
-import UsersProvider from './context/users-context'
-import { userListSchema } from './data/schema'
-import { fetchUsers } from './data/users'
-import { useEffect, useState } from 'react'
+import { Header } from "@/components/layout/header";
+import { Main } from "@/components/layout/main";
+import { ProfileDropdown } from "@/components/profile-dropdown";
+import { Search } from "@/components/search";
+import { ThemeSwitch } from "@/components/theme-switch";
+import { fetchUsers } from "./lib/users";
+import { columns } from "./data-table/columns";
+import { DataTable } from "./data-table/data-table";
+import React, { useEffect, useState } from "react";
+import {
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+  type PaginationState,
+  type RowSelectionState,
+} from "@tanstack/react-table";
+import { useDebounce } from "use-debounce";
+import { DataTableSkeleton } from "./data-table/data-table-skeleton";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { AddUserForm } from "./components/add-user-form";
+import type { User } from "@/types/user";
 
 export function Users() {
-  // Parse user list
-  // const userList = userListSchema.parse(users)
-  const [users, setUsers] = useState([]);
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [pageCount, setPageCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<User[]>([]);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 600);
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const [open, setOpen] = useState(false); // for sheet control
+
   useEffect(() => {
-    fetchUsers().then(setUsers).catch(console.error);
-  }, []);
+    const fetchData = async () => {
+      const page = pagination.pageIndex + 1;
+      const res = await fetchUsers(
+        page.toString(),
+        pagination.pageSize.toString(),
+        debouncedSearch
+      );
+      setData(res.data);
+      setPageCount(res.meta.last_page);
+      setIsLoading(false);
+    };
+
+    fetchData();
+  }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
+
+  const table = useReactTable({
+    data: data,
+    columns,
+    pageCount,
+    state: {
+      pagination,
+      rowSelection,
+    },
+    manualPagination: true,
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+  });
 
   return (
-    <UsersProvider>
+    <>
       <Header fixed>
-        <Search />
-        <div className='ml-auto flex items-center space-x-4'>
+        <div className="ml-auto flex items-center space-x-4">
+          <Search />
           <ThemeSwitch />
           <ProfileDropdown />
         </div>
       </Header>
 
       <Main>
-        <div className='mb-2 flex flex-wrap items-center justify-between space-y-2'>
+        <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>User List</h2>
-            <p className='text-muted-foreground'>
-              Manage system users here.
-            </p>
+            <h2 className="text-2xl font-bold tracking-tight">User List</h2>
+            <p className="text-muted-foreground">Manage system users here.</p>
           </div>
-          <UsersPrimaryButtons />
+
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button onClick={() => setOpen(true)}>+ Add User</Button>
+            </SheetTrigger>
+
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-lg overflow-auto"
+            >
+              <SheetHeader>
+                <SheetTitle className="text-center">Add New User</SheetTitle>
+                <SheetDescription className="text-center">
+                  Fill in the user information below to create a new account.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 pb-10">
+                <AddUserForm
+                  onSuccess={() => {
+                    setOpen(false);
+                    // refresh users list after adding
+                    const page = pagination.pageIndex + 1;
+                    fetchUsers(
+                      page.toString(),
+                      pagination.pageSize.toString(),
+                      debouncedSearch
+                    ).then((res) => {
+                      setData(res.data);
+                      setPageCount(res.meta.last_page);
+                    });
+                  }}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
-        <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12'>
-          <UsersTable data={users} columns={columns} />
+        <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
+          {isLoading ? (
+            <DataTableSkeleton
+              columnCount={8}
+              filterCount={1}
+              cellWidths={[
+                "6rem",
+                "10rem",
+                "30rem",
+                "10rem",
+                "10rem",
+                "6rem",
+                "6rem",
+                "6rem",
+              ]}
+              shrinkZero
+            />
+          ) : (
+            <DataTable table={table} onChange={setSearch} />
+          )}
         </div>
       </Main>
-
-      <UsersDialogs />
-    </UsersProvider>
-  )
+    </>
+  );
 }

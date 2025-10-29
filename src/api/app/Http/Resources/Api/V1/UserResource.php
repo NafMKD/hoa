@@ -70,9 +70,9 @@ class UserResource extends JsonResource
             'representative_leases' => $this->whenLoaded('representativeLeases', function () {
                 return TenantLeaseResource::collection($this->representativeLeases);
             }),
-            'last_login_at' => $this->last_login_at,
-            'created_at'    => $this->created_at,
-            'updated_at'    => $this->updated_at,
+            'last_login_at' => \Carbon\Carbon::parse($this->last_login_at)->toFormattedDateString(),
+            'created_at'    => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),
+            'updated_at'    => \Carbon\Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];
     }
 }

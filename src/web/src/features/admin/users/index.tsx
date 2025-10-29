@@ -12,8 +12,10 @@ import {
   getPaginationRowModel,
   useReactTable,
   type PaginationState,
+  type RowSelectionState,
 } from "@tanstack/react-table";
-import { useDebounce } from "use-debounce"
+import { useDebounce } from "use-debounce";
+import { DataTableSkeleton } from "./data-table/data-table-skeleton";
 
 export function Users() {
   const [pagination, setPagination] = React.useState<PaginationState>({
@@ -24,7 +26,8 @@ export function Users() {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebounce(search, 500)
+  const [debouncedSearch] = useDebounce(search, 500);
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,12 +51,15 @@ export function Users() {
     pageCount,
     state: {
       pagination,
+      rowSelection,
     },
     manualPagination: true,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     debugTable: true,
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
   });
 
   return (
@@ -74,7 +80,25 @@ export function Users() {
           </div>
         </div>
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          {isLoading ? <div>Loading...</div> : <DataTable table={table} onChange={setSearch}/>}
+          {isLoading ? (
+            <DataTableSkeleton
+              columnCount={8}
+              filterCount={1}
+              cellWidths={[
+                "6rem",
+                "10rem",
+                "30rem",
+                "10rem",
+                "10rem",
+                "6rem",
+                "6rem",
+                "6rem",
+              ]}
+              shrinkZero
+            />
+          ) : (
+            <DataTable table={table} onChange={setSearch} />
+          )}
         </div>
       </Main>
     </>

@@ -30,7 +30,8 @@ class UserRepository
                 $q->where('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
             });
         }
 
@@ -41,6 +42,8 @@ class UserRepository
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
+
+        $query->orderBy('created_at', 'desc');
 
         return $perPage ? $query->paginate($perPage) : $query->get();;
     }

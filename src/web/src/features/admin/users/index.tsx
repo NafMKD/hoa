@@ -16,6 +16,17 @@ import {
 } from "@tanstack/react-table";
 import { useDebounce } from "use-debounce";
 import { DataTableSkeleton } from "./data-table/data-table-skeleton";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { AddUserForm } from "./components/add-user-form";
+import type { User } from "@/types/user";
 
 export function Users() {
   const [pagination, setPagination] = React.useState<PaginationState>({
@@ -24,10 +35,11 @@ export function Users() {
   });
   const [pageCount, setPageCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<User[]>([]);
   const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebounce(search, 500);
+  const [debouncedSearch] = useDebounce(search, 600);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const [open, setOpen] = useState(false); // for sheet control
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,7 +69,6 @@ export function Users() {
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    debugTable: true,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
   });
@@ -78,6 +89,41 @@ export function Users() {
             <h2 className="text-2xl font-bold tracking-tight">User List</h2>
             <p className="text-muted-foreground">Manage system users here.</p>
           </div>
+
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button onClick={() => setOpen(true)}>+ Add User</Button>
+            </SheetTrigger>
+
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-lg overflow-auto"
+            >
+              <SheetHeader>
+                <SheetTitle className="text-center">Add New User</SheetTitle>
+                <SheetDescription className="text-center">
+                  Fill in the user information below to create a new account.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 pb-10">
+                <AddUserForm
+                  onSuccess={() => {
+                    setOpen(false);
+                    // refresh users list after adding
+                    const page = pagination.pageIndex + 1;
+                    fetchUsers(
+                      page.toString(),
+                      pagination.pageSize.toString(),
+                      debouncedSearch
+                    ).then((res) => {
+                      setData(res.data);
+                      setPageCount(res.meta.last_page);
+                    });
+                  }}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
           {isLoading ? (

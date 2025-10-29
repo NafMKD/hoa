@@ -1,10 +1,19 @@
+export type UserRole =
+  | "admin"
+  | "accountant"
+  | "secretary"
+  | "tenant"
+  | "homeowner"
+  | "representative";
+
+
 export type User = {
   id: string | number;
   first_name: string;
   last_name: string;
   phone: string | null;
   email: string;
-  role: "admin" | "accountant" | "secretary" | "tenant" | "homeowner" | "representative";
+  role: UserRole;
   status: string;
 
 //   id_file?: DocumentResource | null;
@@ -22,4 +31,14 @@ export type User = {
   last_login_at?: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type UserPaginatedResponse = {
+  data: User[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
 };

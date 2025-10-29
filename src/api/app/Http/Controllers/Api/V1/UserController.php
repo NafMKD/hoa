@@ -97,12 +97,22 @@ class UserController extends Controller
             $data = $request->validate([
                 'first_name' => ['required', 'string', 'max:255'],
                 'last_name'  => ['required', 'string', 'max:255'],
-                'phone'      => ['required', 'string', 'max:20', 'unique:users,phone'],
+                'phone'      => [
+                    'required',
+                    'string',
+                    'regex:/^0\d{9}$/', 
+                    'unique:users,phone',
+                ],  
                 'email'      => ['nullable', 'email', 'unique:users,email'],
-                'password'   => ['required', 'string', 'min:8'],
+                'password'   => ['nullable', 'string', 'min:8'],
                 'role'       => ['required', 'string', Rule::in(self::_ROLES)],
                 'id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.self::_MAX_FILE_SIZE], 
             ]);
+
+            // if password is not provided, generate a random one
+            if (empty($data['password'])) {
+                $data['password'] = self::_DEFAULT_PASSWORD; 
+            }
     
             $user = $this->users->create($data);
     

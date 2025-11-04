@@ -30,6 +30,7 @@ import type { User } from "@/types/user";
 import { IconPlus } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { updateUserStatus } from "./lib/users";
+import { EditUserForm } from "./components/edit-user-form";
 
 export function Users() {
   const [pagination, setPagination] = React.useState<PaginationState>({
@@ -43,6 +44,8 @@ export function Users() {
   const [debouncedSearch] = useDebounce(search, 600);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [open, setOpen] = useState(false); // for sheet control
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,17 +69,16 @@ export function Users() {
       setData((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u))
       );
-  
+
       // Send API request
       await updateUserStatus(userId, newStatus);
-  
+
       toast.success(`User status updated to "${newStatus}"`);
     } catch (err) {
       console.error(err);
       toast.error("Failed to update status");
     }
   };
-
 
   const table = useReactTable({
     data: data,
@@ -93,7 +95,9 @@ export function Users() {
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     meta: {
-      onStatusChange: handleStatusChange, 
+      onStatusChange: handleStatusChange,
+      setEditUser,       
+      setIsEditOpen,
     },
   });
 
@@ -148,6 +152,41 @@ export function Users() {
                     });
                   }}
                 />
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-lg overflow-auto"
+            >
+              <SheetHeader>
+                <SheetTitle className="text-center">Edit User</SheetTitle>
+                <SheetDescription className="text-center">
+                  Update the user information below.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 pb-10">
+                {editUser && (
+                  <EditUserForm
+                    user={editUser}
+                    onSuccess={() => {
+                      setIsEditOpen(false);
+                      setEditUser(null);
+                      // Refresh users after edit
+                      const page = pagination.pageIndex + 1;
+                      fetchUsers(
+                        page.toString(),
+                        pagination.pageSize.toString(),
+                        debouncedSearch
+                      ).then((res) => {
+                        setData(res.data);
+                        setPageCount(res.meta.last_page);
+                      });
+                    }}
+                  />
+                )}
               </div>
             </SheetContent>
           </Sheet>

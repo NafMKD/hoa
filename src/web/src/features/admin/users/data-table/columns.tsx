@@ -12,8 +12,17 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox"
+import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@tanstack/react-router";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { EditUserForm } from "../components/edit-user-form";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -70,9 +79,9 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      
       const status = row.original.status;
-      let variant: "default" | "secondary" | "destructive" | "outline" = "default";
+      let variant: "default" | "secondary" | "destructive" | "outline" =
+        "default";
       let className: string = "";
 
       if (status === "active") {
@@ -80,12 +89,16 @@ export const columns: ColumnDef<User>[] = [
         className = "bg-green-100 text-green-800";
       } else if (status === "inactive") {
         variant = "secondary";
-        className="bg-yellow-100 text-yellow-800";
+        className = "bg-yellow-100 text-yellow-800";
       } else if (status === "suspended") {
         variant = "destructive";
       }
-      return <Badge variant={variant} className={className}>{status.charAt(0).toUpperCase() + status.slice(1)}</Badge>;
-    }
+      return (
+        <Badge variant={variant} className={className}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "created_at",
@@ -98,8 +111,12 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row, table }) => {
       const user = row.original;
       const USER_STATUSES = ["active", "inactive", "suspended"] as const;
-      const availableStatuses = USER_STATUSES.filter(s => s !== user.status);
-  
+      const availableStatuses = USER_STATUSES.filter((s) => s !== user.status);
+      const { setEditUser, setIsEditOpen } = table.options.meta as {
+        setEditUser: React.Dispatch<React.SetStateAction<User | null>>;
+        setIsEditOpen: React.Dispatch<React.SetStateAction<boolean>>;
+      };
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -111,7 +128,7 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-  
+
             <DropdownMenuItem asChild>
               <Link
                 to="/admin/users/$userId"
@@ -121,9 +138,19 @@ export const columns: ColumnDef<User>[] = [
                 View User Details
               </Link>
             </DropdownMenuItem>
-  
             <DropdownMenuSeparator />
-  
+
+            <DropdownMenuItem
+              onClick={() => {
+                setEditUser(user);
+                setIsEditOpen(true);
+              }}
+            >
+              Edit User
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
             {availableStatuses.map((status) => (
               <DropdownMenuItem
                 key={status}
@@ -139,5 +166,5 @@ export const columns: ColumnDef<User>[] = [
       );
     },
     size: 40,
-  }
+  },
 ];

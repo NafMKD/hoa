@@ -129,7 +129,7 @@ class UserRepository
 
                 $data['id_file'] = $document->id;
             }
-
+            
             $user->update($data);
 
             DB::commit();

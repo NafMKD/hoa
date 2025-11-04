@@ -10,3 +10,4 @@ Route::post('/', [UserController::class,  'store'])->name('store');
 Route::get('/{user}', [UserController::class,  'show'])->name('show');
 Route::put('/{user}', [UserController::class,  'update'])->name('update');
 Route::delete('/{user}', [UserController::class,  'destroy'])->name('destroy');
+Route::patch('/{user}/status', [UserController::class,  'changeStatus'])->name('update-status');

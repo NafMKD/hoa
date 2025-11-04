@@ -31,3 +31,14 @@ export const createUser = (formData: FormData) =>
 
 export const deleteUser = (userId: string | number) =>
   handleApi<void>(api.delete(`/v1/users/${userId}`));
+
+export const fetchUserDetail = (userId: string) =>
+  handleApi<User>(api.get(`/v1/users/${userId}`));
+
+export const updateUserStatus = (userId: string, status: string) =>
+  handleApi<User>(
+    api.patch(`/v1/users/${userId}/status`, { status })
+  );
+
+export const updateUser = (userID: string | number, data: FormData) =>
+  handleApi<User>(api.put(`/v1/users/${userID}`, data));

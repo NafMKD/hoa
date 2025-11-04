@@ -129,7 +129,7 @@ class UserRepository
 
                 $data['id_file'] = $document->id;
             }
-
+            
             $user->update($data);
 
             DB::commit();
@@ -170,5 +170,24 @@ class UserRepository
     private function uploadIdFile($file): string
     {
         return $file->store(Controller::_DOCUMENT_TYPES[0], 'public');
+    }
+
+    /**
+     * Change user status.
+     * 
+     * @param  User  $user
+     * @param  string  $status
+     * @return User
+     */
+    public function changeStatus(User $user, string $status): User
+    {
+        if ($user->status === $status) {
+            return $user;
+        }
+
+        $user->status = $status;
+        $user->save();
+
+        return $user;
     }
 }

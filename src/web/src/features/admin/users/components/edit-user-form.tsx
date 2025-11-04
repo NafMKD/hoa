@@ -13,10 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { createUser } from "../lib/users";
+import { updateUser } from "../lib/users";
 import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { ApiError } from "@/types/api-error";
+import type { User } from "@/types/user";
 
 const userSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
@@ -42,13 +43,21 @@ const userSchema = z.object({
 
 type FormValues = z.infer<typeof userSchema>;
 
-interface AddUserFormProps {
+interface EditUserFormProps {
+  user: User;
   onSuccess?: () => void;
 }
 
-export function AddUserForm({ onSuccess }: AddUserFormProps) {
+export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(userSchema),
+    defaultValues: {
+        first_name: user.first_name,  
+        last_name: user.last_name,  
+        phone: user.phone as string,  
+        email: user.email ?? "",  
+        role: user.role as FormValues["role"],
+      },
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,19 +68,22 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
       const formData = new FormData();
 
       for (const [key, value] of Object.entries(values)) {
+        const originalValue = (user as any)[key];
+
         if (
           key === "id_file" &&
           value instanceof FileList &&
           value.length > 0
         ) {
           formData.append("id_file", value[0]);
-        } else if (value !== undefined) {
-          if (key !== "id_file") formData.append(key, value as string);
+        } else if (value !== undefined && value !== originalValue) {
+            if (key !== "id_file") formData.append(key, value as string);
         }
       }
 
-      await createUser(formData);
-      toast.success("User added successfully!", {
+      await updateUser(user.id, formData);
+
+      toast.success("User updated successfully!", {
         position: "top-right",
       });
       onSuccess?.();
@@ -79,7 +91,6 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
       const err = error as ApiError;
       if (err.status === 422 && err.data?.errors) {
         const fieldErrors = err.data.errors;
-
         Object.entries(fieldErrors).forEach(([field, messages]) => {
           form.setError(field as keyof FormValues, {
             type: "server",
@@ -89,7 +100,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
           });
         });
       } else {
-        toast.error(err.message || "Failed to add user", {
+        toast.error(err.message || "Failed to update user", {
           position: "top-right",
         });
       }
@@ -161,6 +172,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
                 Role <span className="text-red-500">*</span>
               </Label>
               <Select
+                defaultValue={user.role}
                 onValueChange={(value) =>
                   form.setValue("role", value as FormValues["role"])
                 }
@@ -205,10 +217,10 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
             {isSubmitting ? (
               <>
                 <Spinner />
-                Submitting...
+                Updating...
               </>
             ) : (
-              "Add User"
+              "Update User"
             )}
           </Button>
         </form>

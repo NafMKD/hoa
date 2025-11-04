@@ -27,6 +27,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { AddUserForm } from "./components/add-user-form";
 import type { User } from "@/types/user";
+import { IconPlus } from "@tabler/icons-react";
+import { toast } from "sonner";
+import { updateUserStatus } from "./lib/users";
 
 export function Users() {
   const [pagination, setPagination] = React.useState<PaginationState>({
@@ -57,6 +60,24 @@ export function Users() {
     fetchData();
   }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
 
+  const handleStatusChange = async (userId: string, newStatus: string) => {
+    try {
+      // Optimistically update local state
+      setData((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u))
+      );
+  
+      // Send API request
+      await updateUserStatus(userId, newStatus);
+  
+      toast.success(`User status updated to "${newStatus}"`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status");
+    }
+  };
+
+
   const table = useReactTable({
     data: data,
     columns,
@@ -71,6 +92,9 @@ export function Users() {
     getPaginationRowModel: getPaginationRowModel(),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
+    meta: {
+      onStatusChange: handleStatusChange, 
+    },
   });
 
   return (
@@ -92,7 +116,10 @@ export function Users() {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button onClick={() => setOpen(true)}>+ Add User</Button>
+              <Button onClick={() => setOpen(true)}>
+                <IconPlus className="mr-1 h-4 w-4" />
+                Add User
+              </Button>
             </SheetTrigger>
 
             <SheetContent

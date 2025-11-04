@@ -59,4 +59,12 @@ class UserPolicy
     {
         return $authUser->hasRole(Controller::_ROLES[0]);
     }
+
+    /**
+     * Determine whether the authenticated user can change the status of the model.
+     */
+    public function changeStatus(User $authUser): bool
+    {
+        return $authUser->hasRole(Controller::_ROLES[0]) ||  $authUser->hasRole(Controller::_ROLES[2]);
+    }
 }

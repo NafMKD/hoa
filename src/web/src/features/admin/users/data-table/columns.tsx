@@ -13,6 +13,7 @@ import { MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox"
+import { Link } from "@tanstack/react-router";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -94,7 +95,11 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     id: "actions",
-    cell: () => {
+    cell: ({ row, table }) => {
+      const user = row.original;
+      const USER_STATUSES = ["active", "inactive", "suspended"] as const;
+      const availableStatuses = USER_STATUSES.filter(s => s !== user.status);
+  
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -106,11 +111,33 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View User details</DropdownMenuItem>
+  
+            <DropdownMenuItem asChild>
+              <Link
+                to="/admin/users/$userId"
+                params={{ userId: user.id as string }}
+                className="w-full cursor-pointer"
+              >
+                View User Details
+              </Link>
+            </DropdownMenuItem>
+  
+            <DropdownMenuSeparator />
+  
+            {availableStatuses.map((status) => (
+              <DropdownMenuItem
+                key={status}
+                onClick={() => {
+                  table.options.meta?.onStatusChange?.(user.id, status);
+                }}
+              >
+                Set status: {status.charAt(0).toUpperCase() + status.slice(1)}
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       );
     },
     size: 40,
-  },
+  }
 ];

@@ -85,6 +85,33 @@ class UserController extends Controller
     }
 
     /**
+     * Change user status (activate/inactive/suspend).
+     * 
+     * @param  Request  $request
+     * @param  User  $user
+     * @return JsonResponse
+     */
+    public function changeStatus(Request $request, User $user): JsonResponse
+    {
+        try {
+            $data = $request->validate([
+                'status'  => ['required', 'string', Rule::in(self::_USER_STATUSES)],
+            ]);
+
+            $this->authorize('changeStatus', User::class);
+
+            $user = $this->users->changeStatus($user, $data['status']);
+
+            return response()->json(new UserResource($user));
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED
+            ], 403);
+        }
+    }
+
+    /**
      * Store a newly created user.
      * 
      * @param  Request  $request

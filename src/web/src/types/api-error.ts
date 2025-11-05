@@ -2,5 +2,11 @@
 export interface ApiError {
   message: string;
   status?: number;
-  data?: unknown;
+  data?: Data;
+}
+
+export interface Data {
+  errors?: {
+    [key: string]: string[] | string;
+  };
 }

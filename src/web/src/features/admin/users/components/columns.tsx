@@ -14,15 +14,6 @@ import { DataTableColumnHeader } from "../../../../components/data-table/data-ta
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@tanstack/react-router";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { EditUserForm } from "./edit-user-form";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -112,9 +103,10 @@ export const columns: ColumnDef<User>[] = [
       const user = row.original;
       const USER_STATUSES = ["active", "inactive", "suspended"] as const;
       const availableStatuses = USER_STATUSES.filter((s) => s !== user.status);
-      const { setEditUser, setIsEditOpen } = table.options.meta as {
+      const { setEditUser, setIsEditOpen, onStatusChange } = table.options.meta as {
         setEditUser: React.Dispatch<React.SetStateAction<User | null>>;
         setIsEditOpen: React.Dispatch<React.SetStateAction<boolean>>;
+        onStatusChange?: (userId: string, status: string) => void;
       };
 
       return (
@@ -155,7 +147,7 @@ export const columns: ColumnDef<User>[] = [
               <DropdownMenuItem
                 key={status}
                 onClick={() => {
-                  table.options.meta?.onStatusChange?.(user.id, status);
+                  onStatusChange?.(user.id as string, status);
                 }}
               >
                 Set status: {status.charAt(0).toUpperCase() + status.slice(1)}

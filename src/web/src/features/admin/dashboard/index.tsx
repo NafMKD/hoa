@@ -1,4 +1,4 @@
-import { RecentPaymentsTable } from './components/recent-payments-table'
+import { RecentPaymentsTable, type Payment } from './components/recent-payments-table'
 import {
   Card,
   CardContent,
@@ -139,7 +139,7 @@ export function Dashboard() {
 }
 
 // === Sub Components ===
-function SummaryCard({ title, value, change }) {
+function SummaryCard({ title, value, change } : { title: string; value: string; change: string }) {
   return (
     <Card>
       <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
@@ -154,11 +154,11 @@ function SummaryCard({ title, value, change }) {
 }
 
 // === Fake Data Sets ===
-const recentPayments = [
-  { name: 'John Doe', amount: '$120', status: 'Paid', date: '2024-06-10' },
-  { name: 'Jane Smith', amount: '$85', status: 'Pending', date: '2024-06-09' },
-  { name: 'Villa 09', amount: '$100', status: 'Paid', date: '2024-06-08' },
-  { name: 'Apartment 24', amount: '$95', status: 'Overdue', date: '2024-06-07' },
+const recentPayments: Payment[] = [
+  { name: 'John Doe', amount: 120, status: 'Paid', date: '2024-06-10' },
+  { name: 'Jane Smith', amount: 85, status: 'Pending', date: '2024-06-09' },
+  { name: 'Villa 09', amount: 100, status: 'Paid', date: '2024-06-08' },
+  { name: 'Apartment 24', amount: 95, status: 'Pending', date: '2024-06-07' },
 ]
 
 const maintenance = [

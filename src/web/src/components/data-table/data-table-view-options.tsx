@@ -22,6 +22,10 @@ interface DataTableViewOptionsProps<TData>
   table: Table<TData>;
 }
 
+interface DataTableColumnMeta {
+  label?: string;
+}
+
 export function DataTableViewOptions<TData>({
   table,
   ...props
@@ -65,7 +69,7 @@ export function DataTableViewOptions<TData>({
                   }
                 >
                   <span className="truncate">
-                    {column.columnDef.meta?.label ?? column.id}
+                    {(column.columnDef.meta as DataTableColumnMeta)?.label ?? column.id}
                   </span>
                   <Check
                     className={cn(

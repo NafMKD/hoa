@@ -1,5 +1,3 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-
 interface Props {
   children: React.ReactNode;
 }

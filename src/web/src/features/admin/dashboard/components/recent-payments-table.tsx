@@ -8,9 +8,18 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
-const columnHelper = createColumnHelper()
+// Define a type for your data
+export interface Payment {
+  name: string
+  amount: number
+  date: string
+  status: 'Paid' | 'Pending' | 'Failed'
+}
 
-export function RecentPaymentsTable({ data }) {
+// Create a typed column helper
+const columnHelper = createColumnHelper<Payment>()
+
+export function RecentPaymentsTable({ data }: { data: Payment[] }) {
   const columns = React.useMemo(
     () => [
       columnHelper.accessor('name', {

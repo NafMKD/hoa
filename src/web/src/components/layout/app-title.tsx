@@ -25,7 +25,7 @@ export function AppTitle() {
 
             {open && (
               <Link
-                to="/"
+                to="/admin"
                 onClick={() => setOpenMobile(false)}
                 className="grid flex-1 text-start text-sm leading-tight ml-2"
               >

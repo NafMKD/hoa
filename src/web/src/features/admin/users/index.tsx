@@ -4,8 +4,8 @@ import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { fetchUsers } from "./lib/users";
-import { columns } from "./data-table/columns";
-import { DataTable } from "./data-table/data-table";
+import { columns } from "./components/columns";
+import { DataTable } from "@/components/data-table/data-table";
 import React, { useEffect, useState } from "react";
 import {
   getCoreRowModel,
@@ -15,7 +15,7 @@ import {
   type RowSelectionState,
 } from "@tanstack/react-table";
 import { useDebounce } from "use-debounce";
-import { DataTableSkeleton } from "./data-table/data-table-skeleton";
+import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import {
   Sheet,
   SheetContent,

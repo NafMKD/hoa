@@ -48,35 +48,13 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Buildings',
+          url: '/admin/buildings',
           icon: Building,
-          items: [
-            {
-              title: 'All Buildings',
-              url: '/admin/buildings',
-              icon: List,
-            },
-            {
-              title: 'Add Building',
-              url: '/admin/buildings/add',
-              icon: PlusCircle,
-            },
-          ],
         },
         {
           title: 'Units',
-          icon: Home,
-          items: [
-            {
-              title: 'All Units',
-              url: '/admin/units',
-              icon: List,
-            },
-            {
-              title: 'Add Unit',
-              url: '/admin/units/add',
-              icon: PlusCircle,
-            },
-          ],
+          url: '/admin/units',
+          icon: Home
         },
       ],
     },

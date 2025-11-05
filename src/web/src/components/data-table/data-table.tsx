@@ -36,7 +36,7 @@ export function DataTable<TData>({
           value={value}
           onChange={(e) => {
             setValue(e.target.value)
-            onChange(e.target.value)
+            onChange?.(e.target.value)
           }}
           className="max-w-sm"
         />

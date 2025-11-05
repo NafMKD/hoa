@@ -40,57 +40,66 @@ export function UserDetail() {
 
   if (isLoading) {
     return (
-      <Main className="container mx-auto px-4 py-6 space-y-8">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-9 w-20" />
-        </div>
-
-        <Card className="border-muted shadow-sm">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-5 w-16 rounded-full" />
-            </div>
-            <Skeleton className="h-4 w-60 mt-2" />
-          </CardHeader>
-
-          <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        <div className="space-y-6">
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-9 w-24 rounded-md" />
-            ))}
+      <>
+        <Header fixed>
+          <div className="ml-auto flex items-center space-x-4">
+            <Search />
+            <ThemeSwitch />
+            <ProfileDropdown />
           </div>
+        </Header>
+        <Main className="container mx-auto px-4 py-6 space-y-8">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-8 w-40" />
+            <Skeleton className="h-9 w-20" />
+          </div>
+
+          <Card className="border-muted shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+              <Skeleton className="h-4 w-60 mt-2" />
+            </CardHeader>
+
+            <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
           <div className="space-y-6">
-            <Skeleton className="h-5 w-32" />
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="border-muted">
-                  <CardHeader>
-                    <Skeleton className="h-5 w-40" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4 mt-2" />
-                  </CardContent>
-                </Card>
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-9 w-24 rounded-md" />
               ))}
             </div>
+
+            <div className="space-y-6">
+              <Skeleton className="h-5 w-32" />
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Card key={i} className="border-muted">
+                    <CardHeader>
+                      <Skeleton className="h-5 w-40" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4 mt-2" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      </Main>
+        </Main>
+      </>
     );
   }
 
@@ -119,11 +128,11 @@ export function UserDetail() {
     className = "bg-green-100 text-green-800";
   } else if (user.status === "inactive") {
     variant = "secondary";
-    className="bg-yellow-100 text-yellow-800";
+    className = "bg-yellow-100 text-yellow-800";
   } else if (user.status === "suspended") {
     variant = "destructive";
   }
-  
+
   return (
     <>
       <Header fixed>
@@ -153,7 +162,7 @@ export function UserDetail() {
               </CardTitle>
               <Badge variant={variant} className={className}>
                 {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-                </Badge>
+              </Badge>
             </div>
             <CardDescription className="text-muted-foreground">
               Basic account information and metadata

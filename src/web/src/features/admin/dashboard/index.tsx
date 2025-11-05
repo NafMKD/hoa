@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { RecentPaymentsTable } from './components/recent-payments-table'
 import {
   Card,
   CardContent,
@@ -13,6 +13,17 @@ import { TopNav } from '@/components/layout/admin/top-nav'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+
+// === Fake Data ===
+const incomeExpenseData = [
+  { month: 'Jan', income: 12000, expenses: 7000 },
+  { month: 'Feb', income: 15000, expenses: 9000 },
+  { month: 'Mar', income: 11000, expenses: 8500 },
+  { month: 'Apr', income: 18000, expenses: 9500 },
+  { month: 'May', income: 16000, expenses: 10000 },
+  { month: 'Jun', income: 20000, expenses: 11000 },
+]
 
 export function Dashboard() {
   return (
@@ -30,153 +41,96 @@ export function Dashboard() {
       {/* ===== Main ===== */}
       <Main>
         <div className='mb-2 flex items-center justify-between space-y-2'>
-          <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
+          <h1 className='text-2xl font-bold tracking-tight'>HOA Dashboard</h1>
         </div>
-        <Tabs
-          orientation='vertical'
-          defaultValue='overview'
-          className='space-y-4'
-        >
+
+        <Tabs orientation='vertical' defaultValue='overview' className='space-y-4'>
           <div className='w-full overflow-x-auto pb-2'>
             <TabsList>
               <TabsTrigger value='overview'>Overview</TabsTrigger>
-              <TabsTrigger value='analytics'>Analytics</TabsTrigger>
-              <TabsTrigger value='reports' disabled>
-                Reports
-              </TabsTrigger>
-              <TabsTrigger value='notifications' disabled>
-                Notifications
-              </TabsTrigger>
+              <TabsTrigger value='residents'>Residents</TabsTrigger>
+              <TabsTrigger value='maintenance'>Maintenance</TabsTrigger>
+              <TabsTrigger value='reports'>Reports</TabsTrigger>
             </TabsList>
           </div>
+
+          {/* ==== OVERVIEW ==== */}
           <TabsContent value='overview' className='space-y-4'>
+            {/* Summary Cards */}
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-              <Card>
-                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                  <CardTitle className='text-sm font-medium'>
-                    Total Revenue
-                  </CardTitle>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth='2'
-                    className='text-muted-foreground h-4 w-4'
-                  >
-                    <path d='M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className='text-2xl font-bold'>$45,231.89</div>
-                  <p className='text-muted-foreground text-xs'>
-                    +20.1% from last month
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                  <CardTitle className='text-sm font-medium'>
-                    Subscriptions
-                  </CardTitle>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth='2'
-                    className='text-muted-foreground h-4 w-4'
-                  >
-                    <path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' />
-                    <circle cx='9' cy='7' r='4' />
-                    <path d='M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75' />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className='text-2xl font-bold'>+2350</div>
-                  <p className='text-muted-foreground text-xs'>
-                    +180.1% from last month
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                  <CardTitle className='text-sm font-medium'>Sales</CardTitle>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth='2'
-                    className='text-muted-foreground h-4 w-4'
-                  >
-                    <rect width='20' height='14' x='2' y='5' rx='2' />
-                    <path d='M2 10h20' />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className='text-2xl font-bold'>+12,234</div>
-                  <p className='text-muted-foreground text-xs'>
-                    +19% from last month
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                  <CardTitle className='text-sm font-medium'>
-                    Active Now
-                  </CardTitle>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth='2'
-                    className='text-muted-foreground h-4 w-4'
-                  >
-                    <path d='M22 12h-4l-3 9L9 3l-3 9H2' />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className='text-2xl font-bold'>+573</div>
-                  <p className='text-muted-foreground text-xs'>
-                    +201 since last hour
-                  </p>
-                </CardContent>
-              </Card>
+              <SummaryCard title='Total Dues Collected' value='$85,430' change='+12.3%' />
+              <SummaryCard title='Pending Payments' value='$4,850' change='-3.8%' />
+              <SummaryCard title='Active Residents' value='142' change='+8 new' />
+              <SummaryCard title='Open Maintenance Requests' value='9' change='+2 new' />
             </div>
+
+            {/* Charts and Tables */}
             <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
+              {/* Chart */}
               <Card className='col-span-1 lg:col-span-4'>
                 <CardHeader>
-                  <CardTitle>Overview</CardTitle>
+                  <CardTitle>Income vs Expenses</CardTitle>
                 </CardHeader>
-                <CardContent className='ps-2'>
-                  over view
+                <CardContent className='h-[280px]'>
+                  <ResponsiveContainer width='100%' height='100%'>
+                    <BarChart data={incomeExpenseData}>
+                      <XAxis dataKey='month' />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey='income' fill='#4ade80' name='Income' />
+                      <Bar dataKey='expenses' fill='#f87171' name='Expenses' />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
-              <Card className='col-span-1 lg:col-span-3'>
-                <CardHeader>
-                  <CardTitle>Recent Sales</CardTitle>
-                  <CardDescription>
-                    You made 265 sales this month.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  recent sale
-                </CardContent>
-              </Card>
+
+              {/* Recent Payments */}
+              <RecentPaymentsTable data={recentPayments} />
             </div>
           </TabsContent>
-          <TabsContent value='analytics' className='space-y-4'>
-            analytics
+
+          {/* ==== RESIDENTS ==== */}
+          <TabsContent value='residents' className='space-y-4'>
+            <Card>
+              <CardHeader>
+                <CardTitle>Residents List</CardTitle>
+                <CardDescription>Manage all registered homeowners</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* integrate your TanStack Table here */}
+                <div className='text-muted-foreground text-sm'>
+                  Table placeholder for Residents
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ==== MAINTENANCE ==== */}
+          <TabsContent value='maintenance' className='space-y-4'>
+            <Card>
+              <CardHeader>
+                <CardTitle>Ongoing Maintenance</CardTitle>
+                <CardDescription>Track ongoing repair and cleaning tasks</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {maintenance.map((m, i) => (
+                  <div key={i} className='flex justify-between border-b py-2 text-sm'>
+                    <span>{m.task}</span>
+                    <span
+                      className={`${
+                        m.status === 'In Progress'
+                          ? 'text-yellow-600'
+                          : m.status === 'Completed'
+                          ? 'text-green-600'
+                          : 'text-red-600'
+                      }`}
+                    >
+                      {m.status}
+                    </span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </Main>
@@ -184,11 +138,37 @@ export function Dashboard() {
   )
 }
 
+// === Sub Components ===
+function SummaryCard({ title, value, change }) {
+  return (
+    <Card>
+      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+        <CardTitle className='text-sm font-medium'>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className='text-2xl font-bold'>{value}</div>
+        <p className='text-muted-foreground text-xs'>{change} from last month</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+// === Fake Data Sets ===
+const recentPayments = [
+  { name: 'John Doe', amount: '$120', status: 'Paid', date: '2024-06-10' },
+  { name: 'Jane Smith', amount: '$85', status: 'Pending', date: '2024-06-09' },
+  { name: 'Villa 09', amount: '$100', status: 'Paid', date: '2024-06-08' },
+  { name: 'Apartment 24', amount: '$95', status: 'Overdue', date: '2024-06-07' },
+]
+
+const maintenance = [
+  { task: 'Street light repair', status: 'In Progress' },
+  { task: 'Pool cleaning', status: 'Completed' },
+  { task: 'Security camera upgrade', status: 'Pending' },
+]
+
 const topNav = [
-  {
-    title: 'Payment Reconciliation',
-    href: 'financials/reconciliation',
-    isActive: true,
-    disabled: false,
-  },
+  { title: 'Financials', href: '/admin/financials', isActive: true, disabled: false },
+  { title: 'Residents', href: '/admin/residents', isActive: false, disabled: false },
+  { title: 'Maintenance', href: '/admin/maintenance', isActive: false, disabled: false },
 ]

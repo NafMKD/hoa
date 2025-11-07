@@ -24,8 +24,8 @@ class BuildingResource extends JsonResource
             'units'          => $this->whenLoaded('units', function () {
                 return UnitResource::collection($this->units);
             }),
-            'created_at'     => $this->created_at,
-            'updated_at'     => $this->updated_at,
+            'created_at'     => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),
+            'updated_at'     => \Carbon\Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];
     }
 }

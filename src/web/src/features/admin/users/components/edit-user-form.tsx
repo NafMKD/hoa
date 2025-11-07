@@ -17,7 +17,7 @@ import { updateUser } from "../lib/users";
 import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { ApiError } from "@/types/api-error";
-import type { User } from "@/types/user";
+import type { User } from "@/types/types";
 
 const userSchema = z.object({
   first_name: z.string().min(1, "First name is required"),

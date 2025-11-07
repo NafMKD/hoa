@@ -12,18 +12,38 @@ use Illuminate\Support\Facades\DB;
 class BuildingRepository
 {
     /**
-     * Get all buildings with optional pagination.
-     * 
-     * @param  int|null  $perPage
+     * Get all buildings, optionally paginated and filtered.
+     *
+     * @param int|null $perPage
+     * @param array $filters
      * @return Collection|LengthAwarePaginator
      */
-    public function all(?int $perPage = null): Collection|LengthAwarePaginator
+    public function all(?int $perPage = null, array $filters = []): Collection|LengthAwarePaginator
     {
-        if ($perPage) {
-            return Building::paginate($perPage);
+        $query = Building::query();
+
+        // Filter by search (name or address)
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
         }
 
-        return Building::all();
+        // Filter by number of floors
+        if (!empty($filters['floors'])) {
+            $query->where('floors', $filters['floors']);
+        }
+
+        // Additional filters can be added here
+        if (!empty($filters['units_per_floor'])) {
+            $query->where('units_per_floor', $filters['units_per_floor']);
+        }
+
+        // Order by creation date descending
+        $query->orderBy('created_at', 'desc');
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     /**

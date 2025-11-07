@@ -9,6 +9,8 @@ use App\Repositories\Api\V1\BuildingRepository;
 use App\Http\Resources\Api\V1\BuildingResource;
 use App\Models\Building;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\Rule;
 
 class BuildingController extends Controller
 {
@@ -26,23 +28,29 @@ class BuildingController extends Controller
 
     /**
      * Display a listing of buildings.
-     * 
-     * @param  Request  $request
-     * @return JsonResponse
+     *
+     * @param Request $request
+     * @return AnonymousResourceCollection|JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $this->authorize('viewAny', Building::class);
 
             $perPage = $request->query('per_page') ?? self::_DEFAULT_PAGINATION;
-            $buildings = $this->buildings->all($perPage);
+            $search = $request->query('search');
+            $floors = $request->query('floors');
+            $unitsPerFloor = $request->query('units_per_floor');
 
-            return response()->json(BuildingResource::collection($buildings));
+            $filters = compact('search', 'floors', 'unitsPerFloor');
+
+            $buildings = $this->buildings->all($perPage, $filters);
+
+            return BuildingResource::collection($buildings);
         } catch (AuthorizationException $e) {
             return response()->json([
                 'status' => self::_ERROR,
-                'message' => self::_UNAUTHORIZED,
+                'message' => self::_UNAUTHORIZED
             ], 403);
         }
     }
@@ -59,7 +67,7 @@ class BuildingController extends Controller
             $this->authorize('create', Building::class);
 
             $data = $request->validate([
-                'name'            => ['required', 'string', 'max:255'],
+                'name'            => ['required', 'string', 'max:255', 'unique:buildings,name'],
                 'floors'          => ['required', 'integer', 'min:1'],
                 'units_per_floor' => ['required', 'integer', 'min:1'],
                 'notes'           => ['nullable', 'string'],
@@ -111,10 +119,9 @@ class BuildingController extends Controller
             $this->authorize('update', Building::class);
 
             $data = $request->validate([
-                'name'            => ['sometimes', 'string', 'max:255'],
+                'name'            => ['sometimes', 'string', 'max:255', Rule::unique('buildings')->ignore($building->id)],
                 'floors'          => ['sometimes', 'integer', 'min:1'],
                 'units_per_floor' => ['sometimes', 'integer', 'min:1'],
-                'address'         => ['sometimes', 'string', 'max:500'],
                 'notes'           => ['nullable', 'string'],
             ]);
 

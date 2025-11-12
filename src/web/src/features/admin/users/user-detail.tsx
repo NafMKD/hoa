@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchUserDetail } from "./lib/users";
-import type { User } from "@/types/user";
+import type { User } from "@/types/types";
 import { Link, useParams } from "@tanstack/react-router";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";

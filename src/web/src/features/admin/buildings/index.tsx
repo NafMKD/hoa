@@ -3,7 +3,7 @@ import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { fetchUsers } from "./lib/users";
+import { fetchBuildings } from "./lib/buildings";
 import { columns } from "./components/columns";
 import { DataTable } from "@/components/data-table/data-table";
 import React, { useEffect, useState } from "react";
@@ -25,32 +25,30 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { AddUserForm } from "./components/add-user-form";
-import type { User } from "@/types/types";
+import { AddBuildingForm } from "./components/add-building-form";
+import type { Building } from "@/types/types";
 import { IconPlus } from "@tabler/icons-react";
-import { toast } from "sonner";
-import { updateUserStatus } from "./lib/users";
-import { EditUserForm } from "./components/edit-user-form";
+import { EditBuildingForm } from "./components/edit-building-form";
 
-export function Users() {
+export function Buildings() {
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
   const [pageCount, setPageCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<User[]>([]);
+  const [data, setData] = useState<Building[]>([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 600);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
-  const [open, setOpen] = useState(false); // for sheet control
-  const [editUser, setEditUser] = useState<User | null>(null);
+  const [open, setOpen] = useState(false); 
+  const [editBuilding, setEditBuilding] = useState<Building | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       const page = pagination.pageIndex + 1;
-      const res = await fetchUsers(
+      const res = await fetchBuildings(
         page.toString(),
         pagination.pageSize.toString(),
         debouncedSearch
@@ -63,42 +61,18 @@ export function Users() {
     fetchData();
   }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
 
-  const handleStatusChange = async (userId: string, newStatus: string) => {
-    try {
-      // Optimistically update local state
-      setData((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u))
-      );
-
-      // Send API request
-      await updateUserStatus(userId, newStatus);
-
-      toast.success(`User status updated to "${newStatus}"`);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update status");
-    }
-  };
-
   const table = useReactTable({
-    data: data,
+    data,
     columns,
     pageCount,
-    state: {
-      pagination,
-      rowSelection,
-    },
+    state: { pagination, rowSelection },
     manualPagination: true,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
-    meta: {
-      onStatusChange: handleStatusChange,
-      setEditUser,       
-      setIsEditOpen,
-    },
+    meta: { setEditBuilding, setIsEditOpen },
   });
 
   return (
@@ -114,35 +88,31 @@ export function Users() {
       <Main>
         <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">User List</h2>
-            <p className="text-muted-foreground">Manage system users here.</p>
+            <h2 className="text-2xl font-bold tracking-tight">Buildings</h2>
+            <p className="text-muted-foreground">Manage community buildings here.</p>
           </div>
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button onClick={() => setOpen(true)}>
                 <IconPlus className="mr-1 h-4 w-4" />
-                Add User
+                Add Building
               </Button>
             </SheetTrigger>
 
-            <SheetContent
-              side="right"
-              className="w-full sm:max-w-lg overflow-auto"
-            >
+            <SheetContent side="right" className="w-full sm:max-w-lg overflow-auto">
               <SheetHeader>
-                <SheetTitle className="text-center">Add New User</SheetTitle>
+                <SheetTitle className="text-center">Add New Building</SheetTitle>
                 <SheetDescription className="text-center">
-                  Fill in the user information below to create a new account.
+                  Fill in building information below.
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-6 pb-10">
-                <AddUserForm
+                <AddBuildingForm
                   onSuccess={() => {
                     setOpen(false);
-                    // refresh users list after adding
                     const page = pagination.pageIndex + 1;
-                    fetchUsers(
+                    fetchBuildings(
                       page.toString(),
                       pagination.pageSize.toString(),
                       debouncedSearch
@@ -157,26 +127,22 @@ export function Users() {
           </Sheet>
 
           <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
-            <SheetContent
-              side="right"
-              className="w-full sm:max-w-lg overflow-auto"
-            >
+            <SheetContent side="right" className="w-full sm:max-w-lg overflow-auto">
               <SheetHeader>
-                <SheetTitle className="text-center">Edit User</SheetTitle>
+                <SheetTitle className="text-center">Edit Building</SheetTitle>
                 <SheetDescription className="text-center">
-                  Update the user information below.
+                  Update the building information below.
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-6 pb-10">
-                {editUser && (
-                  <EditUserForm
-                    user={editUser}
+                {editBuilding && (
+                  <EditBuildingForm
+                    building={editBuilding}
                     onSuccess={() => {
                       setIsEditOpen(false);
-                      setEditUser(null);
-                      // Refresh users after edit
+                      setEditBuilding(null);
                       const page = pagination.pageIndex + 1;
-                      fetchUsers(
+                      fetchBuildings(
                         page.toString(),
                         pagination.pageSize.toString(),
                         debouncedSearch
@@ -191,21 +157,13 @@ export function Users() {
             </SheetContent>
           </Sheet>
         </div>
+
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
           {isLoading ? (
             <DataTableSkeleton
-              columnCount={8}
+              columnCount={6}
               filterCount={1}
-              cellWidths={[
-                "6rem",
-                "10rem",
-                "30rem",
-                "10rem",
-                "10rem",
-                "6rem",
-                "6rem",
-                "6rem",
-              ]}
+              cellWidths={["6rem", "10rem", "20rem", "20rem", "10rem", "6rem"]}
               shrinkZero
             />
           ) : (

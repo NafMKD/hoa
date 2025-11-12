@@ -1,5 +1,7 @@
 import axios from "axios";
 import { EncryptedStorage } from "@/stores/EncryptedStorage";
+import type { AxiosError } from "axios";
+import type { ApiError } from "@/types/api-error";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -21,5 +23,20 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+
+export async function handleApi<T>(promise: Promise<{ data: T }>): Promise<T> {
+  try {
+    const response = await promise;
+    return response.data;
+  } catch (err) {
+    const error = err as AxiosError;
+    throw {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    } as ApiError;
+  }
+}
 
 export default api;

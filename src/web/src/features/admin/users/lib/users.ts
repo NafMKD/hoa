@@ -1,26 +1,38 @@
-import api from "@/lib/api";
-import type { AxiosError } from "axios";
-import type { User, UserPaginatedResponse } from "@/types/user";
-import type { ApiError } from "@/types/api-error";
+import api, { handleApi } from "@/lib/api";
+import type { User, UserPaginatedResponse } from "@/types/types";
 
-async function handleApi<T>(promise: Promise<{ data: T }>): Promise<T> {
+export const fetchUsers = async (
+  page: string,
+  perPage: string,
+  search = ""
+): Promise<UserPaginatedResponse> => {
   try {
-    const response = await promise;
-    return response.data;
-  } catch (err) {
-    const error = err as AxiosError;
-    throw {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-    } as ApiError;
-  }
-}
+    const res = await handleApi<UserPaginatedResponse>(
+      api.get(`/v1/users?page=${page}&per_page=${perPage}&search=${search}`)
+    );
 
-export const fetchUsers = (page: string, perPage: string, search = "") =>
-  handleApi<UserPaginatedResponse>(
-    api.get(`/v1/users?page=${page}&per_page=${perPage}&search=${search}`)
-  );
+    return {
+      data: Array.isArray(res.data) ? res.data : [],
+      meta: {
+        current_page: res?.meta?.current_page ?? 1,
+        per_page: res?.meta?.per_page ?? parseInt(perPage),
+        total: res?.meta?.total ?? 0,
+        last_page: res?.meta?.last_page ?? 1,
+      },
+    };
+  } catch (err) {
+    console.error("Failed to fetch buildings", err);
+    return {
+      data: [],
+      meta: {
+        current_page: 1,
+        per_page: parseInt(perPage),
+        total: 0,
+        last_page: 1,
+      },
+    };
+  }
+};
 
 export const createUser = (formData: FormData) =>
   handleApi<User>(
@@ -36,9 +48,7 @@ export const fetchUserDetail = (userId: string) =>
   handleApi<User>(api.get(`/v1/users/${userId}`));
 
 export const updateUserStatus = (userId: string, status: string) =>
-  handleApi<User>(
-    api.patch(`/v1/users/${userId}/status`, { status })
-  );
+  handleApi<User>(api.patch(`/v1/users/${userId}/status`, { status }));
 
 export const updateUser = (userID: string | number, data: FormData) =>
   handleApi<User>(api.put(`/v1/users/${userID}`, data));

@@ -47,7 +47,8 @@ export type UnitResource = {
   id: string | number;
   name: string;
   description: string | null;
-  unit_number: string;
+  floor_number: string;
+  status: string;
   building_name: string;
   property_name: string;
   property_address: string;
@@ -79,4 +80,24 @@ export type DocumentTemplateResource = {
   updated_at: string;
 };
 
-// export type DocumentResource = {
+export type Building = {
+  id: string | number;
+  name: string;
+  floors: number;
+  units_per_floor: number;
+  address: string;
+  notes: string | null;
+  units?: UnitResource[];
+  created_at: string;
+  updated_at: string;
+};
+
+export type BuildingPaginatedResponse = {
+  data: Building[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+};

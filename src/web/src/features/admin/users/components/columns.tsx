@@ -1,4 +1,4 @@
-import type { User } from "@/types/user";
+import type { User } from "@/types/types";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   DropdownMenu,

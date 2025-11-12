@@ -11,6 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { ApiError } from "@/types/api-error";
 import type { Building } from "@/types/types";
+import { Textarea } from "@/components/ui/textarea";
 
 const buildingSchema = z.object({
   name: z.string().min(1, "Building name is required"),
@@ -133,9 +134,11 @@ export function EditBuildingForm({ building, onSuccess }: EditBuildingFormProps)
           {/* Notes */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="notes">Notes</Label>
-            <Input id="notes" {...form.register("notes")} />
+            <Textarea id="notes" {...form.register("notes")} />
             {form.formState.errors.notes && (
-              <p className="text-sm text-red-500">{form.formState.errors.notes.message}</p>
+              <p className="text-sm text-red-500">
+                {form.formState.errors.notes.message}
+              </p>
             )}
           </div>
 

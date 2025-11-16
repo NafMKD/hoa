@@ -1,5 +1,5 @@
 import api, { handleApi } from "@/lib/api";
-import type { User, UserPaginatedResponse } from "@/types/types";
+import type { IdNamePair, User, UserPaginatedResponse } from "@/types/types";
 
 export const fetchUsers = async (
   page: string,
@@ -52,3 +52,6 @@ export const updateUserStatus = (userId: string, status: string) =>
 
 export const updateUser = (userID: string | number, data: FormData) =>
   handleApi<User>(api.put(`/v1/users/${userID}`, data));
+
+export const fetchUserNames = async (): Promise<IdNamePair[]> => 
+  handleApi<IdNamePair[]>(api.get(`/v1/users/names/all`));

@@ -15,22 +15,19 @@ export type User = {
   email: string;
   role: UserRole;
   status: string;
-
-//   id_file?: DocumentResource | null;
-
   owned_units?: UnitResource[];
   rented_units?: UnitResource[];
-
   leases?: TenantLeaseResource[];
-//   created_leases?: TenantLeaseResource[];
-//   representative_leases?: TenantLeaseResource[];
-
   created_templates?: DocumentTemplateResource[];
   updated_templates?: DocumentTemplateResource[];
-
   last_login_at?: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type IdNamePair = {
+  id: string | number;
+  name: string;
 };
 
 export type UserPaginatedResponse = {
@@ -80,6 +77,18 @@ export type DocumentTemplateResource = {
   updated_at: string;
 };
 
+export type Document = {
+  id: string | number;
+  file_path: string;
+  file_name : string;
+  mime_type : string;
+  file_size : string;
+  category : string;
+  uploaded_at : string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Building = {
   id: string | number;
   name: string;
@@ -100,4 +109,38 @@ export type BuildingPaginatedResponse = {
     total: number;
     last_page: number;
   };
+};
+
+export type Unit = {
+  id: string | number;
+  building?: IdNamePair; 
+  name: string;
+  floor_number: number | null;
+  owner?: User; 
+  unit_type: string;
+  type_name: string;
+  size_m2: number | null;
+  status: string;
+  ownership_file?: Document; 
+  leases?: TenantLeaseResource[]; 
+  tenant?: User; 
+  created_at: string;
+  updated_at: string;
+};
+
+export type UnitPaginatedResponse = {
+  data: Unit[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+};
+
+export type UnitFormData = {
+  status: string;
+  unit_types: string[] | null;
+  unit_statuses: string[] | null;
+  data: IdNamePair[];
 };

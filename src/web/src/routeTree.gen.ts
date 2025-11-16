@@ -18,8 +18,10 @@ import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminUsersIndexRouteImport } from './routes/_authenticated/admin/users/index'
+import { Route as AuthenticatedAdminUnitsIndexRouteImport } from './routes/_authenticated/admin/units/index'
 import { Route as AuthenticatedAdminBuildingsIndexRouteImport } from './routes/_authenticated/admin/buildings/index'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin/users/$userId'
+import { Route as AuthenticatedAdminUnitsUnitIdRouteImport } from './routes/_authenticated/admin/units/$unitId'
 import { Route as AuthenticatedAdminBuildingsBuildingIdRouteImport } from './routes/_authenticated/admin/buildings/$buildingId'
 
 const errors503Route = errors503RouteImport.update({
@@ -68,6 +70,12 @@ const AuthenticatedAdminUsersIndexRoute =
     path: '/users/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminUnitsIndexRoute =
+  AuthenticatedAdminUnitsIndexRouteImport.update({
+    id: '/units/',
+    path: '/units/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminBuildingsIndexRoute =
   AuthenticatedAdminBuildingsIndexRouteImport.update({
     id: '/buildings/',
@@ -78,6 +86,12 @@ const AuthenticatedAdminUsersUserIdRoute =
   AuthenticatedAdminUsersUserIdRouteImport.update({
     id: '/users/$userId',
     path: '/users/$userId',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminUnitsUnitIdRoute =
+  AuthenticatedAdminUnitsUnitIdRouteImport.update({
+    id: '/units/$unitId',
+    path: '/units/$unitId',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminBuildingsBuildingIdRoute =
@@ -97,8 +111,10 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503Route
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
+  '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -110,8 +126,10 @@ export interface FileRoutesByTo {
   '/503': typeof errors503Route
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
+  '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
 }
 export interface FileRoutesById {
@@ -125,8 +143,10 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503Route
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  '/_authenticated/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/_authenticated/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/_authenticated/admin/buildings/': typeof AuthenticatedAdminBuildingsIndexRoute
+  '/_authenticated/admin/units/': typeof AuthenticatedAdminUnitsIndexRoute
   '/_authenticated/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
 }
 export interface FileRouteTypes {
@@ -141,8 +161,10 @@ export interface FileRouteTypes {
     | '/503'
     | '/admin/'
     | '/admin/buildings/$buildingId'
+    | '/admin/units/$unitId'
     | '/admin/users/$userId'
     | '/admin/buildings'
+    | '/admin/units'
     | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,8 +176,10 @@ export interface FileRouteTypes {
     | '/503'
     | '/admin'
     | '/admin/buildings/$buildingId'
+    | '/admin/units/$unitId'
     | '/admin/users/$userId'
     | '/admin/buildings'
+    | '/admin/units'
     | '/admin/users'
   id:
     | '__root__'
@@ -168,8 +192,10 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/buildings/$buildingId'
+    | '/_authenticated/admin/units/$unitId'
     | '/_authenticated/admin/users/$userId'
     | '/_authenticated/admin/buildings/'
+    | '/_authenticated/admin/units/'
     | '/_authenticated/admin/users/'
   fileRoutesById: FileRoutesById
 }
@@ -248,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/units/': {
+      id: '/_authenticated/admin/units/'
+      path: '/units'
+      fullPath: '/admin/units'
+      preLoaderRoute: typeof AuthenticatedAdminUnitsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/buildings/': {
       id: '/_authenticated/admin/buildings/'
       path: '/buildings'
@@ -260,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/users/$userId'
       fullPath: '/admin/users/$userId'
       preLoaderRoute: typeof AuthenticatedAdminUsersUserIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/units/$unitId': {
+      id: '/_authenticated/admin/units/$unitId'
+      path: '/units/$unitId'
+      fullPath: '/admin/units/$unitId'
+      preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/buildings/$buildingId': {
@@ -275,8 +315,10 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminBuildingsBuildingIdRoute: typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  AuthenticatedAdminUnitsUnitIdRoute: typeof AuthenticatedAdminUnitsUnitIdRoute
   AuthenticatedAdminUsersUserIdRoute: typeof AuthenticatedAdminUsersUserIdRoute
   AuthenticatedAdminBuildingsIndexRoute: typeof AuthenticatedAdminBuildingsIndexRoute
+  AuthenticatedAdminUnitsIndexRoute: typeof AuthenticatedAdminUnitsIndexRoute
   AuthenticatedAdminUsersIndexRoute: typeof AuthenticatedAdminUsersIndexRoute
 }
 
@@ -285,9 +327,11 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdminBuildingsBuildingIdRoute:
       AuthenticatedAdminBuildingsBuildingIdRoute,
+    AuthenticatedAdminUnitsUnitIdRoute: AuthenticatedAdminUnitsUnitIdRoute,
     AuthenticatedAdminUsersUserIdRoute: AuthenticatedAdminUsersUserIdRoute,
     AuthenticatedAdminBuildingsIndexRoute:
       AuthenticatedAdminBuildingsIndexRoute,
+    AuthenticatedAdminUnitsIndexRoute: AuthenticatedAdminUnitsIndexRoute,
     AuthenticatedAdminUsersIndexRoute: AuthenticatedAdminUsersIndexRoute,
   }
 

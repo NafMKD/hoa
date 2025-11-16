@@ -1,0 +1,72 @@
+import api, { handleApi } from "@/lib/api";
+import type { Unit, UnitFormData, UnitPaginatedResponse } from "@/types/types";
+
+/**
+ * Fetch paginated units
+ */
+export const fetchUnits = async (
+  page: string,
+  perPage: string,
+  search = ""
+): Promise<UnitPaginatedResponse> => {
+  try {
+    const res = await handleApi<UnitPaginatedResponse>(
+      api.get(`/v1/units?page=${page}&per_page=${perPage}&search=${search}`)
+    );
+
+    return {
+      data: Array.isArray(res.data) ? res.data : [],
+      meta: {
+        current_page: res?.meta?.current_page ?? 1,
+        per_page: res?.meta?.per_page ?? parseInt(perPage),
+        total: res?.meta?.total ?? 0,
+        last_page: res?.meta?.last_page ?? 1,
+      },
+    };
+  } catch (err) {
+    console.error("Failed to fetch units", err);
+    return {
+      data: [],
+      meta: {
+        current_page: 1,
+        per_page: parseInt(perPage),
+        total: 0,
+        last_page: 1,
+      },
+    };
+  }
+};
+
+/**
+ * Fetch unit detail by ID
+ */
+export const fetchUnitDetail = (unitId: string) =>
+  handleApi<Unit>(api.get(`/v1/units/${unitId}`));
+
+/**
+ * Create a new unit
+ */
+export const createUnit = (formData: FormData) =>
+  handleApi<Unit>(
+    api.post("/v1/units", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  );
+
+/**
+ * Update existing unit
+ */
+export const updateUnit = (unitId: string | number, formData: FormData) =>
+  handleApi<Unit>(api.put(`/v1/units/${unitId}`, formData));
+
+/**
+ * Delete a unit
+ */
+export const deleteUnit = (unitId: string | number) =>
+  handleApi<void>(api.delete(`/v1/units/${unitId}`));
+
+/**
+ * fetch unit names for dropdowns
+ */
+export const fetchUnitNames = async (): Promise<UnitFormData> => 
+  handleApi<UnitFormData>(api.get("/v1/buildings/names/all"));

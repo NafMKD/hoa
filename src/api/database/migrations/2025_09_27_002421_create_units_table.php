@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->integer('floor_number');
             $table->foreignId('owner_id')->nullable()->constrained('users');
+            $table->foreignId('tenant_id')->nullable()->constrained('users');
             $table->foreignId('ownership_file_id')->nullable()->constrained('documents');
             $table->enum('unit_type', Controller::_UNIT_TYPES)->nullable();
             $table->decimal('size_m2', 8, 2)->nullable();
@@ -27,6 +28,7 @@ return new class extends Migration
 
             $table->index('building_id');
             $table->index('owner_id');
+            $table->index('tenant_id');
             $table->index('status');
 
         });

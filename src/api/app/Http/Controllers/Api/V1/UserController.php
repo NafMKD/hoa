@@ -56,6 +56,27 @@ class UserController extends Controller
     }
 
     /**
+     * Get all user names and IDs.
+     * 
+     * @return JsonResponse
+     */
+    public function allNames(): JsonResponse
+    {
+        try {
+            $this->authorize('viewAny', User::class);
+
+            $users = $this->users->allNames();
+
+            return response()->json($users);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED
+            ], 403);
+        }
+    }
+
+    /**
      * Get all users by role
      * 
      * @param  Request  $request

@@ -15,18 +15,46 @@ use App\Models\Document;
 class UnitRepository
 {
     /**
-     * Get all units with optional pagination.
-     * 
-     * @param  int|null  $perPage
+     * Get all units, optionally paginated and filtered.
+     *
+     * @param int|null $perPage
+     * @param array $filters
      * @return Collection|LengthAwarePaginator
      */
-    public function all(?int $perPage = null): Collection|LengthAwarePaginator
+    public function all(?int $perPage = null, array $filters = []): Collection|LengthAwarePaginator
     {
-        if ($perPage) {
-            return Unit::paginate($perPage);
+        $query = Unit::query()
+            ->with([
+                'building:id,name'
+            ]);
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
         }
 
-        return Unit::all();
+        if (!empty($filters['building_id'])) {
+            $query->where('building_id', $filters['building_id']);
+        }
+
+        // Filter by floor number
+        if (!empty($filters['floor_number'])) {
+            $query->where('floor_number', $filters['floor_number']);
+        }
+
+        if (!empty($filters['unit_type'])) {
+            $query->where('unit_type', $filters['unit_type']);
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     /**

@@ -25,6 +25,7 @@ class Unit extends Model
         'name',
         'floor_number',
         'owner_id',
+        'tenant_id',
         'ownership_file_id',
         'unit_type',
         'size_m2',
@@ -89,8 +90,7 @@ class Unit extends Model
      */
     public function tenant(): BelongsTo
     {   
-        $activeLease = $this->leases()->where('status', 'active')->first();
-        return $activeLease ? $activeLease->tenant() : null;
+        return $this->belongsTo(User::class, 'tenant_id');
     }
 
     /**

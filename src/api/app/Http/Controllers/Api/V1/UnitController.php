@@ -9,6 +9,7 @@ use App\Repositories\Api\V1\UnitRepository;
 use App\Http\Resources\Api\V1\UnitResource;
 use App\Models\Unit;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\Rule;
 
 class UnitController extends Controller
@@ -29,17 +30,21 @@ class UnitController extends Controller
      * Display a listing of units.
      * 
      * @param Request $request
-     * @return JsonResponse
+     * @return AnonymousResourceCollection|JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $this->authorize('viewAny', Unit::class);
 
             $perPage = $request->query('per_page') ?? self::_DEFAULT_PAGINATION;
-            $units = $this->units->all($perPage);
+            $search = $request->query('search');
 
-            return response()->json(UnitResource::collection($units));
+            $filters = compact('search');
+
+            $units = $this->units->all($perPage, $filters);
+
+            return UnitResource::collection($units);
         } catch (AuthorizationException $e) {
             return response()->json([
                 'status' => self::_ERROR,

@@ -25,9 +25,7 @@ class BuildingRepository
         // Filter by search (name or address)
         if (!empty($filters['search'])) {
             $search = $filters['search'];
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
-            });
+            $query->where('name', 'like', "%{$search}%");
         }
 
         // Filter by number of floors
@@ -44,6 +42,19 @@ class BuildingRepository
         $query->orderBy('created_at', 'desc');
 
         return $perPage ? $query->paginate($perPage) : $query->get();
+    }
+
+    /**
+     * Get all building names and IDs.
+     * 
+     * @return Collection
+     */
+    public function allNames(): Collection
+    {
+        return Building::query()
+            ->select('id', 'name')
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
     /**

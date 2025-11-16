@@ -56,6 +56,32 @@ class BuildingController extends Controller
     }
 
     /**
+     * Get all building names and IDs.
+     * 
+     * @return JsonResponse
+     */
+    public function allNames(): JsonResponse
+    {
+        try {
+            $this->authorize('viewAny', Building::class);
+
+            $names = $this->buildings->allNames();
+
+            return response()->json([
+                'status' => self::_SUCCESS,
+                'unit_statuses' => Controller::_UNIT_STATUSES,
+                'unit_types' => Controller::_UNIT_TYPES,
+                'data' => $names,
+            ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        }
+    }
+
+    /**
      * Store a newly created building.
      * 
      * @param  Request  $request

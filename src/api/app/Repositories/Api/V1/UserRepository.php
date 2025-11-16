@@ -49,6 +49,20 @@ class UserRepository
     }
 
     /**
+     * Get all user names and IDs.
+     * 
+     * @return Collection
+     */
+    public function allNames(): Collection
+    {
+        return User::query()
+            ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) AS name"))
+            ->orderBy('first_name', 'asc')
+            ->orderBy('last_name', 'asc')
+            ->get();
+    }
+
+    /**
      * Get users by role with optional pagination.
      * 
      * @param  string  $role

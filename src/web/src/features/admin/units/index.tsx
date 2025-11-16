@@ -29,6 +29,7 @@ import { AddUnitForm } from "./components/add-unit-form";
 import type { Unit } from "@/types/types";
 import { IconPlus } from "@tabler/icons-react";
 import { EditUnitForm } from "./components/edit-unit-form";
+import { Spinner } from "@/components/ui/spinner";
 
 export function Units() {
   const [pagination, setPagination] = React.useState<PaginationState>({
@@ -52,7 +53,7 @@ export function Units() {
         page.toString(),
         pagination.pageSize.toString(),
         debouncedSearch
-      );      
+      );
       setData(res.data);
       setPageCount(res.meta.last_page);
       setIsLoading(false);
@@ -97,12 +98,24 @@ export function Units() {
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button onClick={() => setOpen(true)}>
-                <IconPlus className="mr-1 h-4 w-4" />
-                Add Unit
+                {open ? (
+                  <>
+                    <Spinner className="h-8 w-8" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <IconPlus className="mr-1 h-4 w-4" />
+                    Add Unit
+                  </>
+                )}
               </Button>
             </SheetTrigger>
 
-            <SheetContent side="right" className="w-full sm:max-w-lg overflow-auto">
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-lg overflow-auto"
+            >
               <SheetHeader>
                 <SheetTitle className="text-center">Add New Unit</SheetTitle>
                 <SheetDescription className="text-center">
@@ -129,7 +142,10 @@ export function Units() {
           </Sheet>
 
           <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
-            <SheetContent side="right" className="w-full sm:max-w-lg overflow-auto">
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-lg overflow-auto"
+            >
               <SheetHeader>
                 <SheetTitle className="text-center">Edit Unit</SheetTitle>
                 <SheetDescription className="text-center">
@@ -166,8 +182,14 @@ export function Units() {
               columnCount={8}
               filterCount={1}
               cellWidths={[
-                "6rem", "10rem", "10rem", "10rem",
-                "10rem", "10rem", "10rem", "6rem",
+                "6rem",
+                "10rem",
+                "10rem",
+                "10rem",
+                "10rem",
+                "10rem",
+                "10rem",
+                "6rem",
               ]}
               shrinkZero
             />

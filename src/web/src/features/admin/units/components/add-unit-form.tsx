@@ -146,6 +146,18 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
     }
   };
 
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex justify-center items-center h-32">
+            <Spinner className="mr-1" /> Loading form...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -368,7 +380,6 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
           </Button>
         </form>
       </CardContent>
-
       <CardFooter>
         <p className="text-sm text-muted-foreground">
           Fields marked with <span className="text-red-500">*</span> are

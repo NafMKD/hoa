@@ -66,7 +66,7 @@ class UnitController extends Controller
 
             $data = $request->validate([
                 'building_id'      => ['required', 'exists:buildings,id'],
-                'name'             => ['required', 'string', 'max:255'],
+                'name'             => ['required', 'string', 'max:255', 'unique:unit,name'],
                 'floor_number'     => ['required', 'integer', 'min:0'],
                 'owner_id'         => ['nullable', 'exists:users,id'],
                 'ownership_file_id'=> ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.self::_MAX_FILE_SIZE],

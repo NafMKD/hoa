@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('units', function (Blueprint $table) {
             $table->id();
             $table->foreignId('building_id')->constrained('buildings');
-            $table->string('name');
+            $table->string('name')->unique();
             $table->integer('floor_number');
             $table->foreignId('owner_id')->nullable()->constrained('users');
             $table->foreignId('tenant_id')->nullable()->constrained('users');

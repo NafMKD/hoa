@@ -32,7 +32,7 @@ export function DataTable<TData>({
       <div className="flex items-center py-4">
         <Input
           type="text"
-          placeholder="Search users..."
+          placeholder="Search here..."
           value={value}
           onChange={(e) => {
             setValue(e.target.value)

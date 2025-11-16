@@ -18,6 +18,14 @@ import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { IconArrowLeft, IconArrowLeftCircle } from "@tabler/icons-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export function BuildingDetail() {
   const { buildingId } = useParams({ from: "/_authenticated/admin/buildings/$buildingId" });
@@ -152,30 +160,47 @@ export function BuildingDetail() {
           </TabsList>
 
           <TabsContent value="units" className="mt-6 space-y-8">
-            {building.units?.length ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {building.units.map((unit) => (
-                  <Card key={unit.id} className="hover:shadow transition">
-                    <CardHeader>
-                      <CardTitle>{unit.name || `Unit #${unit.id}`}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground">
-                        {unit.description || "No description"}
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Floor: {unit.floor_number || "—"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Status: {unit.status || "—"}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No units found.</p>
-            )}
+          <section>
+              <h2 className="text-lg font-semibold mb-3">Owned Units</h2>
+
+              {building.units?.length ? (
+                <div className="bg-card/70 backdrop-blur-sm shadow-md rounded-xl p-2 border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-1/3">Unit Name</TableHead>
+                        <TableHead>Area (sqm) </TableHead>
+                        <TableHead>Type</TableHead>
+                      </TableRow>
+                    </TableHeader>
+
+                    <TableBody>
+                      {building.units.map((unit) => (
+                        <TableRow
+                          key={unit.id}
+                          className="hover:bg-muted/40 transition"
+                        >
+                          <TableCell>
+                            <Link
+                              to="/admin/units/$unitId"
+                              params={{ unitId: unit.id as string }}
+                              target="_blank"
+                              className="underline hover:text-primary transition"
+                            >
+                              {unit.name || `Unit #${unit.id}`}
+                            </Link>
+                          </TableCell>
+                          <TableCell>{unit.size_m2 || "No Size"}</TableCell>
+                          <TableCell>{unit.type_name || "No Size"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No owned units.</p>
+              )}
+            </section>
           </TabsContent>
 
           <TabsContent value="note" className="mt-6">

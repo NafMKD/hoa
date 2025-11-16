@@ -18,6 +18,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { ApiError } from "@/types/api-error";
 import type { IdNamePair, Unit } from "@/types/types";
 import { fetchUserNames } from "../../users/lib/users";
+import { Skeleton } from "@/components/ui/skeleton";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface EditUnitFormProps {
   unit: Unit;
@@ -85,11 +87,12 @@ export function EditUnitForm({ unit, onSuccess }: EditUnitFormProps) {
   type FormValues = z.infer<typeof unitSchema>;
 
   const form = useForm<FormValues>({
+    resolver: zodResolver(unitSchema) as any,  
     defaultValues: {
       building_id: unit.building?.id as number,
       name: unit.name,
       floor_number: unit.floor_number as number,
-      owner_id: unit.owner?.id as number ?? undefined,
+      owner_id: (unit.owner?.id as number) ?? undefined,
       unit_type: unit.unit_type,
       size_m2: unit.size_m2 ?? undefined,
       status: unit.status,
@@ -160,11 +163,52 @@ export function EditUnitForm({ unit, onSuccess }: EditUnitFormProps) {
   if (loading) {
     return (
       <Card>
-        <CardContent className="pt-6">
-          <div className="flex justify-center items-center h-32">
-            <Spinner className="mr-1" /> Loading form...
+        <CardContent className="pt-6 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-9 w-full rounded-md" />
+          </div>
+          <div className="space-y-1.5">
+            <Skeleton className="h-3 w-40" />
+            <Skeleton className="h-9 w-full rounded-md" />
+          </div>
+          <Skeleton className="h-9 w-full rounded-md" />
         </CardContent>
+
+        <CardFooter>
+          <Skeleton className="h-3 w-56" />
+        </CardFooter>
       </Card>
     );
   }

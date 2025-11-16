@@ -55,8 +55,14 @@ class UserRepository
      */
     public function allNames(): Collection
     {
+        $roles = array_slice(Controller::_ROLES, 3);
+
         return User::query()
             ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) AS name"))
+            ->where(function ($q) use ($roles) {
+                $q->whereNull('role')
+                  ->orWhereIn('role', $roles);  
+            })
             ->orderBy('first_name', 'asc')
             ->orderBy('last_name', 'asc')
             ->get();

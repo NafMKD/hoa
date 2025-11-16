@@ -122,7 +122,7 @@ export function UnitDetail() {
             <div>
               <p className="text-sm text-muted-foreground">Building</p>
               <p className="font-medium">
-                { unit.building ? (
+                {unit.building ? (
                   <Link
                     to="/admin/buildings/$buildingId"
                     params={{ buildingId: unit.building.id as string }}
@@ -133,8 +133,7 @@ export function UnitDetail() {
                   </Link>
                 ) : (
                   "—"
-                )
-                }
+                )}
               </p>
             </div>
             <div>
@@ -181,13 +180,41 @@ export function UnitDetail() {
                 <div>
                   <p className="text-sm text-muted-foreground">Owner</p>
                   <p className="font-medium">
-                    {unit.owner ? `${unit.owner.first_name} ${unit.owner.last_name}`   : "—"}
+                    {unit.owner ? (
+                      <Link
+                        to="/admin/users/$userId"
+                        params={{ userId: unit.owner?.id as string }}
+                        target="_blank"
+                        className={
+                          unit.owner ? "text-primary hover:underline" : ""
+                        }
+                      >
+                        {unit.owner.first_name} {unit.owner.last_name}
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
                   </p>
                 </div>
                 {unit.tenant && (
                   <div>
                     <p className="text-sm text-muted-foreground">Tenant</p>
-                    <p className="font-medium">{unit.owner ? `${unit.owner.first_name} ${unit.owner.last_name}`   : "—"}</p>
+                    <p className="font-medium">
+                      {unit.owner ? (
+                        <Link
+                          to="/admin/users/$userId"
+                          params={{ userId: unit.owner?.id as string }}
+                          target="_blank"
+                          className={
+                            unit.owner ? "text-primary hover:underline" : ""
+                          }
+                        >
+                          {unit.owner.first_name} {unit.owner.last_name}
+                        </Link>
+                      ) : (
+                        "—"
+                      )}
+                    </p>
                   </div>
                 )}
               </CardContent>

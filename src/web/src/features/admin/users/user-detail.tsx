@@ -20,6 +20,14 @@ import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { IconArrowLeft, IconArrowLeftCircle } from "@tabler/icons-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export function UserDetail() {
   const { userId } = useParams({ from: "/_authenticated/admin/users/$userId" });
@@ -213,22 +221,43 @@ export function UserDetail() {
           </TabsList>
 
           <TabsContent value="units" className="mt-6 space-y-8">
+            {/* Owned Units */}
             <section>
               <h2 className="text-lg font-semibold mb-3">Owned Units</h2>
+
               {user.owned_units?.length ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {user.owned_units.map((unit) => (
-                    <Card key={unit.id} className="hover:shadow transition">
-                      <CardHeader>
-                        <CardTitle>{unit.name || `Unit #${unit.id}`}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground">
-                          {unit.description || "No description"}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="bg-card/70 backdrop-blur-sm shadow-md rounded-xl p-2 border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-1/3">Unit Name</TableHead>
+                        <TableHead>Area (sqm) </TableHead>
+                        <TableHead>Type</TableHead>
+                      </TableRow>
+                    </TableHeader>
+
+                    <TableBody>
+                      {user.owned_units.map((unit) => (
+                        <TableRow
+                          key={unit.id}
+                          className="hover:bg-muted/40 transition"
+                        >
+                          <TableCell>
+                            <Link
+                              to="/admin/units/$unitId"
+                              params={{ unitId: unit.id as string }}
+                              target="_blank"
+                              className="underline hover:text-primary transition"
+                            >
+                              {unit.name || `Unit #${unit.id}`}
+                            </Link>
+                          </TableCell>
+                          <TableCell>{unit.size_m2 || "No Size"}</TableCell>
+                          <TableCell>{unit.type_name || "No Size"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">No owned units.</p>
@@ -237,23 +266,42 @@ export function UserDetail() {
 
             <Separator />
 
+            {/* Rented Units */}
             <section>
               <h2 className="text-lg font-semibold mb-3">Rented Units</h2>
+
               {user.rented_units?.length ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {user.rented_units.map((unit) => (
-                    <Card key={unit.id} className="hover:shadow transition">
-                      <CardHeader>
-                        <CardTitle>{unit.name || `Unit #${unit.id}`}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground">
-                          {unit.description || "No description"}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <Table className="shadow-sm border rounded-xl">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-1/3">Unit Name</TableHead>
+                      <TableHead>Area (sqm) </TableHead>
+                      <TableHead>Type</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {user.rented_units.map((unit) => (
+                      <TableRow
+                        key={unit.id}
+                        className="hover:bg-muted/40 transition"
+                      >
+                        <TableCell>
+                          <Link
+                            to="/admin/units/$unitId"
+                            params={{ unitId: unit.id as string }}
+                            target="_blank"
+                            className="underline hover:text-primary transition"
+                          >
+                            {unit.name || `Unit #${unit.id}`}
+                          </Link>
+                        </TableCell>
+                        <TableCell>{unit.size_m2 || "No Size"}</TableCell>
+                        <TableCell>{unit.type_name || "No Size"}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               ) : (
                 <p className="text-sm text-muted-foreground">
                   No rented units.

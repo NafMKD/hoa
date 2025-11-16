@@ -90,7 +90,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
   type FormValues = z.infer<typeof unitSchema>;
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(unitSchema),
+    resolver: zodResolver(unitSchema) as any,
     defaultValues: {
       floor_number: 0,
       size_m2: undefined,

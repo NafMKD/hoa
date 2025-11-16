@@ -87,7 +87,7 @@ export function EditUnitForm({ unit, onSuccess }: EditUnitFormProps) {
   type FormValues = z.infer<typeof unitSchema>;
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(unitSchema),  
+    resolver: zodResolver(unitSchema) as any,  
     defaultValues: {
       building_id: unit.building?.id as number,
       name: unit.name,

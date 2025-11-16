@@ -29,7 +29,7 @@ export default function ProtectedRoute({ role, children }: ProtectedRouteProps) 
   }
 
   if (!user || (role && user.role !== role)) {
-    return <Navigate to="/sign-in" replace />;
+    return <Navigate to="/sign-in" search={{redirect: null}} replace />;
   }
 
   return <>{children}</>;

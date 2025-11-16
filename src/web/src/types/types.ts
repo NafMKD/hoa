@@ -46,9 +46,8 @@ export type UnitResource = {
   description: string | null;
   floor_number: string;
   status: string;
-  building_name: string;
-  property_name: string;
-  property_address: string;
+  size_m2: number | null;
+  type_name: string;
 };
 
 export type TenantLeaseResource = {

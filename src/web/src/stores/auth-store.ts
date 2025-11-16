@@ -7,7 +7,13 @@ export interface User {
   id: number;
   name: string;
   phone: string;
-  role: "admin" | "accountant" | "secretary" | "homeowner" | "tenant" | "representative";
+  role:
+    | "admin"
+    | "accountant"
+    | "secretary"
+    | "homeowner"
+    | "tenant"
+    | "representative";
 }
 
 interface AuthState {
@@ -15,7 +21,7 @@ interface AuthState {
   token?: string;
   setAuth: (user: User, token?: string) => void;
   logout: () => void;
-  initAuth: () => Promise<void>;
+  initAuth: (redirect?: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -32,7 +38,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user: null, token: undefined });
   },
 
-  initAuth: async () => {
+  initAuth: async (redirect?: string) => {
     const token = EncryptedStorage.getItem("token");
     if (!token) return;
 
@@ -45,7 +51,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         role: data.user.role,
       };
       set({ user, token });
-      router.navigate({ to: `/${user.role}` });
+      router.navigate({
+        to: (redirect as string) || `/${user.role}`,
+      });
     } catch {
       EncryptedStorage.removeItem("token");
       set({ user: null, token: undefined });

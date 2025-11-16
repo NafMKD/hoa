@@ -18,20 +18,14 @@ import type { ApiError } from "@/types/api-error";
 import { createUnit, fetchUnitNames } from "../lib/units";
 import { fetchUserNames } from "../../users/lib/users";
 import type { IdNamePair } from "@/types/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface AddUnitFormProps {
   onSuccess?: () => void;
 }
 
 export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
-  const form = useForm<FormValues>({
-    defaultValues: {
-      floor_number: 0,
-      size_m2: undefined,
-      status: undefined,
-    },
-  });
-
   const [buildings, setBuildings] = useState<IdNamePair[]>([]);
   const [users, setUsers] = useState<IdNamePair[]>([]);
   const [unitTypes, setUnitTypes] = useState<string[]>([]);
@@ -63,7 +57,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
   }, []);
 
   const unitSchema = z.object({
-    building_id: z.number().int().positive("Building is required"),
+    building_id: z.coerce.number().int().positive("Building is required"),
     name: z.string().min(1, "Unit name is required").max(255),
     floor_number: z.coerce
       .number()
@@ -75,7 +69,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
       .enum(
         unitTypes.length > 0
           ? (unitTypes as [string, ...string[]])
-          : ([""] as any)
+          : ([""] as string[])
       )
       .refine((val) => val !== undefined, {
         message: `Unit type is required`,
@@ -85,7 +79,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
       .enum(
         unitStatuses.length > 0
           ? (unitStatuses as [string, ...string[]])
-          : ([""] as any)
+          : ([""] as string[])
       )
       .refine((val) => val !== undefined, {
         message: `Status is required`,
@@ -94,6 +88,15 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
   });
 
   type FormValues = z.infer<typeof unitSchema>;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(unitSchema),
+    defaultValues: {
+      floor_number: 0,
+      size_m2: undefined,
+      status: undefined,
+    },
+  });
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -149,11 +152,52 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
   if (loading) {
     return (
       <Card>
-        <CardContent className="pt-6">
-          <div className="flex justify-center items-center h-32">
-            <Spinner className="mr-1" /> Loading form...
+        <CardContent className="pt-6 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-9 w-full rounded-md" />
+          </div>
+          <div className="space-y-1.5">
+            <Skeleton className="h-3 w-40" />
+            <Skeleton className="h-9 w-full rounded-md" />
+          </div>
+          <Skeleton className="h-9 w-full rounded-md" />
         </CardContent>
+
+        <CardFooter>
+          <Skeleton className="h-3 w-56" />
+        </CardFooter>
       </Card>
     );
   }
@@ -192,6 +236,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
                       <SelectValue placeholder="Select a building" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value=" ">Select a building</SelectItem>
                       {buildings.map((b) => (
                         <SelectItem key={b.id} value={b.id.toString()}>
                           {b.name}
@@ -241,6 +286,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value=" ">Select Unit Type</SelectItem>
                       {unitTypes.map((type) => (
                         <SelectItem key={type} value={type}>
                           {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -287,6 +333,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value=" ">Select Status</SelectItem>
                       {unitStatuses.map((status) => (
                         <SelectItem key={status} value={status}>
                           {status
@@ -321,6 +368,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
                     <SelectValue placeholder="Select owner" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value=" ">Select Owner</SelectItem>
                     {users.map((u) => (
                       <SelectItem key={u.id} value={u.id.toString()}>
                         {u.name}

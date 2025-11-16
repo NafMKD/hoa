@@ -226,34 +226,39 @@ export function UserDetail() {
               <h2 className="text-lg font-semibold mb-3">Owned Units</h2>
 
               {user.owned_units?.length ? (
-                <Table className="shadow-sm border rounded-xl">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-1/3">Unit Name</TableHead>
-                      <TableHead>Area (sqm) </TableHead>
-                      <TableHead>Type</TableHead>
-                    </TableRow>
-                  </TableHeader>
-
-                  <TableBody>
-                    {user.owned_units.map((unit) => (
-                      <TableRow
-                        key={unit.id}
-                        className="hover:bg-muted/40 transition"
-                      >
-                        <TableCell className="font-medium">
-                          {unit.name || `Unit #${unit.id}`}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {unit.size_m2 || "No Size"}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {unit.type_name || "No Size"}
-                        </TableCell>
+                <div className="bg-card/70 backdrop-blur-sm shadow-md rounded-xl p-2 border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-1/3">Unit Name</TableHead>
+                        <TableHead>Area (sqm) </TableHead>
+                        <TableHead>Type</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+
+                    <TableBody>
+                      {user.owned_units.map((unit) => (
+                        <TableRow
+                          key={unit.id}
+                          className="hover:bg-muted/40 transition"
+                        >
+                          <TableCell>
+                            <Link
+                              to="/admin/units/$unitId"
+                              params={{ unitId: unit.id as string }}
+                              target="_blank"
+                              className="underline hover:text-primary transition"
+                            >
+                              {unit.name || `Unit #${unit.id}`}
+                            </Link>
+                          </TableCell>
+                          <TableCell>{unit.size_m2 || "No Size"}</TableCell>
+                          <TableCell>{unit.type_name || "No Size"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground">No owned units.</p>
               )}
@@ -281,15 +286,18 @@ export function UserDetail() {
                         key={unit.id}
                         className="hover:bg-muted/40 transition"
                       >
-                        <TableCell className="font-medium">
-                          {unit.name || `Unit #${unit.id}`}
+                        <TableCell>
+                          <Link
+                            to="/admin/units/$unitId"
+                            params={{ unitId: unit.id as string }}
+                            target="_blank"
+                            className="underline hover:text-primary transition"
+                          >
+                            {unit.name || `Unit #${unit.id}`}
+                          </Link>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {unit.size_m2 || "No Size"}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {unit.type_name || "No Size"}
-                        </TableCell>
+                        <TableCell>{unit.size_m2 || "No Size"}</TableCell>
+                        <TableCell>{unit.type_name || "No Size"}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

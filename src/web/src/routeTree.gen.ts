@@ -19,9 +19,11 @@ import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminUsersIndexRouteImport } from './routes/_authenticated/admin/users/index'
 import { Route as AuthenticatedAdminUnitsIndexRouteImport } from './routes/_authenticated/admin/units/index'
+import { Route as AuthenticatedAdminTemplatesIndexRouteImport } from './routes/_authenticated/admin/templates/index'
 import { Route as AuthenticatedAdminBuildingsIndexRouteImport } from './routes/_authenticated/admin/buildings/index'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin/users/$userId'
 import { Route as AuthenticatedAdminUnitsUnitIdRouteImport } from './routes/_authenticated/admin/units/$unitId'
+import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/admin/templates/$templateId'
 import { Route as AuthenticatedAdminBuildingsBuildingIdRouteImport } from './routes/_authenticated/admin/buildings/$buildingId'
 
 const errors503Route = errors503RouteImport.update({
@@ -76,6 +78,12 @@ const AuthenticatedAdminUnitsIndexRoute =
     path: '/units/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminTemplatesIndexRoute =
+  AuthenticatedAdminTemplatesIndexRouteImport.update({
+    id: '/templates/',
+    path: '/templates/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminBuildingsIndexRoute =
   AuthenticatedAdminBuildingsIndexRouteImport.update({
     id: '/buildings/',
@@ -92,6 +100,12 @@ const AuthenticatedAdminUnitsUnitIdRoute =
   AuthenticatedAdminUnitsUnitIdRouteImport.update({
     id: '/units/$unitId',
     path: '/units/$unitId',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminTemplatesTemplateIdRoute =
+  AuthenticatedAdminTemplatesTemplateIdRouteImport.update({
+    id: '/templates/$templateId',
+    path: '/templates/$templateId',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminBuildingsBuildingIdRoute =
@@ -111,9 +125,11 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503Route
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  '/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
+  '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
 }
@@ -126,9 +142,11 @@ export interface FileRoutesByTo {
   '/503': typeof errors503Route
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  '/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
+  '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
 }
@@ -143,9 +161,11 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503Route
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  '/_authenticated/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/_authenticated/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/_authenticated/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/_authenticated/admin/buildings/': typeof AuthenticatedAdminBuildingsIndexRoute
+  '/_authenticated/admin/templates/': typeof AuthenticatedAdminTemplatesIndexRoute
   '/_authenticated/admin/units/': typeof AuthenticatedAdminUnitsIndexRoute
   '/_authenticated/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
 }
@@ -161,9 +181,11 @@ export interface FileRouteTypes {
     | '/503'
     | '/admin/'
     | '/admin/buildings/$buildingId'
+    | '/admin/templates/$templateId'
     | '/admin/units/$unitId'
     | '/admin/users/$userId'
     | '/admin/buildings'
+    | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
@@ -176,9 +198,11 @@ export interface FileRouteTypes {
     | '/503'
     | '/admin'
     | '/admin/buildings/$buildingId'
+    | '/admin/templates/$templateId'
     | '/admin/units/$unitId'
     | '/admin/users/$userId'
     | '/admin/buildings'
+    | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
   id:
@@ -192,9 +216,11 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/buildings/$buildingId'
+    | '/_authenticated/admin/templates/$templateId'
     | '/_authenticated/admin/units/$unitId'
     | '/_authenticated/admin/users/$userId'
     | '/_authenticated/admin/buildings/'
+    | '/_authenticated/admin/templates/'
     | '/_authenticated/admin/units/'
     | '/_authenticated/admin/users/'
   fileRoutesById: FileRoutesById
@@ -281,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUnitsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/templates/': {
+      id: '/_authenticated/admin/templates/'
+      path: '/templates'
+      fullPath: '/admin/templates'
+      preLoaderRoute: typeof AuthenticatedAdminTemplatesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/buildings/': {
       id: '/_authenticated/admin/buildings/'
       path: '/buildings'
@@ -302,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/templates/$templateId': {
+      id: '/_authenticated/admin/templates/$templateId'
+      path: '/templates/$templateId'
+      fullPath: '/admin/templates/$templateId'
+      preLoaderRoute: typeof AuthenticatedAdminTemplatesTemplateIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/buildings/$buildingId': {
       id: '/_authenticated/admin/buildings/$buildingId'
       path: '/buildings/$buildingId'
@@ -315,9 +355,11 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminBuildingsBuildingIdRoute: typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  AuthenticatedAdminTemplatesTemplateIdRoute: typeof AuthenticatedAdminTemplatesTemplateIdRoute
   AuthenticatedAdminUnitsUnitIdRoute: typeof AuthenticatedAdminUnitsUnitIdRoute
   AuthenticatedAdminUsersUserIdRoute: typeof AuthenticatedAdminUsersUserIdRoute
   AuthenticatedAdminBuildingsIndexRoute: typeof AuthenticatedAdminBuildingsIndexRoute
+  AuthenticatedAdminTemplatesIndexRoute: typeof AuthenticatedAdminTemplatesIndexRoute
   AuthenticatedAdminUnitsIndexRoute: typeof AuthenticatedAdminUnitsIndexRoute
   AuthenticatedAdminUsersIndexRoute: typeof AuthenticatedAdminUsersIndexRoute
 }
@@ -327,10 +369,14 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdminBuildingsBuildingIdRoute:
       AuthenticatedAdminBuildingsBuildingIdRoute,
+    AuthenticatedAdminTemplatesTemplateIdRoute:
+      AuthenticatedAdminTemplatesTemplateIdRoute,
     AuthenticatedAdminUnitsUnitIdRoute: AuthenticatedAdminUnitsUnitIdRoute,
     AuthenticatedAdminUsersUserIdRoute: AuthenticatedAdminUsersUserIdRoute,
     AuthenticatedAdminBuildingsIndexRoute:
       AuthenticatedAdminBuildingsIndexRoute,
+    AuthenticatedAdminTemplatesIndexRoute:
+      AuthenticatedAdminTemplatesIndexRoute,
     AuthenticatedAdminUnitsIndexRoute: AuthenticatedAdminUnitsIndexRoute,
     AuthenticatedAdminUsersIndexRoute: AuthenticatedAdminUsersIndexRoute,
   }

@@ -18,13 +18,20 @@ class DocumentTemplateRepository
      * @param  int|null  $perPage
      * @return Collection|LengthAwarePaginator
      */
-    public function all(?int $perPage = null): Collection|LengthAwarePaginator
+    public function all(?int $perPage = null, array $filters = []): Collection|LengthAwarePaginator
     {
-        if ($perPage) {
-            return DocumentTemplate::paginate($perPage);
+        $query = DocumentTemplate::query();
+
+        // Filter by search (name or address)
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where('name', 'like', "%{$search}%");
         }
 
-        return DocumentTemplate::all();
+        // Order by creation date descending
+        $query->orderBy('created_at', 'desc');
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     /**

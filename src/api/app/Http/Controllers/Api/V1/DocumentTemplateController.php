@@ -9,10 +9,15 @@ use Illuminate\Http\Request;
 use App\Repositories\Api\V1\DocumentTemplateRepository;
 use App\Http\Resources\Api\V1\DocumentTemplateResource;
 use App\Models\DocumentTemplate;
+use App\Rules\UniqueTemplateVersion;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DocumentTemplateController extends Controller
 {
@@ -32,17 +37,20 @@ class DocumentTemplateController extends Controller
      * Display a listing of templates.
      * 
      * @param Request $request
-     * @return JsonResponse
+     * @return AnonymousResourceCollection|JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $this->authorize('viewAny', DocumentTemplate::class);
 
             $perPage = (int) ($request->query('per_page', self::_DEFAULT_PAGINATION));
-            $templates = $this->templates->all($perPage);
+            $search = $request->query('search', null);
 
-            return response()->json(DocumentTemplateResource::collection($templates));
+            $filters = compact('search');
+            $templates = $this->templates->all($perPage, $filters);
+
+            return DocumentTemplateResource::collection($templates);
         } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
@@ -75,11 +83,11 @@ class DocumentTemplateController extends Controller
             $this->authorize('create', DocumentTemplate::class);
 
             $validated = $request->validate([
-                'category'     => ['required', 'string', 'max:255'],
+                'category'     => ['required', 'string', 'max:255', Rule::in(self::_DOCUMENT_TEMPLATE_CATEGORIES)],
                 'sub_category' => ['required', 'string', 'max:255'],
-                'name'         => ['nullable', 'string', 'max:255'],
+                'name'         => ['required', 'string', 'max:255'],
                 'description'  => ['nullable', 'string'],
-                'version'      => ['required', 'integer', 'min:1'],
+                'version'      => ['required', 'integer', 'min:1', new UniqueTemplateVersion],
                 'file'         => ['required', 'file', 'mimes:docx', 'max:' . self::_MAX_FILE_SIZE],
             ]);
 
@@ -140,6 +148,46 @@ class DocumentTemplateController extends Controller
         } catch (\Exception $e) {
             // Log the exception 
             Log::error('Error fetching document template: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Download the specified template file.
+     * 
+     * @param DocumentTemplate $template
+     * @return BinaryFileResponse|JsonResponse
+     */
+    public function download(DocumentTemplate $template): BinaryFileResponse|JsonResponse
+    {
+        try {
+            $this->authorize('viewAny', $template);
+
+            // check if the file exist
+            if(!$template->path || !Storage::disk('public')->exists($template->path)) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'Template file not found.',
+                ], 404);
+            }
+
+            return response()->file(Storage::disk('public')->path($template->path));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            // Log the exception 
+            Log::error('Error downloading document template: ' . $e->getMessage());
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNKNOWN_ERROR,

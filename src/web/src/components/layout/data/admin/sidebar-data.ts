@@ -18,154 +18,140 @@ import {
   HelpCircle,
   List,
   Sticker,
-} from 'lucide-react'
-import { type SidebarData } from '@/components/layout/types'
+  File,
+  FileArchive,
+} from "lucide-react";
+import { type SidebarData } from "@/components/layout/types";
 
 export const sidebarData: SidebarData = {
   user: {
-    name: 'Admin User',
-    email: 'admin@gmail.com',
-    avatar: '/avatars/admin.jpg',
+    name: "Admin User",
+    email: "admin@gmail.com",
+    avatar: "/avatars/admin.jpg",
   },
   navGroups: [
     {
-      title: 'Main',
+      title: "Main",
       items: [
         {
-          title: 'Dashboard',
-          url: '/admin',
+          title: "Dashboard",
+          url: "/admin",
           icon: LayoutDashboard,
         },
       ],
     },
     {
-      title: 'Users & Properties',
+      title: "Users & Properties",
       items: [
         {
-          title: 'Users',
-          url: '/admin/users',
+          title: "Users",
+          url: "/admin/users",
           icon: Users,
         },
         {
-          title: 'Buildings',
-          url: '/admin/buildings',
+          title: "Buildings",
+          url: "/admin/buildings",
           icon: Building,
         },
         {
-          title: 'Units',
-          url: '/admin/units',
-          icon: Home
+          title: "Units",
+          url: "/admin/units",
+          icon: Home,
         },
       ],
     },
     {
-      title: 'Financials',
+      title: "Financials",
       items: [
         {
-          title: 'Fees',
-          url: '/admin/financials/fees',
+          title: "Fees",
+          url: "/admin/financials/fees",
           icon: CreditCard,
         },
         {
-          title: 'Invoices',
-          url: '/admin/financials/invoices',
+          title: "Invoices",
+          url: "/admin/financials/invoices",
           icon: FileText,
         },
         {
-          title: 'Payments',
-          url: '/admin/financials/payments',
+          title: "Payments",
+          url: "/admin/financials/payments",
           icon: Receipt,
         },
         {
-          title: 'Payment Reconciliation',
-          url: '/admin/financials/reconciliation',
+          title: "Payment Reconciliation",
+          url: "/admin/financials/reconciliation",
           icon: DollarSign,
         },
         {
-          title: 'Expenses',
-          url: '/admin/financials/expenses',
+          title: "Expenses",
+          url: "/admin/financials/expenses",
           icon: Wallet,
         },
         {
-          title: 'Payroll',
-          url: '/admin/financials/payroll',
+          title: "Payroll",
+          url: "/admin/financials/payroll",
           icon: FileSignature,
         },
         {
-          title: 'Reports',
-          url: '/admin/financials/reports',
+          title: "Reports",
+          url: "/admin/financials/reports",
           icon: BarChart3,
         },
       ],
     },
     {
-      title: 'Community',
+      title: "Community",
       items: [
         {
-          title: 'Vehicles',
+          title: "Vehicles",
           icon: Car,
           items: [
             {
-              title: 'All Vehicles',
-              url: '/admin/vehicles',
+              title: "All Vehicles",
+              url: "/admin/vehicles",
               icon: List,
             },
             {
-              title: 'Add Vehicle',
-              url: '/admin/vehicles/add',
+              title: "Add Vehicle",
+              url: "/admin/vehicles/add",
               icon: PlusCircle,
             },
             {
-              title: 'Parking Stickers',
-              url: '/admin/vehicles/stickers',
+              title: "Parking Stickers",
+              url: "/admin/vehicles/stickers",
               icon: Sticker,
             },
           ],
         },
         {
-          title: 'Community Poll',
+          title: "Community Poll",
           icon: Vote,
           items: [
             {
-              title: 'All Polls',
-              url: '/admin/polls',
+              title: "All Polls",
+              url: "/admin/polls",
               icon: List,
             },
             {
-              title: 'Create Poll',
-              url: '/admin/polls/create',
+              title: "Create Poll",
+              url: "/admin/polls/create",
               icon: PlusCircle,
             },
           ],
         },
         {
-          title: 'Complaints',
+          title: "Complaints",
           icon: MessageSquareWarning,
           items: [
             {
-              title: 'All Complaints',
-              url: '/admin/complaints',
+              title: "All Complaints",
+              url: "/admin/complaints",
               icon: List,
             },
             {
-              title: 'Create Complaint',
-              url: '/admin/complaints/create',
-              icon: PlusCircle,
-            },
-          ],
-        },
-        {
-          title: 'Letters',
-          icon: Inbox,
-          items: [
-            {
-              title: 'All Letters',
-              url: '/admin/letters',
-              icon: List,
-            },
-            {
-              title: 'Create Letter',
-              url: '/admin/letters/create',
+              title: "Create Complaint",
+              url: "/admin/complaints/create",
               icon: PlusCircle,
             },
           ],
@@ -173,14 +159,29 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: 'Support',
+      title: "System",
       items: [
         {
-          title: 'Help Center',
-          url: '/help-center',
+          title: "Document Templates",
+          url: "/admin/templates",
+          icon: FileArchive,
+        },
+        {
+          title: "Letters",
+          url: "/admin/letters",
+          icon: Inbox,
+        },
+      ],
+    },
+    {
+      title: "Support",
+      items: [
+        {
+          title: "Help Center",
+          url: "/help-center",
           icon: HelpCircle,
         },
       ],
     },
   ],
-}
+};

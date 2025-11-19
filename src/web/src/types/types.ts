@@ -18,8 +18,8 @@ export type User = {
   owned_units?: UnitResource[];
   rented_units?: UnitResource[];
   leases?: TenantLeaseResource[];
-  created_templates?: DocumentTemplateResource[];
-  updated_templates?: DocumentTemplateResource[];
+  created_templates?: DocumentTemplate[];
+  updated_templates?: DocumentTemplate[];
   last_login_at?: string | null;
   created_at: string;
   updated_at: string;
@@ -66,14 +66,29 @@ export type TenantLeaseResource = {
   updated_at: string;
 };
 
-export type DocumentTemplateResource = {
-  id: string | number;
-  title: string;
-  name: string;
-  description: string | null;
-  type: string;
-  created_at: string;
-  updated_at: string;
+export type DocumentTemplate = {
+  id: string | number;           
+  category: string | number;      
+  sub_category: string | number;  
+  name: string | number;          
+  path: string | number;          
+  placeholders: string | number;  
+  description: string | number;   
+  version: string | number;       
+  created_by: string | number;  
+  updated_by: string | number;  
+  created_at: string | number;    
+  updated_at: string | number;    
+};
+
+export type DocumentTemplatePaginatedResponse = {
+  data: DocumentTemplate[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
 };
 
 export type Document = {

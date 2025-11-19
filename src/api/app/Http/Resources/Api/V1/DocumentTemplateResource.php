@@ -4,6 +4,8 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class DocumentTemplateResource extends JsonResource
 {
@@ -19,7 +21,7 @@ class DocumentTemplateResource extends JsonResource
             'category'      => $this->category,
             'sub_category'  => $this->sub_category,
             'name'          => $this->name,
-            'path'          => $this->path,
+            'path'          => $this->path ? URL::to(Storage::url($this->path)) : null,
             'placeholders'  => $this->placeholders,
             'description'   => $this->description,
             'version'       => $this->version,
@@ -29,8 +31,8 @@ class DocumentTemplateResource extends JsonResource
             'updated_by'    => $this->whenLoaded('updater', function () {
                 return new UserResource($this->updater);
             }),
-            'created_at'    => $this->created_at,
-            'updated_at'    => $this->updated_at,
+            'created_at'    => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),
+            'updated_at'    => \Carbon\Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];
     }
 }

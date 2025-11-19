@@ -87,7 +87,7 @@ class DocumentTemplateController extends Controller
                 'sub_category' => ['required', 'string', 'max:255'],
                 'name'         => ['required', 'string', 'max:255'],
                 'description'  => ['nullable', 'string'],
-                'version'      => ['required', 'integer', 'min:1', new UniqueTemplateVersion],
+                'version'      => ['required', 'integer', 'min:1', new UniqueTemplateVersion()],
                 'file'         => ['required', 'file', 'mimes:docx', 'max:' . self::_MAX_FILE_SIZE],
             ]);
 

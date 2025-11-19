@@ -5,8 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
-class TenantLease extends Model
+class UnitLease extends Model
 {
     use SoftDeletes;
 
@@ -32,6 +33,7 @@ class TenantLease extends Model
         'witness_3_full_name',
         'notes',
         'created_by',
+        'updated_by',
     ];
 
     /**
@@ -42,8 +44,8 @@ class TenantLease extends Model
     protected function casts(): array
     {
         return [
-            'lease_start_date' => 'date',
-            'lease_end_date' => 'date',
+            'lease_start_date' => Carbon::class,
+            'lease_end_date' => Carbon::class,
             'agreement_amount' => 'decimal:2',
         ];
     }
@@ -86,6 +88,16 @@ class TenantLease extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the user who last updated this lease.
+     * 
+     * @return BelongsTo
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**

@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tenant_leases', function (Blueprint $table) {
+        Schema::create('unit_leases', function (Blueprint $table) {
             $table->id();
             $table->foreignId('unit_id')->constrained('units');
             $table->foreignId('tenant_id')->constrained('users');
@@ -24,12 +24,13 @@ return new class extends Migration
             $table->foreignId('lease_document_id')->nullable()->constrained('documents');
             $table->date('lease_start_date');
             $table->date('lease_end_date')->nullable();
-            $table->enum('status', Controller::_LEASE_STATUS)->default('active');
+            $table->enum('status', Controller::_LEASE_STATUS)->default('draft');
             $table->string('witness_1_full_name')->nullable();
             $table->string('witness_2_full_name')->nullable();
             $table->string('witness_3_full_name')->nullable();
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamps();
             $table->softDeletes();
 
@@ -40,7 +41,7 @@ return new class extends Migration
             $table->index('lease_end_date');
             $table->index('agreement_type');
 
-            // TODO: implement unique
+            $table->unique(['unit_id', 'tenant_id', 'lease_start_date', 'lease_end_date'], 'unique_active_lease_per_unit_tenant');
         });
     }
 
@@ -49,6 +50,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tenant_leases');
+        Schema::dropIfExists('unit_leases');
     }
 };

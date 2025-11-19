@@ -4,16 +4,14 @@ namespace App\Repositories\Api\V1;
 
 use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
-use App\Models\TenantLease;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\UnitLease;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Document;
 use Illuminate\Support\Facades\Auth;
 
-class TenantLeaseRepository
+class UnitLeaseRepository
 {
     protected DocumentTemplateRepository $templates;
 
@@ -23,109 +21,39 @@ class TenantLeaseRepository
     }
 
     /**
-     * Get all tenant leases with optional pagination.
-     * 
-     * @param int|null $perPage
-     * @return Collection|LengthAwarePaginator
-     */
-    public function all(?int $perPage = null): Collection|LengthAwarePaginator
-    {
-        if ($perPage) {
-            return TenantLease::paginate($perPage);
-        }
-
-        return TenantLease::all();
-    }
-
-    /**
-     * Create a new tenant lease.
+     * Create a new unit lease.
      * 
      * @param array<string, mixed> $data
-     * @return TenantLease
+     * @return UnitLease
      */
-    public function create(array $data): TenantLease
+    public function create(array $data): UnitLease
     {
         DB::beginTransaction();
 
         try {
-            // check if active lease exists for the same tenant or unit
-            $existingLease = TenantLease::where(function ($query) use ($data) {
-                $query->where('tenant_id', $data['tenant_id'])
-                      ->orWhere('unit_id', $data['unit_id']);
-            })->where('status', 'active')->first();
-
-            if ($existingLease) {
-                throw new RepositoryException('An active lease already exists for the same tenant or unit.');
-            }
-
             // Handle representative document upload
             if (isset($data['representative_document']) && $data['representative_document'] instanceof UploadedFile) {
                 $data['representative_document_id'] = $this->uploadRepresentativeDocument($data['representative_document']);
             }
 
             // Create the lease
-            $lease = TenantLease::create($data);
-
-            // If lease template assigned, generate lease document
-            if (!empty($data['lease_template_id']) && !empty($data['placeholders'])) {
-                $lease = $this->generateLeaseDocument($lease, $data['placeholders']);
-            }
-
-            // update unit status
-            $unit = $lease->unit;
-            if ($unit) {
-                $unit->status = Controller::_UNIT_STATUSES[0];
-                $unit->save();
-            }
+            $lease = UnitLease::create($data);
 
             DB::commit();
             return $lease;
         } catch (\Throwable $e) {
             DB::rollBack();
-            throw new RepositoryException('Failed to create tenant lease: ' . $e->getMessage());
+            throw new RepositoryException('Failed to create unit lease ');
         }
     }
 
     /**
-     * Update an existing tenant lease.
+     * Soft delete a unit lease.
      * 
-     * @param TenantLease $lease
-     * @param array<string, mixed> $data
-     * @return TenantLease
-     * @throws RepositoryException
-     */
-    public function update(TenantLease $lease, array $data): TenantLease
-    {
-        DB::beginTransaction();
-
-        try {
-            // Handle representative document replacement
-            if (isset($data['representative_document']) && $data['representative_document'] instanceof UploadedFile) {
-                if ($lease->representativeDocument && Storage::disk('public')->exists($lease->representativeDocument->file_path)) {
-                    Storage::disk('public')->delete($lease->representativeDocument->file_path);
-                    $lease->representativeDocument->delete();
-                }
-
-                $data['representative_document_id'] = $this->uploadRepresentativeDocument($data['representative_document']);
-            }
-
-            $lease->update($data);
-
-            DB::commit();
-            return $lease;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            throw new RepositoryException('Failed to update tenant lease: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Soft delete a tenant lease.
-     * 
-     * @param TenantLease $lease
+     * @param UnitLease $lease
      * @return bool|null
      */
-    public function delete(TenantLease $lease): ?bool
+    public function delete(UnitLease $lease): ?bool
     {
         return DB::transaction(function () use ($lease) {
             // Delete representative document if exists
@@ -163,12 +91,12 @@ class TenantLeaseRepository
     /**
      * Generate the lease document from the template and save it as a Document.
      *
-     * @param TenantLease $lease
+     * @param UnitLease $lease
      * @param array<string, string> $placeholderData
-     * @return TenantLease
+     * @return UnitLease
      * @throws RepositoryException
      */
-    private function generateLeaseDocument(TenantLease $lease, array $placeholderData): TenantLease
+    private function generateLeaseDocument(UnitLease $lease, array $placeholderData): UnitLease
     {
         if (!$lease->leaseTemplate) {
             throw new RepositoryException('Lease template not assigned.');
@@ -202,6 +130,41 @@ class TenantLeaseRepository
     }
 
     /**
+     * Activate draft lease by ID.
+     * 
+     * @param UnitLease $lease
+     * @return UnitLease
+     */
+    public function activateDraftLease(UnitLease $lease): UnitLease
+    {
+        DB::beginTransaction();
+
+        try {
+            if ($lease->status !== 'draft') {
+                throw new RepositoryException('Only draft leases can be activated.');
+            }
+
+            $lease->status = 'active';
+
+            // update unit status
+            $unit = $lease->unit;
+            if ($unit) {
+                $unit->status = Controller::_UNIT_STATUSES[0];
+                $unit->save();
+            }
+            $lease->updated_by = Auth::id();
+
+            $lease->save();
+
+            DB::commit();
+            return $lease;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw new RepositoryException('Failed to activate draft lease');
+        }
+    }
+
+    /**
      * Deactivate expired leases.
      * 
      * @return int Number of leases deactivated
@@ -209,37 +172,45 @@ class TenantLeaseRepository
      */
     public function deactivateExpiredLeases(): int
     {
+        DB::beginTransaction();
         try {
             $now = now();
-            $expiredLeases = TenantLease::where('status', 'active')
+            $expiredLeases = UnitLease::where('status', 'active')
                 ->where('end_date', '<', $now)
                 ->get();
 
             foreach ($expiredLeases as $lease) {
                 $lease->status = 'expired';
+                $lease->updated_by = Auth::id();
                 $lease->save();
+
+                $unit = $lease->unit;
+                if ($unit && $unit->status === Controller::_UNIT_STATUSES[0]) {
+                    $unit->status = Controller::_UNIT_STATUSES[2];
+                    $unit->save();
+                }
             }
 
+            DB::commit();
             return $expiredLeases->count();
         } catch (\Throwable $e) {
-            throw new RepositoryException('Failed to deactivate expired leases: ' . $e->getMessage());
+            DB::rollBack();
+            throw new RepositoryException('Failed to deactivate expired leases ');
         }
     }
 
     /**
      * Terminate a lease by ID.
      * 
-     * @param int $leaseId
-     * @return TenantLease
+     * @param UnitLease $lease
+     * @return UnitLease
      * @throws RepositoryException
      */
-    public function terminateLeaseById(int $leaseId): TenantLease
+    public function terminateLeaseById(UnitLease $lease): UnitLease
     {
         DB::beginTransaction();
 
         try {
-            $lease = TenantLease::findOrFail($leaseId);
-
             if ($lease->status !== 'active') {
                 throw new RepositoryException('Only active leases can be terminated.');
             }
@@ -257,11 +228,13 @@ class TenantLeaseRepository
                 $unit->save();
             }
 
+            $lease->updated_by = Auth::id();
+
             DB::commit();
             return $lease;
         } catch (\Throwable $e) {
             DB::rollBack();
-            throw new RepositoryException('Failed to terminate lease: ' . $e->getMessage());
+            throw new RepositoryException('Failed to terminate lease ');
         }
     }
     

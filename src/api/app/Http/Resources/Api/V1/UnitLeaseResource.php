@@ -5,7 +5,7 @@ namespace App\Http\Resources\Api\V1;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TenantLeaseResource extends JsonResource
+class UnitLeaseResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -38,7 +38,7 @@ class TenantLeaseResource extends JsonResource
             }),
             'lease_start_date'          => $this->lease_start_date,
             'lease_end_date'            => $this->lease_end_date,
-            'status'                    => $this->status,
+            'status'                    => ucwords(str_replace('_', ' ', $this->status)),
             'witness_1_full_name'       => $this->witness_1_full_name,
             'witness_2_full_name'       => $this->witness_2_full_name,
             'witness_3_full_name'       => $this->witness_3_full_name,

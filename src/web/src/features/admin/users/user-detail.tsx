@@ -342,7 +342,7 @@ export function UserDetail() {
                       {user.created_templates.map((tpl) => (
                         <Card key={tpl.id} className="hover:shadow transition">
                           <CardHeader>
-                            <CardTitle>{tpl.title}</CardTitle>
+                            <CardTitle>{tpl.name}</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <p className="text-muted-foreground">
@@ -368,7 +368,7 @@ export function UserDetail() {
                       {user.updated_templates.map((tpl) => (
                         <Card key={tpl.id} className="hover:shadow transition">
                           <CardHeader>
-                            <CardTitle>{tpl.title}</CardTitle>
+                            <CardTitle>{tpl.name}</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <p className="text-muted-foreground">

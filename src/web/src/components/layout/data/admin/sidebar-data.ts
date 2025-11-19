@@ -18,7 +18,6 @@ import {
   HelpCircle,
   List,
   Sticker,
-  File,
   FileArchive,
 } from "lucide-react";
 import { type SidebarData } from "@/components/layout/types";

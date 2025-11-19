@@ -2,28 +2,45 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\UnitLeaseResource;
+use App\Http\Resources\Api\V1\UnitOwnerResource;
+use App\Models\UnitLease;
+use App\Rules\UniqueUnitLease;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\Repositories\Api\V1\UnitRepository;
 use App\Http\Resources\Api\V1\UnitResource;
 use App\Models\Unit;
+use App\Models\UnitOwner;
+use App\Repositories\Api\V1\UnitLeaseRepository;
+use App\Repositories\Api\V1\UnitOwnerRepository;
+use App\Rules\UniqueUnitName;
+use App\Rules\UniqueUnitOwner;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class UnitController extends Controller
 {
     protected UnitRepository $units;
+    protected UnitLeaseRepository $leases;
+    protected UnitOwnerRepository $owners;
 
     /**
      * UnitController constructor.
      * 
      * @param UnitRepository $units
      */
-    public function __construct(UnitRepository $units)
+    public function __construct(UnitRepository $units, UnitLeaseRepository $leases, UnitOwnerRepository $owners)
     {
         $this->units = $units;
+        $this->leases = $leases;
+        $this->owners = $owners;
     }
 
     /**
@@ -66,10 +83,8 @@ class UnitController extends Controller
 
             $data = $request->validate([
                 'building_id'      => ['required', 'exists:buildings,id'],
-                'name'             => ['required', 'string', 'max:255', 'unique:units,name'],
+                'name'             => ['required', 'string', 'max:255', new UniqueUnitName()],
                 'floor_number'     => ['required', 'integer', 'min:0'],
-                'owner_id'         => ['nullable', 'exists:users,id'],
-                'ownership_file_id'=> ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.self::_MAX_FILE_SIZE],
                 'unit_type'        => ['required', 'string', Rule::in(Controller::_UNIT_TYPES)],
                 'size_m2'          => ['nullable', 'numeric', 'min:0'],
                 'status'           => ['nullable', 'string', Rule::in(Controller::_UNIT_STATUSES)],
@@ -164,6 +179,279 @@ class UnitController extends Controller
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        }
+    }
+
+    /**
+     * Create a unit lease.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function storeUnitLease(Request $request): JsonResponse
+    {
+        try {
+            $this->authorize('create', UnitLease::class);
+
+            $validated = $request->validate([
+                'unit_id'                    => ['required', 'integer', 'exists:units,id'],
+                'tenant_id'                  => ['required', 'integer', 'exists:users,id', new UniqueUnitLease()],
+                'representative_id'          => ['nullable', 'integer', 'exists:users,id'],
+                'representative_document'    => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:' . self::_MAX_FILE_SIZE],
+                'agreement_type'             => ['required', 'string', 'in:' . implode(',', Controller::_LEASE_AGREEMENT_TYPES)],
+                'agreement_amount'           => ['required', 'numeric', 'min:0'],
+                'lease_template_id'          => ['nullable', 'integer', 'exists:document_templates,id'],
+                'lease_start_date'           => ['required', 'date'],
+                'lease_end_date'             => ['nullable', 'date', 'after_or_equal:lease_start_date'],
+                'status'                     => ['nullable', 'string', 'in:' . implode(',', Controller::_LEASE_STATUS)],
+                'witness_1_full_name'        => ['nullable', 'string', 'max:255'],
+                'witness_2_full_name'        => ['nullable', 'string', 'max:255'],
+                'witness_3_full_name'        => ['nullable', 'string', 'max:255'],
+                'notes'                      => ['nullable', 'string']
+            ]);
+
+            $validated['created_by'] = Auth::id();
+            $lease = $this->leases->create($validated);
+
+            return response()->json(new UnitLeaseResource($lease), 201);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (ValidationException $e) {
+            // Return validation errors in array format
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error creating tenant lease: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Remove the specified unit lease (soft delete).
+     *
+     * @param UnitLease $lease
+     * @return JsonResponse
+     */
+    public function destroyUnitLease(UnitLease $lease): JsonResponse
+    {
+        try {
+            $this->authorize('delete', $lease);
+
+            $this->leases->delete($lease);
+
+            return response()->json([
+                'status' => self::_SUCCESS,
+                'message' => 'Unit lease deleted successfully.',
+            ]);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error deleting Unit lease: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Terminate the specified unit lease.
+     * 
+     * @param UnitLease $lease
+     * @return JsonResponse
+     */
+    public function terminateUnitLease(UnitLease $lease): JsonResponse
+    {
+        try {
+            $this->authorize('terminate', $lease);
+
+            $terminatedLease = $this->leases->terminateLeaseById($lease->id);
+
+            return response()->json(new UnitLeaseResource($terminatedLease));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error terminating unit lease: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Activate the specified unit lease.
+     * 
+     * @param UnitLease $lease
+     * @return JsonResponse
+     */
+    public function activateUnitLease(UnitLease $lease): JsonResponse
+    {
+        try {
+            $this->authorize('activate', $lease);
+
+            $activatedLease = $this->leases->activateDraftLease($lease->id);
+
+            return response()->json(new UnitLeaseResource($activatedLease));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error activating unit lease: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Create a unit owner.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function storeUnitOwner(Request $request): JsonResponse
+    {
+        try {
+            $this->authorize('create', UnitOwner::class);
+
+            $validated = $request->validate([
+                'unit_id'             => ['required', 'integer', 'exists:units,id'],
+                'user_id'             => ['required', 'integer', 'exists:users,id', new UniqueUnitOwner()],
+                'start_date'          => ['required', 'date'],
+                'end_date'            => ['nullable', 'date', 'after_or_equal:start_date'],
+                'ownership_file'      => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:' . self::_MAX_FILE_SIZE],
+            ]);
+
+            $validated['created_by'] = Auth::id();
+
+            $owner = $this->owners->create($validated);
+
+            return response()->json(new UnitOwnerResource($owner), 201);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error creating unit owner: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Remove the specified unit owner (soft delete).
+     *
+     * @param UnitOwner $owner
+     * @return JsonResponse
+     */
+    public function destroyUnitOwner(UnitOwner $owner): JsonResponse
+    {
+        try {
+            $this->authorize('delete', $owner);
+
+            $this->owners->delete($owner);
+
+            return response()->json([
+                'status' => self::_SUCCESS,
+                'message' => 'Unit owner deleted successfully.',
+            ]);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error deleting unit owner: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Deactivate the specified unit owner.
+     *
+     * @param UnitOwner $owner
+     * @return JsonResponse
+     */
+    public function deactivateUnitOwner(UnitOwner $owner): JsonResponse
+    {
+        try {
+            $this->authorize('deactivate', $owner);
+
+            $this->owners->deactivate($owner);
+
+            return response()->json(new UnitOwnerResource($owner));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (\Exception $e) {
+            Log::error('Error deactivating unit owner: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 }

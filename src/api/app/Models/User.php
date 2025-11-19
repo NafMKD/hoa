@@ -78,29 +78,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Get units owned by the user.
-     * 
-     * @return HasMany
-     */
-    public function ownedUnits(): HasMany
-    {
-        return $this->hasMany(Unit::class, 'owner_id');
-    }
-
-    /**
-     * Get units rented by the user.
-     * 
-     * @return HasMany
-     */
-    public function rentedUnits(): HasMany
-    {
-        return $this->hasMany(Unit::class, 'owner_id')
-                ->whereHas('leases', function($query) {
-                    $query->where('status', 'active');
-                });
-    }
-
-    /**
      * Get payments made by the user.
      * 
      * @return mixed
@@ -129,7 +106,7 @@ class User extends Authenticatable
      */
     public function leases(): HasMany
     {
-        return $this->hasMany(TenantLease::class, 'tenant_id');
+        return $this->hasMany(UnitLease::class, 'tenant_id');
     }
 
     /**
@@ -139,7 +116,7 @@ class User extends Authenticatable
      */
     public function createdLeases(): HasMany
     {
-        return $this->hasMany(TenantLease::class, 'created_by');
+        return $this->hasMany(UnitLease::class, 'created_by');
     }
 
     /**
@@ -229,6 +206,6 @@ class User extends Authenticatable
      */
     public function representativeLeases(): HasMany
     {
-        return $this->hasMany(TenantLease::class, 'representative_id');
+        return $this->hasMany(UnitLease::class, 'representative_id');
     }
 }

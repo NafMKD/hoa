@@ -67,7 +67,7 @@ class DocumentTemplate extends Model
      */
     public function leases(): HasMany
     {
-        return $this->hasMany(TenantLease::class, 'lease_template_id');
+        return $this->hasMany(UnitLease::class, 'lease_template_id');
     }
 
 }

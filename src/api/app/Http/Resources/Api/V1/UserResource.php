@@ -38,10 +38,10 @@ class UserResource extends JsonResource
             //     return InvoiceResource::collection($this->invoices);
             // }),
             'leases'        => $this->whenLoaded('leases', function () {
-                return TenantLeaseResource::collection($this->leases);
+                return UnitLeaseResource::collection($this->leases);
             }),
             'created_leases' => $this->whenLoaded('createdLeases', function () {
-                return TenantLeaseResource::collection($this->createdLeases);
+                return UnitLeaseResource::collection($this->createdLeases);
             }),
             // 'created_expenses' => $this->whenLoaded('createdExpenses', function () {
             //     return ExpenseResource::collection($this->createdExpenses);
@@ -68,7 +68,7 @@ class UserResource extends JsonResource
                 return DocumentTemplateResource::collection($this->updatedTemplates);
             }),
             'representative_leases' => $this->whenLoaded('representativeLeases', function () {
-                return TenantLeaseResource::collection($this->representativeLeases);
+                return UnitLeaseResource::collection($this->representativeLeases);
             }),
             'last_login_at' => \Carbon\Carbon::parse($this->last_login_at)->toFormattedDateString(),
             'created_at'    => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),

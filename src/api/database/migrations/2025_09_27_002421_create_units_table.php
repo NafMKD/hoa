@@ -17,19 +17,15 @@ return new class extends Migration
             $table->foreignId('building_id')->constrained('buildings');
             $table->string('name')->unique();
             $table->integer('floor_number');
-            $table->foreignId('owner_id')->nullable()->constrained('users');
-            $table->foreignId('tenant_id')->nullable()->constrained('users');
-            $table->foreignId('ownership_file_id')->nullable()->constrained('documents');
             $table->enum('unit_type', Controller::_UNIT_TYPES)->nullable();
             $table->decimal('size_m2', 8, 2)->nullable();
-            $table->enum('status', Controller::_UNIT_STATUSES)->default('owner_occupied');
+            $table->enum('status', Controller::_UNIT_STATUSES)->default('vacant');
             $table->timestamps();
             $table->softDeletes();
 
             $table->index('building_id');
-            $table->index('owner_id');
-            $table->index('tenant_id');
             $table->index('status');
+            $table->unique(['building_id', 'name']);
 
         });
     }

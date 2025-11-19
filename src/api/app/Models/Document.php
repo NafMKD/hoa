@@ -70,7 +70,7 @@ class Document extends Model
      */
     public function tenantLeases(): HasMany
     {
-        return $this->hasMany(TenantLease::class, 'lease_document_id');
+        return $this->hasMany(UnitLease::class, 'lease_document_id');
     }
 
     /**
@@ -94,22 +94,22 @@ class Document extends Model
     }
 
     /**
-     * Get unit that have this document ownership document.
-     * 
-     * @return HasMany
-     */
-    public function ownership(): HasMany
-    {
-        return $this->hasMany(Unit::class, 'ownership_file_id');
-    }
-
-    /**
      * Get tenant lease that have this document as representative document.
      * 
      * @return HasMany
      */
     public function representativeLeases(): HasMany
     {
-        return $this->hasMany(TenantLease::class, 'representative_document_id');
+        return $this->hasMany(UnitLease::class, 'representative_document_id');
+    }
+
+    /**
+     * Get unit owner that have this document as ownership file.
+     * 
+     * @return HasMany
+     */
+    public function unitOwners(): HasMany
+    {
+        return $this->hasMany(UnitOwner::class, 'ownership_file_id');
     }
 }

@@ -19,23 +19,19 @@ class UnitResource extends JsonResource
             'id'               => $this->id,
             'building'         => $this->whenLoaded('building', function () {
                 return new IdNameResource($this->building);
-            }), 
+            }),
             'name'             => $this->name,
             'floor_number'     => $this->floor_number,
-            'owner'            => $this->whenLoaded('owner', function () {
-                return new UserResource($this->owner);
-            }),
+            'owners'           => $this->whenLoaded('owners'),
+            'currentOwner'     => $this->whenLoaded('currentOwner'),
             'unit_type'        => $this->unit_type,
             'type_name'        => $this->type(),
             'size_m2'          => $this->size_m2,
             'status'           => ucwords(str_replace('_', ' ', $this->status)),
-            'ownership_file'   => $this->whenLoaded('ownershipFile', function () {
-                return new DocumentResource($this->ownershipFile);
-            }),
-            'tenant'           => $this->whenLoaded('tenant', function () {
-                return new UserResource($this->tenant);
-            }),
+            'currentLease'     => $this->whenLoaded('currentLease'),
             'leases'           => $this->whenLoaded('leases'),
+            'invoices'         => $this->whenLoaded('invoices'),
+            'vehicles'         => $this->whenLoaded('vehicles'),
             'created_at'       => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),
             'updated_at'       => \Carbon\Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -24,9 +25,6 @@ class Unit extends Model
         'building_id',
         'name',
         'floor_number',
-        'owner_id',
-        'tenant_id',
-        'ownership_file_id',
         'unit_type',
         'size_m2',
         'status',
@@ -40,16 +38,6 @@ class Unit extends Model
     public function building(): BelongsTo
     {
         return $this->belongsTo(Building::class);
-    }
-
-    /**
-     * Get the ownership file of the unit.
-     * 
-     * @return BelongsTo
-     */
-    public function ownershipFile(): BelongsTo
-    {
-        return $this->belongsTo(Document::class, 'ownership_file_id');
     }
 
     /**
@@ -74,35 +62,45 @@ class Unit extends Model
     }
 
     /**
-     * Get the owner of the unit.
-     * 
-     * @return BelongsTo
-     */
-    public function owner(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'owner_id');
-    }
-
-    /**
-     * Get the tenant of the unit.
-     * 
-     * @return BelongsTo
-     */
-    public function tenant(): BelongsTo
-    {   
-        return $this->belongsTo(User::class, 'tenant_id');
-    }
-
-    /**
      * Get the leases of the unit.
      * 
      * @return HasMany
      */
     public function leases(): HasMany
     {
-        return $this->hasMany(TenantLease::class);
+        return $this->hasMany(UnitLease::class);
     }
 
+    /**
+     * Get the current active lease of the unit.
+     * 
+     * @return hasOne
+     */
+    public function currentLease(): HasOne
+    {
+        return $this->hasOne(UnitLease::class)->where('status', 'active');
+    }
+
+    /**
+     * Get the owners of the unit.
+     * 
+     * @return HasMany
+     */
+    public function owners(): HasMany
+    {
+        return $this->hasMany(UnitOwner::class);
+    }
+
+    /**
+     * Get the the current active owner of the unit.
+     * 
+     * @return hasOne
+     */
+    public function currentOwner(): HasOne
+    {
+        return $this->hasOne(UnitOwner::class)->where('status', 'active');
+    }
+    
     /**
      * Get the invoices of the unit.
      * 

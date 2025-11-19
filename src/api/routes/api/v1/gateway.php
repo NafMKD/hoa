@@ -17,9 +17,6 @@ Route::prefix('units')->middleware('auth:sanctum')->name('api.v1.units.')->group
 Route::prefix('document-templates')->middleware('auth:sanctum')->name('api.v1.document_templates.')->group(function () { 
     require __DIR__.'/document_template.php';
 });
-Route::prefix('tenant-leases')->middleware('auth:sanctum')->name('api.v1.tenant_leases.')->group(function () { 
-    require __DIR__.'/tenant_lease.php';
-});
 Route::prefix('fees')->middleware('auth:sanctum')->name('api.v1.fees.')->group(function () { 
     require __DIR__.'/fee.php';
 });

@@ -22,9 +22,10 @@ import { Route as AuthenticatedAdminUnitsIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminTemplatesIndexRouteImport } from './routes/_authenticated/admin/templates/index'
 import { Route as AuthenticatedAdminBuildingsIndexRouteImport } from './routes/_authenticated/admin/buildings/index'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin/users/$userId'
-import { Route as AuthenticatedAdminUnitsUnitIdRouteImport } from './routes/_authenticated/admin/units/$unitId'
 import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/admin/templates/$templateId'
 import { Route as AuthenticatedAdminBuildingsBuildingIdRouteImport } from './routes/_authenticated/admin/buildings/$buildingId'
+import { Route as AuthenticatedAdminUnitsUnitIdIndexRouteImport } from './routes/_authenticated/admin/units/$unitId/index'
+import { Route as AuthenticatedAdminUnitsUnitIdLeasesRouteImport } from './routes/_authenticated/admin/units/$unitId/leases'
 
 const errors503Route = errors503RouteImport.update({
   id: '/(errors)/503',
@@ -96,12 +97,6 @@ const AuthenticatedAdminUsersUserIdRoute =
     path: '/users/$userId',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
-const AuthenticatedAdminUnitsUnitIdRoute =
-  AuthenticatedAdminUnitsUnitIdRouteImport.update({
-    id: '/units/$unitId',
-    path: '/units/$unitId',
-    getParentRoute: () => AuthenticatedAdminRouteRoute,
-  } as any)
 const AuthenticatedAdminTemplatesTemplateIdRoute =
   AuthenticatedAdminTemplatesTemplateIdRouteImport.update({
     id: '/templates/$templateId',
@@ -112,6 +107,18 @@ const AuthenticatedAdminBuildingsBuildingIdRoute =
   AuthenticatedAdminBuildingsBuildingIdRouteImport.update({
     id: '/buildings/$buildingId',
     path: '/buildings/$buildingId',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminUnitsUnitIdIndexRoute =
+  AuthenticatedAdminUnitsUnitIdIndexRouteImport.update({
+    id: '/units/$unitId/',
+    path: '/units/$unitId/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminUnitsUnitIdLeasesRoute =
+  AuthenticatedAdminUnitsUnitIdLeasesRouteImport.update({
+    id: '/units/$unitId/leases',
+    path: '/units/$unitId/leases',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 
@@ -126,12 +133,13 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
   '/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
-  '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
+  '/admin/units/$unitId/leases': typeof AuthenticatedAdminUnitsUnitIdLeasesRoute
+  '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
@@ -143,12 +151,13 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
   '/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
-  '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
+  '/admin/units/$unitId/leases': typeof AuthenticatedAdminUnitsUnitIdLeasesRoute
+  '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -162,12 +171,13 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
   '/_authenticated/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
-  '/_authenticated/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/_authenticated/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/_authenticated/admin/buildings/': typeof AuthenticatedAdminBuildingsIndexRoute
   '/_authenticated/admin/templates/': typeof AuthenticatedAdminTemplatesIndexRoute
   '/_authenticated/admin/units/': typeof AuthenticatedAdminUnitsIndexRoute
   '/_authenticated/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
+  '/_authenticated/admin/units/$unitId/leases': typeof AuthenticatedAdminUnitsUnitIdLeasesRoute
+  '/_authenticated/admin/units/$unitId/': typeof AuthenticatedAdminUnitsUnitIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -182,12 +192,13 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/buildings/$buildingId'
     | '/admin/templates/$templateId'
-    | '/admin/units/$unitId'
     | '/admin/users/$userId'
     | '/admin/buildings'
     | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
+    | '/admin/units/$unitId/leases'
+    | '/admin/units/$unitId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
@@ -199,12 +210,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/buildings/$buildingId'
     | '/admin/templates/$templateId'
-    | '/admin/units/$unitId'
     | '/admin/users/$userId'
     | '/admin/buildings'
     | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
+    | '/admin/units/$unitId/leases'
+    | '/admin/units/$unitId'
   id:
     | '__root__'
     | '/_authenticated/admin'
@@ -217,12 +229,13 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/buildings/$buildingId'
     | '/_authenticated/admin/templates/$templateId'
-    | '/_authenticated/admin/units/$unitId'
     | '/_authenticated/admin/users/$userId'
     | '/_authenticated/admin/buildings/'
     | '/_authenticated/admin/templates/'
     | '/_authenticated/admin/units/'
     | '/_authenticated/admin/users/'
+    | '/_authenticated/admin/units/$unitId/leases'
+    | '/_authenticated/admin/units/$unitId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -328,13 +341,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersUserIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/admin/units/$unitId': {
-      id: '/_authenticated/admin/units/$unitId'
-      path: '/units/$unitId'
-      fullPath: '/admin/units/$unitId'
-      preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRouteRoute
-    }
     '/_authenticated/admin/templates/$templateId': {
       id: '/_authenticated/admin/templates/$templateId'
       path: '/templates/$templateId'
@@ -349,6 +355,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBuildingsBuildingIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/units/$unitId/': {
+      id: '/_authenticated/admin/units/$unitId/'
+      path: '/units/$unitId'
+      fullPath: '/admin/units/$unitId'
+      preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/units/$unitId/leases': {
+      id: '/_authenticated/admin/units/$unitId/leases'
+      path: '/units/$unitId/leases'
+      fullPath: '/admin/units/$unitId/leases'
+      preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdLeasesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
@@ -356,12 +376,13 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminBuildingsBuildingIdRoute: typeof AuthenticatedAdminBuildingsBuildingIdRoute
   AuthenticatedAdminTemplatesTemplateIdRoute: typeof AuthenticatedAdminTemplatesTemplateIdRoute
-  AuthenticatedAdminUnitsUnitIdRoute: typeof AuthenticatedAdminUnitsUnitIdRoute
   AuthenticatedAdminUsersUserIdRoute: typeof AuthenticatedAdminUsersUserIdRoute
   AuthenticatedAdminBuildingsIndexRoute: typeof AuthenticatedAdminBuildingsIndexRoute
   AuthenticatedAdminTemplatesIndexRoute: typeof AuthenticatedAdminTemplatesIndexRoute
   AuthenticatedAdminUnitsIndexRoute: typeof AuthenticatedAdminUnitsIndexRoute
   AuthenticatedAdminUsersIndexRoute: typeof AuthenticatedAdminUsersIndexRoute
+  AuthenticatedAdminUnitsUnitIdLeasesRoute: typeof AuthenticatedAdminUnitsUnitIdLeasesRoute
+  AuthenticatedAdminUnitsUnitIdIndexRoute: typeof AuthenticatedAdminUnitsUnitIdIndexRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
@@ -371,7 +392,6 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminBuildingsBuildingIdRoute,
     AuthenticatedAdminTemplatesTemplateIdRoute:
       AuthenticatedAdminTemplatesTemplateIdRoute,
-    AuthenticatedAdminUnitsUnitIdRoute: AuthenticatedAdminUnitsUnitIdRoute,
     AuthenticatedAdminUsersUserIdRoute: AuthenticatedAdminUsersUserIdRoute,
     AuthenticatedAdminBuildingsIndexRoute:
       AuthenticatedAdminBuildingsIndexRoute,
@@ -379,6 +399,10 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminTemplatesIndexRoute,
     AuthenticatedAdminUnitsIndexRoute: AuthenticatedAdminUnitsIndexRoute,
     AuthenticatedAdminUsersIndexRoute: AuthenticatedAdminUsersIndexRoute,
+    AuthenticatedAdminUnitsUnitIdLeasesRoute:
+      AuthenticatedAdminUnitsUnitIdLeasesRoute,
+    AuthenticatedAdminUnitsUnitIdIndexRoute:
+      AuthenticatedAdminUnitsUnitIdIndexRoute,
   }
 
 const AuthenticatedAdminRouteRouteWithChildren =

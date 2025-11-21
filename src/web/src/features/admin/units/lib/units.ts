@@ -1,5 +1,5 @@
 import api, { handleApi } from "@/lib/api";
-import type { Unit, UnitFormData, UnitPaginatedResponse } from "@/types/types";
+import type { Unit, UnitPaginatedResponse } from "@/types/types";
 
 /**
  * Fetch paginated units
@@ -64,9 +64,3 @@ export const updateUnit = (unitId: string | number, formData: FormData) =>
  */
 export const deleteUnit = (unitId: string | number) =>
   handleApi<void>(api.delete(`/v1/units/${unitId}`));
-
-/**
- * fetch unit names for dropdowns
- */
-export const fetchUnitNames = async (): Promise<UnitFormData> => 
-  handleApi<UnitFormData>(api.get("/v1/buildings/names/all"));

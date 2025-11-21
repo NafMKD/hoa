@@ -103,6 +103,17 @@ export const columns: ColumnDef<Unit>[] = [
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            {unit.isRentable && (
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/admin/units/$unitId/leases"
+                  params={{ unitId: unit.id as string }}
+                  className="w-full cursor-pointer"
+                >
+                  Create Lease
+                </Link>
+              </DropdownMenuItem>
+            )}
 
             <DropdownMenuItem
               onClick={() => {

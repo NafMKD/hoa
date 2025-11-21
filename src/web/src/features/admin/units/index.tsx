@@ -25,10 +25,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { AddUnitForm } from "./components/add-unit-form";
+import { AddUnitForm } from "./components/form/add-unit-form";
 import type { Unit } from "@/types/types";
 import { IconPlus } from "@tabler/icons-react";
-import { EditUnitForm } from "./components/edit-unit-form";
+import { EditUnitForm } from "./components/form/edit-unit-form";
 import { Spinner } from "@/components/ui/spinner";
 
 export function Units() {

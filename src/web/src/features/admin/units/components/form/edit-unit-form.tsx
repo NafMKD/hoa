@@ -12,43 +12,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { updateUnit } from "../../lib/units";
 import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { ApiError } from "@/types/api-error";
-import { createUnit, fetchUnitNames } from "../lib/units";
-import { fetchUserNames } from "../../users/lib/users";
-import type { IdNamePair } from "@/types/types";
+import type { IdNamePair, Unit } from "@/types/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { fetchBuildingNames } from "../../../buildings/lib/buildings";
 
-interface AddUnitFormProps {
+interface EditUnitFormProps {
+  unit: Unit;
   onSuccess?: () => void;
 }
 
-export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
+export function EditUnitForm({ unit, onSuccess }: EditUnitFormProps) {
   const [buildings, setBuildings] = useState<IdNamePair[]>([]);
-  const [users, setUsers] = useState<IdNamePair[]>([]);
   const [unitTypes, setUnitTypes] = useState<string[]>([]);
   const [unitStatuses, setUnitStatuses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fileName, setFileName] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [unt, usr] = await Promise.all([
-          fetchUnitNames(),
-          fetchUserNames(),
+        const [unt] = await Promise.all([
+          fetchBuildingNames()
         ]);
         setBuildings(unt.data);
-        setUsers(usr);
         setUnitTypes(unt.unit_types as string[]);
         setUnitStatuses(unt.unit_statuses as string[]);
       } catch (err) {
-        toast.error("Failed to load form data");
+        toast.error("Failed to load form options");
       } finally {
         setLoading(false);
       }
@@ -56,77 +52,78 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
     loadData();
   }, []);
 
+  // Dynamic schema using loaded enums
   const unitSchema = z.object({
-    building_id: z.coerce.number().int().positive("Building is required"),
+    building_id: z.number().int().positive(),
     name: z.string().min(1, "Unit name is required").max(255),
     floor_number: z.coerce
       .number()
       .int()
       .min(0, "Floor number must be at least 0"),
-    owner_id: z.coerce.number().int().optional().nullable(),
-    ownership_file_id: z.instanceof(File).optional().nullable(),
     unit_type: z
       .enum(
         unitTypes.length > 0
           ? (unitTypes as [string, ...string[]])
-          : ([""] as string[])
+          : ([""] as any)
       )
-      .refine((val) => val !== undefined, {
-        message: `Unit type is required`,
-      }),
+      .refine((val) => val !== "", { message: "Unit type is required" }),
     size_m2: z.coerce.number().min(0).optional().nullable(),
     status: z
       .enum(
         unitStatuses.length > 0
           ? (unitStatuses as [string, ...string[]])
-          : ([""] as string[])
+          : ([""] as any)
       )
-      .refine((val) => val !== undefined, {
-        message: `Status is required`,
-      })
+      .refine((val) => val !== "", { message: "Status is required" })
       .optional(),
   });
 
   type FormValues = z.infer<typeof unitSchema>;
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(unitSchema) as any,
+    resolver: zodResolver(unitSchema) as any,  
     defaultValues: {
-      floor_number: 0,
-      size_m2: undefined,
-      status: undefined,
+      building_id: unit.building?.id as number,
+      name: unit.name,
+      floor_number: unit.floor_number as number,
+      unit_type: unit.unit_type,
+      size_m2: unit.size_m2 ?? undefined,
+      status: unit.status,
     },
-  });
+  }); 
 
   const onSubmit = async (values: FormValues) => {
     try {
       setIsSubmitting(true);
       const formData = new FormData();
 
-      // Append all values (backend will ignore null/undefined)
-      formData.append("building_id", values.building_id.toString());
-      formData.append("name", values.name);
-      formData.append("floor_number", values.floor_number.toString());
-      formData.append("unit_type", values.unit_type);
+      const appendIfChanged = (
+        key: keyof FormValues,
+        current: any,
+        original: any
+      ) => {
+        if (current !== undefined && current !== original) {
+          if (current !== null) {
+            formData.append(key, current.toString());
+          }
+        }
+      };
 
-      if (values.owner_id !== null && values.owner_id !== undefined) {
-        formData.append("owner_id", values.owner_id.toString());
-      }
-      if (values.size_m2 !== null && values.size_m2 !== undefined) {
-        formData.append("size_m2", values.size_m2.toString());
-      }
-      if (values.status) {
-        formData.append("status", values.status);
-      }
-      if (values.ownership_file_id) {
-        formData.append("ownership_file_id", values.ownership_file_id);
+      appendIfChanged("building_id", values.building_id, unit.building?.id);
+      appendIfChanged("name", values.name, unit.name);
+      appendIfChanged("floor_number", values.floor_number, unit.floor_number);
+      appendIfChanged("unit_type", values.unit_type, unit.unit_type);
+      appendIfChanged("size_m2", values.size_m2, unit.size_m2 ?? null);
+      appendIfChanged("status", values.status, unit.status);
+
+      if (formData.entries().next().done) {
+        toast.info("No changes detected.", { position: "top-right" });
+        return;
       }
 
-      await createUnit(formData);
+      await updateUnit(unit.id, formData);
 
-      toast.success("Unit added successfully!", { position: "top-right" });
-      form.reset();
-      setFileName(null);
+      toast.success("Unit updated successfully!", { position: "top-right" });
       onSuccess?.();
     } catch (error) {
       const err = error as ApiError;
@@ -140,7 +137,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
           });
         });
       } else {
-        toast.error(err.message || "Failed to add unit", {
+        toast.error(err.message || "Failed to update unit", {
           position: "top-right",
         });
       }
@@ -206,7 +203,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
     <Card>
       <CardContent className="pt-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Building Select & Unit Name */}
+          {/* Unit Name & Building Select */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="name">
@@ -233,10 +230,9 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
                     value={field.value?.toString()}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a building" />
+                      <SelectValue placeholder="Select building" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value=" ">Select a building</SelectItem>
                       {buildings.map((b) => (
                         <SelectItem key={b.id} value={b.id.toString()}>
                           {b.name}
@@ -286,7 +282,6 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value=" ">Select Unit Type</SelectItem>
                       {unitTypes.map((type) => (
                         <SelectItem key={type} value={type}>
                           {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -333,12 +328,9 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value=" ">Select Status</SelectItem>
                       {unitStatuses.map((status) => (
                         <SelectItem key={status} value={status}>
-                          {status
-                            .replace(/_/g, " ")
-                            .replace(/^\w/, (c) => c.toUpperCase())}
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -353,77 +345,17 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
             </div>
           </div>
 
-          {/* Owner ID */}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="building_id">Owner (optional)</Label>
-            <Controller
-              control={form.control}
-              name="owner_id"
-              render={({ field }) => (
-                <Select
-                  onValueChange={(v) => field.onChange(parseInt(v))}
-                  value={field.value?.toString()}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select owner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value=" ">Select Owner</SelectItem>
-                    {users.map((u) => (
-                      <SelectItem key={u.id} value={u.id.toString()}>
-                        {u.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {form.formState.errors.owner_id && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.owner_id.message}
-              </p>
-            )}
-          </div>
-
-          {/* Ownership File */}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="ownership_file_id">
-              Ownership Document (PDF, JPG, PNG)
-            </Label>
-            <Input
-              id="ownership_file_id"
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => {
-                const file = e.target.files?.[0] ?? null;
-                if (file) {
-                  setFileName(file.name);
-                  form.setValue("ownership_file_id", file);
-                } else {
-                  setFileName(null);
-                  form.setValue("ownership_file_id", undefined);
-                }
-              }}
-            />
-            {fileName && (
-              <p className="text-sm text-muted-foreground">
-                Selected: {fileName}
-              </p>
-            )}
-            {form.formState.errors.ownership_file_id && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.ownership_file_id.message}
-              </p>
-            )}
-          </div>
-
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <Button
+            type="submit"
+            disabled={isSubmitting || loading}
+            className="w-full"
+          >
             {isSubmitting ? (
               <>
-                <Spinner /> Submitting...
+                <Spinner /> Updating...
               </>
             ) : (
-              "Add Unit"
+              "Update Unit"
             )}
           </Button>
         </form>

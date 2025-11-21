@@ -85,9 +85,9 @@ class UnitController extends Controller
                 'building_id'      => ['required', 'exists:buildings,id'],
                 'name'             => ['required', 'string', 'max:255', new UniqueUnitName()],
                 'floor_number'     => ['required', 'integer', 'min:0'],
-                'unit_type'        => ['required', 'string', Rule::in(Controller::_UNIT_TYPES)],
+                'unit_type'        => ['required', 'string', Rule::in(self::_UNIT_TYPES)],
                 'size_m2'          => ['nullable', 'numeric', 'min:0'],
-                'status'           => ['nullable', 'string', Rule::in(Controller::_UNIT_STATUSES)],
+                'status'           => ['nullable', 'string', Rule::in(self::_UNIT_STATUSES)],
             ]);
 
             $unit = $this->units->create($data);
@@ -112,7 +112,7 @@ class UnitController extends Controller
         try {
             $this->authorize('view', $unit);
 
-            $unit->load(['building', 'owner', 'leases', 'ownershipFile', 'tenant']);
+            $unit->load(['building', 'owners', 'leases', 'currentOwner', 'currentLease']);
 
             return response()->json(new UnitResource($unit));
         } catch (AuthorizationException $e) {
@@ -139,11 +139,9 @@ class UnitController extends Controller
                 'building_id'      => ['sometimes', 'exists:buildings,id'],
                 'name'             => ['sometimes', 'string', 'max:255', Rule::unique('units')->ignore($unit->id)],
                 'floor_number'     => ['sometimes', 'integer', 'min:0'],
-                'owner_id'         => ['nullable', 'exists:users,id'],
-                'ownership_file_id'=> ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.self::_MAX_FILE_SIZE],
-                'unit_type'        => ['sometimes', 'string', Rule::in(Controller::_UNIT_TYPES)],
+                'unit_type'        => ['sometimes', 'string', Rule::in(self::_UNIT_TYPES)],
                 'size_m2'          => ['nullable', 'numeric', 'min:0'],
-                'status'           => ['nullable', 'string', Rule::in(Controller::_UNIT_STATUSES)],
+                'status'           => ['nullable', 'string', Rule::in(self::_UNIT_STATUSES)],
             ]);
 
             $updated = $this->units->update($unit, $data);
@@ -198,12 +196,12 @@ class UnitController extends Controller
                 'tenant_id'                  => ['required', 'integer', 'exists:users,id', new UniqueUnitLease()],
                 'representative_id'          => ['nullable', 'integer', 'exists:users,id'],
                 'representative_document'    => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:' . self::_MAX_FILE_SIZE],
-                'agreement_type'             => ['required', 'string', 'in:' . implode(',', Controller::_LEASE_AGREEMENT_TYPES)],
+                'agreement_type'             => ['required', 'string', 'in:' . implode(',', self::_LEASE_AGREEMENT_TYPES)],
                 'agreement_amount'           => ['required', 'numeric', 'min:0'],
                 'lease_template_id'          => ['nullable', 'integer', 'exists:document_templates,id'],
                 'lease_start_date'           => ['required', 'date'],
                 'lease_end_date'             => ['nullable', 'date', 'after_or_equal:lease_start_date'],
-                'status'                     => ['nullable', 'string', 'in:' . implode(',', Controller::_LEASE_STATUS)],
+                'status'                     => ['nullable', 'string', 'in:' . implode(',', self::_LEASE_STATUS)],
                 'witness_1_full_name'        => ['nullable', 'string', 'max:255'],
                 'witness_2_full_name'        => ['nullable', 'string', 'max:255'],
                 'witness_3_full_name'        => ['nullable', 'string', 'max:255'],

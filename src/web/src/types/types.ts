@@ -135,6 +135,7 @@ export type Unit = {
   type_name: string;
   size_m2: number | null;
   status: string;
+  isRentable: boolean;
   ownership_file?: Document; 
   leases?: TenantLeaseResource[]; 
   tenant?: User; 

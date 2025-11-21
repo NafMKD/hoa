@@ -20,7 +20,7 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { IconArrowLeft, IconArrowLeftCircle } from "@tabler/icons-react";
 
 export function UnitDetail() {
-  const { unitId } = useParams({ from: "/_authenticated/admin/units/$unitId" });
+  const { unitId } = useParams({ from: "/_authenticated/admin/units/$unitId/" });
   const [unit, setUnit] = useState<Unit | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 

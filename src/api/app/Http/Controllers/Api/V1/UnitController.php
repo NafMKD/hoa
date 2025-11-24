@@ -198,7 +198,7 @@ class UnitController extends Controller
                 'representative_document'    => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:' . self::_MAX_FILE_SIZE],
                 'agreement_type'             => ['required', 'string', 'in:' . implode(',', self::_LEASE_AGREEMENT_TYPES)],
                 'agreement_amount'           => ['required', 'numeric', 'min:0'],
-                'lease_template_id'          => ['nullable', 'integer', 'exists:document_templates,id'],
+                'lease_template_id'          => ['required', 'integer', 'exists:document_templates,id'],
                 'lease_start_date'           => ['required', 'date'],
                 'lease_end_date'             => ['nullable', 'date', 'after_or_equal:lease_start_date'],
                 'status'                     => ['nullable', 'string', 'in:' . implode(',', self::_LEASE_STATUS)],

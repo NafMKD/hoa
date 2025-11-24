@@ -1,5 +1,5 @@
 import api, { handleApi } from "@/lib/api";
-import type { Building, BuildingPaginatedResponse } from "@/types/types";
+import type { Building, BuildingPaginatedResponse, UnitFormData } from "@/types/types";
 
 export const fetchBuildings = async (
   page: string,
@@ -49,3 +49,6 @@ export const updateBuilding = (buildingId: string | number, formData: FormData) 
 
 export const deleteBuilding = (buildingId: string | number) =>
   handleApi<void>(api.delete(`/v1/buildings/${buildingId}`));
+
+export const fetchBuildingNames = async (): Promise<UnitFormData> => 
+  handleApi<UnitFormData>(api.get("/v1/buildings/names/all"));

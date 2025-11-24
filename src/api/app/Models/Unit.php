@@ -45,7 +45,7 @@ class Unit extends Model
      * 
      * @return string
      */
-    public function type(): string
+    public function getTypeAttribute(): string
     {
         switch ($this->unit_type) {
             case Controller::_UNIT_TYPES[0]:
@@ -59,6 +59,21 @@ class Unit extends Model
             default:
                 return 'Unknown';
         }
+    }
+
+    /**
+     * Get if the unit is rentable
+     * 
+     * @return bool
+     */
+    public function getIsRentableAttribute(): bool
+    {
+        if ($this->status == 'rented') return false;
+
+        if ($this->currentLease != null) return false;
+
+
+        return true;
     }
 
     /**

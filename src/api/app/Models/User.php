@@ -26,6 +26,10 @@ class User extends Authenticatable
         'phone',
         'email',
         'password',
+        'city',
+        'sub_city',
+        'woreda',
+        'house_number',
         'id_file',
         'role',
         'last_login_at',
@@ -58,13 +62,50 @@ class User extends Authenticatable
     /**
      * Check if the user has a specific role.
      *
-     * @param string $role
+     * @param array|string $role
      * @return bool
      */
-    public function hasRole(string $role): bool
+    public function hasRole(array|string $roles): bool
     {
-        return in_array($role, \App\Http\Controllers\Controller::_ROLES, true)
-            && $this->role === $role;
+
+        if (is_array($roles)) {
+            return in_array($this->role, $roles, true);
+        }
+
+        return $this->role === $roles;
+    }
+
+    /**
+     * Check if the user is active.
+     * 
+     * @return bool
+     */
+    public function getIsActiveAttribute(): bool
+    {
+        return $this->status === \App\Http\Controllers\Controller::_USER_STATUSES[0];
+    }
+
+    /**
+     * Check if the user address is complete.
+     * 
+     * @return bool
+     */
+    public function getIsAddressCompleteAttribute(): bool
+    {
+        return !is_null($this->city)
+            && !is_null($this->sub_city)
+            && !is_null($this->woreda)
+            && !is_null($this->house_number);
+    }
+
+    /**
+     * Get the user's full name.
+     * 
+     * @return string
+     */
+    public function getFullNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
     }
 
     /**
@@ -78,98 +119,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Get payments made by the user.
-     * 
-     * @return mixed
-     */
-    public function payments(): mixed
-    {
-        return Payment::whereHas('invoice', function ($query) {
-            $query->where('user_id', $this->id);
-        })->first();
-    }
-
-    /**
-     * Get invoices for the user.
-     * 
-     * @return HasMany
-     */
-    public function invoices(): HasMany
-    {
-        return $this->hasMany(Invoice::class);
-    }
-
-    /**
-     * Get leases where the user is tenant.
-     * 
-     * @return HasMany
-     */
-    public function leases(): HasMany
-    {
-        return $this->hasMany(UnitLease::class, 'tenant_id');
-    }
-
-    /**
-     * Get leases created by the user (staff).
-     * 
-     * @return HasMany
-     */
-    public function createdLeases(): HasMany
-    {
-        return $this->hasMany(UnitLease::class, 'created_by');
-    }
-
-    /**
-     * Get expense created by the user (staff).
-     * 
-     * @return HasMany
-     */
-    public function createdExpenses(): HasMany
-    {
-        return $this->hasMany(Expense::class, 'created_by');
-    }
-
-    /**
-     * Get stickers created by the user (staff).
-     * 
-     * @return HasMany
-     */
-    public function createdStickers(): HasMany
-    {
-        return $this->hasMany(StickerIssue::class, 'issued_by');
-    }
-
-    /**
-     * Get votes cast by the user.
-     * 
-     * @return HasMany
-     */
-    public function votes(): HasMany
-    {
-        return $this->hasMany(Vote::class);
-    }
-
-    /**
-     * Get vehicles owned by the user.
-     * 
-     * @return HasMany
-     */
-    public function vehicles(): HasMany
-    {
-        return $this->hasMany(Vehicle::class);
-    }
-
-    /**
-     * Get sticker issues issued by the user.
-     * 
-     * @return HasMany
-     */
-    public function issuedStickers(): HasMany
-    {
-        return $this->hasMany(StickerIssue::class, 'issued_by');
-    }
-
-    /**
      * Get audit logs performed by the user.
      * 
      * @return HasMany
@@ -177,35 +126,5 @@ class User extends Authenticatable
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class, 'actor_user_id');
-    }
-
-    /**
-     * Get document templates created by the user.
-     * 
-     * @return HasMany
-     */
-    public function createdTemplates(): HasMany
-    {
-        return $this->hasMany(DocumentTemplate::class, 'created_by');
-    }
-
-    /**
-     * Get document templates updated by the user.
-     * 
-     * @return HasMany
-     */
-    public function updatedTemplates(): HasMany
-    {
-        return $this->hasMany(DocumentTemplate::class, 'updated_by');
-    }
-
-    /**
-     * Get the leases where the user is a representative.
-     * 
-     * @return HasMany
-     */
-    public function representativeLeases(): HasMany
-    {
-        return $this->hasMany(UnitLease::class, 'representative_id');
     }
 }

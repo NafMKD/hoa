@@ -19,6 +19,10 @@ return new class extends Migration
             $table->string('phone')->unique();
             $table->string('email')->nullable();
             $table->string('password');
+            $table->string('city')->nullable();
+            $table->string('sub_city')->nullable();
+            $table->string('woreda')->nullable();
+            $table->string('house_number')->nullable();
             $table->foreignId('id_file')->nullable()->constrained('documents');
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('role', Controller::_ROLES)->default('tenant');

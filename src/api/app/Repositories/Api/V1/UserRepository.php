@@ -4,20 +4,27 @@ namespace App\Repositories\Api\V1;
 
 use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
-use App\Models\Document;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class UserRepository
 {
+    protected DocumentRepository $documentRepository;
+
+    public function __construct(DocumentRepository $documentRepository)
+    {
+        $this->documentRepository = $documentRepository;
+    }
+
     /**
      * Get all users with optional pagination.
      * 
      * @param  int|null  $perPage
+     * @param  array  $filters
      * @return Collection|LengthAwarePaginator
      */
     public function all(?int $perPage = null, array $filters = []): Collection|LengthAwarePaginator
@@ -49,39 +56,36 @@ class UserRepository
     }
 
     /**
-     * Get all user names and IDs.
+     * Search users by name or phone.
+     * Additional filters can be added.
+     * ['role', 'status']
      * 
+     * @param  string  $term
+     * @param  array  $filers
      * @return Collection
      */
-    public function allNames(): Collection
+    public function search(string $term, array $filers = []): Collection
     {
-        $roles = array_slice(Controller::_ROLES, 3);
+        $query = User::query()
+            ->where(function ($q) use ($term) {
+                $q->where('first_name', 'like', "%{$term}%")
+                  ->orWhere('last_name', 'like', "%{$term}%")
+                  ->orWhere('phone', 'like', "%{$term}%")
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$term}%"]);
+            });
 
-        return User::query()
-            ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) AS name"))
-            ->where(function ($q) use ($roles) {
-                $q->whereNull('role')
-                  ->orWhereIn('role', $roles);  
-            })
-            ->orderBy('first_name', 'asc')
-            ->orderBy('last_name', 'asc')
-            ->get();
-    }
-
-    /**
-     * Get users by role with optional pagination.
-     * 
-     * @param  string  $role
-     * @param  int|null  $perPage
-     * @return Collection|LengthAwarePaginator
-     */
-    public function getByRole(string $role, ?int $perPage = null): Collection|LengthAwarePaginator
-    {
-        if ($perPage) {
-            return User::where('role', $role)->paginate($perPage);
+        // Apply additional filters if provided
+        if (!empty($filers['role'])) {
+            $query->where('role', $filers['role']);
         }
 
-        return User::where('role', $role)->get();
+        if (!empty($filers['status'])) {
+            $query->where('status', $filers['status']);
+        }
+
+        return $query->orderBy('first_name', 'asc')
+                     ->orderBy('last_name', 'asc')
+                     ->get();
     }
 
     /**
@@ -89,6 +93,7 @@ class UserRepository
      * 
      * @param  array<string, mixed>  $data
      * @return User
+     * @throws RepositoryException
      */
     public function create(array $data): User
     {
@@ -96,14 +101,10 @@ class UserRepository
 
         try {
             if (isset($data['id_file'])) {
-                $path = $this->uploadIdFile($data['id_file']);
-                $document = Document::create([
-                    'file_path' => $path,
-                    'file_name' => $data['id_file']->getClientOriginalName(),
-                    'mime_type' => $data['id_file']->getClientMimeType(),
-                    'file_size' => $data['id_file']->getSize(),
-                    'category' => Controller::_DOCUMENT_TYPES[0] // 'id_files'
-                ]);
+                $document = $this->documentRepository->create(
+                    $data['id_file'],
+                    Controller::_DOCUMENT_TYPES[0] // 'id_files'
+                );
 
                 $data['id_file'] = $document->id;
             }
@@ -114,7 +115,8 @@ class UserRepository
             return $user;
         } catch (\Throwable $e) {
             DB::rollBack();
-            throw new RepositoryException('Failed to create user: ' . $e->getMessage());
+            Log::error('User creation failed: ' . $e->getMessage());
+            throw new RepositoryException('Failed to create user');
         }
     }
 
@@ -124,6 +126,7 @@ class UserRepository
      * @param  User  $user
      * @param  array<string, mixed>  $data
      * @return User
+     * @throws RepositoryException
      */
     public function update(User $user, array $data): User
     {
@@ -131,21 +134,15 @@ class UserRepository
 
         try {
             if (isset($data['id_file'])) {
-                // Delete old file if exists
-                if ($user->idFile->file_path && Storage::disk('public')->exists($user->idFile->file_path)) {
-                    Storage::disk('public')->delete($user->idFile->file_path);
-                    $user->idFile->delete();
+                // delete old id_file if exist 
+                if ($user->idFile) {
+                    $this->documentRepository->delete($user->idFile);
                 }
 
-                $path = $this->uploadIdFile($data['id_file']);
-
-                $document = Document::create([
-                    'file_path' => $path,
-                    'file_name' => $data['id_file']->getClientOriginalName(),
-                    'mime_type' => $data['id_file']->getClientMimeType(),
-                    'file_size' => $data['id_file']->getSize(),
-                    'category' => Controller::_DOCUMENT_TYPES[0] // 'id_files'
-                ]);
+                $document = $this->documentRepository->create(
+                    $data['id_file'],
+                    Controller::_DOCUMENT_TYPES[0] // 'id_files'
+                );
 
                 $data['id_file'] = $document->id;
             }
@@ -156,7 +153,8 @@ class UserRepository
             return $user;
         } catch (\Throwable $e) {
             DB::rollBack();
-            throw new RepositoryException('Failed to update user: ' . $e->getMessage());
+            Log::error('User update failed: ' . $e->getMessage());
+            throw new RepositoryException('Failed to update user');
         }
     }
 
@@ -182,25 +180,18 @@ class UserRepository
     }
 
     /**
-     * Handle uploading ID file.
-     *
-     * @param UploadedFile|string $file
-     * @return string
-     */
-    private function uploadIdFile($file): string
-    {
-        return $file->store(Controller::_DOCUMENT_TYPES[0], 'public');
-    }
-
-    /**
      * Change user status.
      * 
      * @param  User  $user
      * @param  string  $status
      * @return User
+     * @throws RepositoryException
      */
     public function changeStatus(User $user, string $status): User
     {
+        if (!in_array($status, Controller::_USER_STATUSES)) {
+            throw new RepositoryException('Invalid status provided.');
+        }
         if ($user->status === $status) {
             return $user;
         }

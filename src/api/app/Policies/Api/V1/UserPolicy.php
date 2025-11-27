@@ -12,20 +12,8 @@ class UserPolicy
      */
     public function viewAny(User $authUser): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]);
-    }
-
-    /**
-     * Determine whether the authenticated user can view users by role.
-     */
-    public function viewByRole(User $authUser, string $role ): bool
-    {
-        // Accountant can view only 'homeowner' and 'tenant' roles
-        if ($authUser->hasRole(Controller::_ROLES[1]) || $authUser->hasRole(Controller::_ROLES[2])) {
-            return in_array($role, Controller::_ROLES.slice(-3), true);
-        }
-        
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -33,7 +21,8 @@ class UserPolicy
      */
     public function view(User $authUser, User $user): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]) || $authUser->id === $user->id;
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -41,7 +30,8 @@ class UserPolicy
      */
     public function create(User $authUser): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -49,7 +39,8 @@ class UserPolicy
      */
     public function update(User $authUser, User $user): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]) || $authUser->id === $user->id;
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -57,6 +48,7 @@ class UserPolicy
      */
     public function delete(User $authUser): bool
     {
+        // Only admin can delete
         return $authUser->hasRole(Controller::_ROLES[0]);
     }
 
@@ -65,6 +57,7 @@ class UserPolicy
      */
     public function changeStatus(User $authUser): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]) ||  $authUser->hasRole(Controller::_ROLES[2]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 }

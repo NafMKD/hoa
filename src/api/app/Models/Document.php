@@ -34,82 +34,13 @@ class Document extends Model
     ];
 
     /**
-     * Get users that have this document as ID file.
+     * Get publicly accessible URL for the document.
      * 
-     * @return HasMany
+     * @return string
      */
-    public function users(): HasMany
+    public function getUrlAttribute(): string
     {
-        return $this->hasMany(User::class, 'id_file');
+        return asset('storage/' . $this->file_path);
     }
-
-    /**
-     * Get payroll that have this document as payslips.
-     * 
-     * @return HasMany
-     */
-    public function payslip(): HasMany
-    {
-        return $this->hasMany(Payroll::class, 'payslip_document_id');
-    }
-
-    /**
-     * Get payment that have this document as screen shoot.
-     * 
-     * @return HasMany
-     */
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class, 'payment_screen_shoot_id');
-    }
-
-    /**
-     * Get tenant lease that have this document as agreement document.
-     * 
-     * @return HasMany
-     */
-    public function tenantLeases(): HasMany
-    {
-        return $this->hasMany(UnitLease::class, 'lease_document_id');
-    }
-
-    /**
-     * Get vehicle that have this document as vehicle document.
-     * 
-     * @return HasMany
-     */
-    public function vehicles(): HasMany
-    {
-        return $this->hasMany(Vehicle::class, 'vehicle_document_id');
-    }
-
-    /**
-     * Get sticker that have this document as qr code document.
-     * 
-     * @return HasMany
-     */
-    public function stickers(): HasMany
-    {
-        return $this->hasMany(StickerIssue::class, 'qr_code_file_id');
-    }
-
-    /**
-     * Get tenant lease that have this document as representative document.
-     * 
-     * @return HasMany
-     */
-    public function representativeLeases(): HasMany
-    {
-        return $this->hasMany(UnitLease::class, 'representative_document_id');
-    }
-
-    /**
-     * Get unit owner that have this document as ownership file.
-     * 
-     * @return HasMany
-     */
-    public function unitOwners(): HasMany
-    {
-        return $this->hasMany(UnitOwner::class, 'ownership_file_id');
-    }
+    
 }

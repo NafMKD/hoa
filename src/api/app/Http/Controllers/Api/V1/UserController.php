@@ -10,7 +10,6 @@ use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -56,47 +55,26 @@ class UserController extends Controller
     }
 
     /**
-     * Get all user names and IDs.
-     * 
-     * @return JsonResponse
-     */
-    public function allNames(): JsonResponse
-    {
-        try {
-            $this->authorize('viewAny', User::class);
-
-            $users = $this->users->allNames();
-
-            return response()->json($users);
-        } catch (AuthorizationException $e) {
-            return response()->json([
-                'status' => self::_ERROR,
-                'message' => self::_UNAUTHORIZED
-            ], 403);
-        }
-    }
-
-    /**
-     * Get all users by role
+     * Search users by name or phone.
+     * filtered by role if provided.
      * 
      * @param  Request  $request
      * @return JsonResponse
      */
-    public function getUsersByRole(Request $request): JsonResponse
+    public function search(Request $request): JsonResponse
     {
         try {
-            Validator::validate($request->all(), [
-                'role' => ['required', 'string', Rule::in(self::_ROLES)],
-                'per_page' => ['sometimes', 'integer', 'min:1']
-            ]);
+            $this->authorize('viewAny', User::class);
 
+            $term = $request->query('term');
             $role = $request->query('role');
-            $this->authorize('viewByRole', [User::class, $role]);
-            $perPage = $request->query('per_page') ?? self::_DEFAULT_PAGINATION;
-    
-            $users = $this->users->getByRole($role, $perPage);
-    
-            return response()->json(UserResource::collection($users));
+            $status = $request->query('status');
+
+            $filters = compact('role', 'status');
+
+            $users = $this->users->search($term, $filters);
+
+            return response()->json($users);
         } catch (AuthorizationException $e) {
             return response()->json([
                 'status' => self::_ERROR,
@@ -153,6 +131,10 @@ class UserController extends Controller
                 ],  
                 'email'      => ['nullable', 'email', 'unique:users,email'],
                 'password'   => ['nullable', 'string', 'min:8'],
+                'city'       => ['nullable', 'string', 'max:255'],
+                'sub_city'   => ['nullable', 'string', 'max:255'],
+                'woreda'     => ['nullable', 'string', 'max:255'],
+                'house_number' => ['nullable', 'string', 'max:50'],
                 'role'       => ['required', 'string', Rule::in(self::_ROLES)],
                 'id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.self::_MAX_FILE_SIZE], 
             ]);
@@ -184,7 +166,7 @@ class UserController extends Controller
         try {
             $this->authorize('view', [User::class, $user]); 
 
-            $user->load(['idFile', 'ownedUnits', 'rentedUnits', 'leases', 'createdLeases', 'createdTemplates', 'updatedTemplates', 'representativeLeases']);
+            $user->load(['idFile']);
     
             return response()->json(new UserResource($user));
         } catch (AuthorizationException $e) {
@@ -213,6 +195,9 @@ class UserController extends Controller
                 'phone'      => ['sometimes', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
                 'email'      => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
                 'password'   => ['sometimes', 'string', 'min:8'],
+                'city'       => ['nullable', 'string', 'max:255'],
+                'sub_city'   => ['nullable', 'string', 'max:255'],
+                'woreda'     => ['nullable', 'string', 'max:255'],
                 'role'       => ['sometimes', 'string', Rule::in(self::_ROLES)],
                 'id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.self::_MAX_FILE_SIZE],
             ]);

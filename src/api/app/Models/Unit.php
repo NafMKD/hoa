@@ -3,13 +3,10 @@
 namespace App\Models;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Unit extends Model
@@ -114,25 +111,5 @@ class Unit extends Model
     public function currentOwner(): HasOne
     {
         return $this->hasOne(UnitOwner::class)->where('status', 'active');
-    }
-    
-    /**
-     * Get the invoices of the unit.
-     * 
-     * @return HasMany
-     */
-    public function invoices(): HasMany
-    {
-        return $this->hasMany(Invoice::class);
-    }
-
-    /**
-     * Get vehicles assigned to the unit.
-     * 
-     * @return HasMany
-     */
-    public function vehicles(): HasMany
-    {
-        return $this->hasMany(Vehicle::class);
     }
 }

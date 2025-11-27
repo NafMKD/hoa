@@ -51,7 +51,11 @@ export const updateUserStatus = (userId: string, status: string) =>
   handleApi<User>(api.patch(`/v1/users/${userId}/status`, { status }));
 
 export const updateUser = (userID: string | number, data: FormData) =>
-  handleApi<User>(api.put(`/v1/users/${userID}`, data));
+  handleApi<User>(
+    api.post(`/v1/users/${userID}`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  );
 
 export const fetchUserNames = async (): Promise<IdNamePair[]> => 
   handleApi<IdNamePair[]>(api.get(`/v1/users/names/all`));

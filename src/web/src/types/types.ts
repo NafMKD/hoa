@@ -14,7 +14,12 @@ export type User = {
   phone: string | null;
   email: string;
   role: UserRole;
+  city: string | null;
+  sub_city: string | null;
+  woreda: string | null;
+  house_number: string | null;
   status: string;
+  idFile?: Document;
   owned_units?: UnitResource[];
   rented_units?: UnitResource[];
   leases?: TenantLeaseResource[];

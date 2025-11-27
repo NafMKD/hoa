@@ -141,6 +141,11 @@ export function UserDetail() {
     variant = "destructive";
   }
 
+  const ownedCount = user.owned_units?.length ?? 0;
+  const rentedCount = user.rented_units?.length ?? 0;
+  const totalUnits = ownedCount + rentedCount;
+  const leasesCount = user.leases?.length ?? 0;
+
   return (
     <>
       <Header fixed>
@@ -162,50 +167,112 @@ export function UserDetail() {
           </Button>
         </div>
 
-        <Card className="shadow-sm border-muted">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-semibold">
-                {user.first_name} {user.last_name}
-              </CardTitle>
-              <Badge variant={variant} className={className}>
-                {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-              </Badge>
-            </div>
-            <CardDescription className="text-muted-foreground">
-              Basic account information and metadata
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-            <div>
-              <p className="text-sm text-muted-foreground">Email</p>
-              <p className="font-medium">{user.email || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Phone</p>
-              <p className="font-medium">{user.phone || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Role</p>
-              <p className="font-medium">{user.role || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Last Login</p>
-              <p className="font-medium">{user.last_login_at || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Created At</p>
-              <p className="font-medium">{user.created_at || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Updated At</p>
-              <p className="font-medium">{user.updated_at || "—"}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <Card className="border-muted shadow-sm">
+          <CardHeader className="space-y-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="flex flex-1 flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <CardTitle className="text-xl font-semibold leading-tight">
+                    {user.first_name} {user.last_name}
+                  </CardTitle>
+                  <Badge variant={variant} className={className}>
+                    {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                  </Badge>
+                  {user.role && (
+                    <Badge variant="outline" className="text-xs">
+                      {user.role}
+                    </Badge>
+                  )}
+                </div>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Basic account information and system activity overview.
+                </CardDescription>
 
+                <div className="mt-2 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Email
+                    </p>
+                    <p className="text-sm font-medium break-all">{user.email || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Phone
+                    </p>
+                    <p className="text-sm font-medium">{user.phone || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      City
+                    </p>
+                    <p className="text-sm font-medium">{user.city || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Sub-city
+                    </p>
+                    <p className="text-sm font-medium">{user.sub_city || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Woreda
+                    </p>
+                    <p className="text-sm font-medium">{user.woreda || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      House Number
+                    </p>
+                    <p className="text-sm font-medium">{user.house_number || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Last login
+                    </p>
+                    <p className="text-sm font-medium">{user.last_login_at || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Created
+                    </p>
+                    <p className="text-sm font-medium">{user.created_at || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Updated
+                    </p>
+                    <p className="text-sm font-medium">{user.updated_at || "—"}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick stats */}
+              <div className="grid w-full max-w-xs grid-cols-2 gap-3 rounded-lg border bg-muted/40 p-3 text-sm md:grid-cols-1">
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Total units
+                  </p>
+                  <p className="text-lg font-semibold">{totalUnits}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {ownedCount} owned · {rentedCount} rented
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Leases
+                  </p>
+                  <p className="text-lg font-semibold">{leasesCount}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Active & historical leases.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+          
         <Tabs defaultValue="units" className="w-full">
-          <TabsList className="flex flex-wrap gap-2">
+          <TabsList className="flex flex-wrap gap-2 w-full">
             <TabsTrigger value="units">Units</TabsTrigger>
             <TabsTrigger value="leases">Leases</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
@@ -221,6 +288,8 @@ export function UserDetail() {
           </TabsList>
 
           <TabsContent value="units" className="mt-6 space-y-8">
+            {/* split the two grid */}
+            <div className="grid gap-8 md:grid-cols-2">
             {/* Owned Units */}
             <section>
               <h2 className="text-lg font-semibold mb-3">Owned Units</h2>
@@ -264,8 +333,6 @@ export function UserDetail() {
               )}
             </section>
 
-            <Separator />
-
             {/* Rented Units */}
             <section>
               <h2 className="text-lg font-semibold mb-3">Rented Units</h2>
@@ -308,6 +375,7 @@ export function UserDetail() {
                 </p>
               )}
             </section>
+            </div>
           </TabsContent>
 
           <TabsContent value="leases" className="mt-6 space-y-4">

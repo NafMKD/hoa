@@ -21,6 +21,10 @@ class UserResource extends JsonResource
             'phone'         => $this->phone,
             'email'         => $this->email,
             'role'          => $this->role,
+            'city'          => $this->city,
+            'sub_city'      => $this->sub_city,
+            'woreda'        => $this->woreda,
+            'house_number'  => $this->house_number,
             'status'        => $this->status,
             'id_file'       => $this->whenLoaded('idFile', function () {
                 return new DocumentResource($this->idFile);

@@ -30,6 +30,10 @@ const userSchema = z.object({
       "Phone number must start with 0 and be exactly 10 digits"
     ),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
+  city: z.string().optional().or(z.literal("")),
+  sub_city: z.string().optional().or(z.literal("")),
+  woreda: z.string().optional().or(z.literal("")),
+  house_number: z.string().optional().or(z.literal("")),
   role: z.enum([
     "admin",
     "accountant",
@@ -57,6 +61,10 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
         phone: user.phone as string,  
         email: user.email ?? "",  
         role: user.role as FormValues["role"],
+        city: user.city as string ?? "",
+        sub_city: user.sub_city as string ?? "",
+        woreda: user.woreda as string ?? "",
+        house_number: user.house_number as string ?? "",
       },
   });
 
@@ -66,6 +74,7 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
     try {
       setIsSubmitting(true);
       const formData = new FormData();
+      formData.append("_method", "PUT");
 
       for (const [key, value] of Object.entries(values)) {
         const originalValue = (user as any)[key];
@@ -74,13 +83,13 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
           key === "id_file" &&
           value instanceof FileList &&
           value.length > 0
-        ) {
+        ) {          
           formData.append("id_file", value[0]);
         } else if (value !== undefined && value !== originalValue) {
             if (key !== "id_file") formData.append(key, value as string);
         }
       }
-
+      
       await updateUser(user.id, formData);
 
       toast.success("User updated successfully!", {
@@ -163,6 +172,54 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
                 {form.formState.errors.email.message}
               </p>
             )}
+          </div>
+
+          <div className="flex items-start gap-4">
+            {/* City */}
+            <div className="flex flex-col gap-2 basis-1/2">
+              <Label htmlFor="city">City</Label>
+              <Input id="city" {...form.register("city")} />
+              {form.formState.errors.city && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.city.message}
+                </p>
+              )}
+            </div>
+
+            {/* Sub City */}
+            <div className="flex flex-col gap-2 basis-1/2">
+              <Label htmlFor="sub_city">Sub City</Label>
+              <Input id="sub_city" {...form.register("sub_city")} />
+              {form.formState.errors.sub_city && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.sub_city.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4">
+            {/* Woreda */}
+            <div className="flex flex-col gap-2 basis-1/2">
+              <Label htmlFor="woreda">Woreda</Label>
+              <Input id="woreda" {...form.register("woreda")} />
+              {form.formState.errors.woreda && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.woreda.message}
+                </p>
+              )}
+            </div>
+
+            {/* House Number */}
+            <div className="flex flex-col gap-2 basis-1/2">
+              <Label htmlFor="house_number">House Number</Label>
+              <Input id="house_number" {...form.register("house_number")} />
+              {form.formState.errors.house_number && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.house_number.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex items-start gap-4">

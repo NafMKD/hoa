@@ -48,8 +48,8 @@ class UserPolicy
      */
     public function delete(User $authUser): bool
     {
-        $roles  = array_slice(Controller::_ROLES, 0, 3);
-        return $authUser->hasRole($roles);
+        // Only admin can delete
+        return $authUser->hasRole(Controller::_ROLES[0]);
     }
 
     /**

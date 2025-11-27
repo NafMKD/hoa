@@ -13,8 +13,8 @@ class BuildingPolicy
      */
     public function viewAny(User $authUser): bool
     {
-        // Only admin can view all buildings
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -22,8 +22,8 @@ class BuildingPolicy
      */
     public function view(User $authUser): bool
     {
-        // Admin can view any building
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -31,8 +31,8 @@ class BuildingPolicy
      */
     public function create(User $authUser): bool
     {
-        // Only admin can create new buildings
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**

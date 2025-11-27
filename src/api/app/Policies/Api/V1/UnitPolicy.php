@@ -13,7 +13,8 @@ class UnitPolicy
      */
     public function viewAny(User $authUser): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -21,7 +22,8 @@ class UnitPolicy
      */
     public function view(User $authUser): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -29,7 +31,8 @@ class UnitPolicy
      */
     public function create(User $authUser): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -37,7 +40,8 @@ class UnitPolicy
      */
     public function update(User $authUser): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**

@@ -32,8 +32,6 @@ class UnitResource extends JsonResource
             'isRentable'       => $this->isRentable,
             'currentLease'     => $this->whenLoaded('currentLease'),
             'leases'           => $this->whenLoaded('leases'),
-            'invoices'         => $this->whenLoaded('invoices'),
-            'vehicles'         => $this->whenLoaded('vehicles'),
             'created_at'       => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),
             'updated_at'       => \Carbon\Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];

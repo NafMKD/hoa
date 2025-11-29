@@ -6,36 +6,72 @@ use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
 use App\Models\UnitOwner;
 use App\Models\Document;
+use App\Models\Unit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UnitOwnerRepository
 {
+    protected DocumentRepository $documentRepository;
+
+    public function __construct(DocumentRepository $documentRepository)
+    {
+        $this->documentRepository = $documentRepository;
+    }
+
     /**
      * Create a new unit owner.
      *
+     * @param Unit $unit
      * @param array<string, mixed> $data
      * @return UnitOwner
      * @throws RepositoryException
      */
-    public function create(array $data): UnitOwner
+    public function create(unit $unit, array $data): UnitOwner
     {
         DB::beginTransaction();
 
         try {
             // Handle ownership document upload
             if (isset($data['ownership_file']) && $data['ownership_file'] instanceof UploadedFile) {
-                $data['ownership_file_id'] = $this->uploadOwnershipDocument($data['ownership_file']);
+                $document = $this->documentRepository->create(
+                    $data['ownership_file'],
+                    Controller::_DOCUMENT_TYPES[1], // ownership_files
+                );
+
+                $data['ownership_file_id'] = $document->id;
+            }
+            
+            unset($data['ownership_file']);
+
+            // Deactivate current owner if exists
+            if ($unit->currentOwner) {
+                if ($unit->currentOwner->user_id == $data['user_id'] && $unit->currentOwner->status === 'active') {
+                    throw new RepositoryException('The specified user is already the active owner of this unit.');
+                }
+                $currentOwner = $unit->currentOwner;
+                $deactivation = [
+                    'status' => 'inactive',
+                    'updated_by' => Auth::id(),
+                ];
+                if ($currentOwner->end_date === null || $currentOwner->end_date->isFuture()) {
+                    $deactivation['end_date'] = now();
+                }
+                $currentOwner->update($deactivation);
+                $currentOwner->save();
             }
 
-            $owner = UnitOwner::create($data);
-
+            $owner = $unit->owners()->create($data);
+            
             DB::commit();
             return $owner;
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error('Unit owner creation failed: ' . $e->getMessage());
+            if ($e instanceof RepositoryException) throw $e;
             throw new RepositoryException('Failed to create unit owner.');
         }
     }
@@ -51,36 +87,13 @@ class UnitOwnerRepository
     {
         return DB::transaction(function () use ($owner) {
             // Delete ownership document if exists
-            if ($owner->document && Storage::disk('public')->exists($owner->document->file_path)) {
-                Storage::disk('public')->delete($owner->document->file_path);
-                $owner->document->delete();
+            if ($owner->document) {
+                $this->documentRepository->delete($owner->document);
             }
 
             // Note: Soft delete the owner record
             return $owner->delete();
         });
-    }
-
-    /**
-     * Upload the ownership document.
-     *
-     * @param UploadedFile $file
-     * @return int
-     */
-    private function uploadOwnershipDocument(UploadedFile $file): int
-    {
-        $path = $file->store(Controller::_DOCUMENT_TYPES[1], 'public');
-
-        $document = Document::create([
-            'file_path' => $path,
-            'file_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getClientMimeType(),
-            'file_size' => $file->getSize(),
-            'category'  => Controller::_DOCUMENT_TYPES[1],
-            'created_by' => Auth::id(),
-        ]);
-
-        return $document->id;
     }
 
     /**
@@ -120,6 +133,7 @@ class UnitOwnerRepository
             return $owner;
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error('Unit owner deactivation failed: ' . $e->getMessage());
             throw new RepositoryException('Failed to deactivate unit owner.');
         }
     }

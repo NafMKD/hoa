@@ -68,12 +68,9 @@ class UnitRepository
         DB::beginTransaction();
 
         try {
-            if (isset($data['ownership_file_id']) && $data['ownership_file_id'] instanceof UploadedFile) {
-                $data['ownership_file_id'] = $this->uploadOwnershipFile($data['ownership_file_id']);
-            }
 
             if (!isset($data['status'])) {
-                $data['status'] = 'owner_occupied';
+                $data['status'] = 'vacant';
             }
 
             $unit = Unit::create($data);
@@ -98,16 +95,6 @@ class UnitRepository
         DB::beginTransaction();
 
         try {
-            if (isset($data['ownership_file_id']) && $data['ownership_file_id'] instanceof UploadedFile) {
-                // Delete old ownership file
-                if ($unit->ownershipFile && Storage::disk('public')->exists($unit->ownershipFile->file_path)) {
-                    Storage::disk('public')->delete($unit->ownershipFile->file_path);
-                    $unit->ownershipFile->delete();
-                }
-
-                $data['ownership_file_id'] = $this->uploadOwnershipFile($data['ownership_file_id']);
-            }
-
             $unit->update($data);
 
             DB::commit();
@@ -127,36 +114,10 @@ class UnitRepository
     public function delete(Unit $unit): ?bool
     {
         return DB::transaction(function () use ($unit) {
-            // Delete ownership file if exists
-            if ($unit->ownershipFile && Storage::disk('public')->exists($unit->ownershipFile->file_path)) {
-                Storage::disk('public')->delete($unit->ownershipFile->file_path);
-                $unit->ownershipFile->delete();
-            }
 
             // TODO: Handle related entities (e.g., leases, tenants) 
 
             return $unit->delete();
         });
-    }
-
-    /**
-     * Handle uploading the ownership file.
-     * 
-     * @param UploadedFile $file
-     * @return int
-     */
-    private function uploadOwnershipFile(UploadedFile $file): int
-    {
-        $path = $file->store(Controller::_DOCUMENT_TYPES[1], 'public');
-
-        $document = Document::create([
-            'file_path' => $path,
-            'file_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getClientMimeType(),
-            'file_size' => $file->getSize(),
-            'category'  => Controller::_DOCUMENT_TYPES[1],
-        ]);
-
-        return $document->id;
     }
 }

@@ -61,6 +61,8 @@ class UnitController extends Controller
 
             $units = $this->units->all($perPage, $filters);
 
+            $units->load(['currentOwner']);
+            
             return UnitResource::collection($units);
         } catch (AuthorizationException $e) {
             return response()->json([
@@ -344,16 +346,16 @@ class UnitController extends Controller
      * Create a unit owner.
      *
      * @param Request $request
+     * @param Unit $unit
      * @return JsonResponse
      */
-    public function storeUnitOwner(Request $request): JsonResponse
+    public function storeUnitOwner(Request $request, Unit $unit): JsonResponse
     {
         try {
             $this->authorize('create', UnitOwner::class);
 
             $validated = $request->validate([
-                'unit_id'             => ['required', 'integer', 'exists:units,id'],
-                'user_id'             => ['required', 'integer', 'exists:users,id', new UniqueUnitOwner()],
+                'user_id'             => ['required', 'exists:users,id', new UniqueUnitOwner($unit->id)],
                 'start_date'          => ['required', 'date'],
                 'end_date'            => ['nullable', 'date', 'after_or_equal:start_date'],
                 'ownership_file'      => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:' . self::_MAX_FILE_SIZE],
@@ -361,7 +363,7 @@ class UnitController extends Controller
 
             $validated['created_by'] = Auth::id();
 
-            $owner = $this->owners->create($validated);
+            $owner = $this->owners->create($unit, $validated); 
 
             return response()->json(new UnitOwnerResource($owner), 201);
         } catch (AuthorizationException) {

@@ -127,4 +127,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(AuditLog::class, 'actor_user_id');
     }
+
+    /**
+     * Get the units owned by the user.
+     * 
+     * @return HasMany
+     */
+    public function ownedUnits(): HasMany
+    {
+        return $this->hasMany(UnitOwner::class, 'user_id');
+    }
 }

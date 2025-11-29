@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 class UnitOwner extends Model
 {
@@ -35,8 +34,8 @@ class UnitOwner extends Model
     protected function casts(): array
     {
         return [
-            'start_date' => Carbon::class,
-            'end_date' => Carbon::class,
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
         ];
     }
 
@@ -57,7 +56,7 @@ class UnitOwner extends Model
      */
     public function unit(): BelongsTo
     {
-        return $this->belongsTo(Unit::class);
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 
     /**

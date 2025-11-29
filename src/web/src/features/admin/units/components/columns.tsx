@@ -76,9 +76,11 @@ export const columns: ColumnDef<Unit>[] = [
     id: "actions",
     cell: ({ row, table }) => {
       const unit = row.original;
-      const { setEditUnit, setIsEditOpen } = table.options.meta as {
+      const { setEditUnit, setIsEditOpen, setAddOwnership, setIsOwnershipOpen } = table.options.meta as {
         setEditUnit: React.Dispatch<React.SetStateAction<Unit | null>>;
         setIsEditOpen: React.Dispatch<React.SetStateAction<boolean>>;
+        setAddOwnership: React.Dispatch<React.SetStateAction<Unit | null>>;
+        setIsOwnershipOpen: React.Dispatch<React.SetStateAction<boolean>>;
       };
 
       return (
@@ -115,6 +117,15 @@ export const columns: ColumnDef<Unit>[] = [
               </DropdownMenuItem>
             )}
 
+            <DropdownMenuItem
+              onClick={() => {
+                setIsOwnershipOpen(true);
+                setAddOwnership(unit);
+              }}
+            >
+              {unit.currentOwner ? "Change Owner" : "Add Owner"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator /> 
             <DropdownMenuItem
               onClick={() => {
                 setEditUnit(unit);

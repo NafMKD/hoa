@@ -11,6 +11,7 @@ export type User = {
   id: string | number;
   first_name: string;
   last_name: string;
+  full_name: string;
   phone: string | null;
   email: string;
   role: UserRole;
@@ -29,6 +30,10 @@ export type User = {
   created_at: string;
   updated_at: string;
 };
+
+export type UserSelectOption = {
+  data: User[];
+}
 
 export type IdNamePair = {
   id: string | number;
@@ -135,15 +140,17 @@ export type Unit = {
   building?: IdNamePair; 
   name: string;
   floor_number: number | null;
-  owner?: User; 
+  owners?: User[]; 
+  currentOwner?: User;
   unit_type: string;
   type_name: string;
   size_m2: number | null;
   status: string;
+  status_name: string;
   isRentable: boolean;
   ownership_file?: Document; 
-  leases?: TenantLeaseResource[]; 
-  tenant?: User; 
+  currentLease?: TenantLeaseResource;
+  leases?: TenantLeaseResource[];
   created_at: string;
   updated_at: string;
 };
@@ -164,3 +171,16 @@ export type UnitFormData = {
   unit_statuses: string[] | null;
   data: IdNamePair[];
 };
+
+export type UnitOwnership = {
+  id: string | number;
+  unit?: UnitResource;
+  owner?: User;
+  ownership_document?: Document;
+  start_date: string;
+  end_date: string | null;
+  created_by?: User;
+  updated_by?: User;
+  created_at: string;
+  updated_at: string;
+}

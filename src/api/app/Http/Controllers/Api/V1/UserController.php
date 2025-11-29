@@ -10,6 +10,7 @@ use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -59,11 +60,11 @@ class UserController extends Controller
      * filtered by role if provided.
      * 
      * @param  Request  $request
-     * @return JsonResponse
+     * @return AnonymousResourceCollection|JsonResponse
      */
-    public function search(Request $request): JsonResponse
+    public function search(Request $request): AnonymousResourceCollection|JsonResponse
     {
-        try {
+        try {            
             $this->authorize('viewAny', User::class);
 
             $term = $request->query('term');
@@ -74,7 +75,7 @@ class UserController extends Controller
 
             $users = $this->users->search($term, $filters);
 
-            return response()->json($users);
+            return UserResource::collection($users);
         } catch (AuthorizationException $e) {
             return response()->json([
                 'status' => self::_ERROR,

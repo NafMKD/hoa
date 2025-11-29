@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Policies;
+namespace App\Policies\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\UnitOwner;
@@ -13,7 +13,8 @@ class UnitOwnerPolicy
      */
     public function viewAny(User $authUser): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -29,7 +30,8 @@ class UnitOwnerPolicy
      */
     public function view(User $authUser, UnitOwner $lease): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]) || $lease->created_by === $authUser->id;
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -37,7 +39,8 @@ class UnitOwnerPolicy
      */
     public function create(User $authUser): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]);
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**
@@ -45,7 +48,8 @@ class UnitOwnerPolicy
      */
     public function update(User $authUser, UnitOwner $lease): bool
     {
-        return $authUser->hasRole(Controller::_ROLES[0]) || $lease->created_by === $authUser->id;
+        $roles  = array_slice(Controller::_ROLES, 0, 3);
+        return $authUser->hasRole($roles);
     }
 
     /**

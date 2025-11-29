@@ -100,7 +100,7 @@ class Unit extends Model
      */
     public function owners(): HasMany
     {
-        return $this->hasMany(UnitOwner::class);
+        return $this->hasMany(UnitOwner::class, 'unit_id');
     }
 
     /**
@@ -110,6 +110,6 @@ class Unit extends Model
      */
     public function currentOwner(): HasOne
     {
-        return $this->hasOne(UnitOwner::class)->where('status', 'active');
+        return $this->hasOne(UnitOwner::class, 'unit_id')->where('status', 'active');
     }
 }

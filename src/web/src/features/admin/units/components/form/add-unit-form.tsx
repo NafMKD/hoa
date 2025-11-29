@@ -58,7 +58,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
     floor_number: z.coerce
       .number()
       .int()
-      .min(0, "Floor number must be at least 0"),
+      .min(-2, "Floor number must be at least -2"),
     unit_type: z
       .enum(
         unitTypes.length > 0
@@ -248,7 +248,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
               <Input
                 id="floor_number"
                 type="number"
-                min="0"
+                min="-2"
                 {...form.register("floor_number", { valueAsNumber: true })}
               />
               {form.formState.errors.floor_number && (

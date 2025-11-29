@@ -86,7 +86,7 @@ class UnitController extends Controller
             $data = $request->validate([
                 'building_id'      => ['required', 'exists:buildings,id'],
                 'name'             => ['required', 'string', 'max:255', new UniqueUnitName()],
-                'floor_number'     => ['required', 'integer', 'min:0'],
+                'floor_number'     => ['required', 'integer', 'min:-2'],
                 'unit_type'        => ['required', 'string', Rule::in(self::_UNIT_TYPES)],
                 'size_m2'          => ['nullable', 'numeric', 'min:0'],
                 'status'           => ['nullable', 'string', Rule::in(self::_UNIT_STATUSES)],
@@ -114,7 +114,17 @@ class UnitController extends Controller
         try {
             $this->authorize('view', $unit);
 
-            $unit->load(['building', 'owners', 'leases', 'currentOwner', 'currentLease']);
+            $unit->load([
+                'building', 
+                'owners', 
+                'owners.owner', 
+                'owners.document',
+                'currentOwner', 
+                'currentOwner.owner', 
+                'currentOwner.document', 
+                'leases', 
+                'currentLease',
+            ]);
 
             return response()->json(new UnitResource($unit));
         } catch (AuthorizationException $e) {

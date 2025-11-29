@@ -103,6 +103,7 @@ export type DocumentTemplatePaginatedResponse = {
 
 export type Document = {
   id: string | number;
+  url: string;
   file_path: string;
   file_name : string;
   mime_type : string;
@@ -140,15 +141,15 @@ export type Unit = {
   building?: IdNamePair; 
   name: string;
   floor_number: number | null;
-  owners?: User[]; 
-  currentOwner?: User;
+  floor_name?: string;
+  owners?: UnitOwnership[]; 
+  currentOwner?: UnitOwnership;
   unit_type: string;
   type_name: string;
   size_m2: number | null;
   status: string;
   status_name: string;
   isRentable: boolean;
-  ownership_file?: Document; 
   currentLease?: TenantLeaseResource;
   leases?: TenantLeaseResource[];
   created_at: string;

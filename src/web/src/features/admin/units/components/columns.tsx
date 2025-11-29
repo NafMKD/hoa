@@ -55,7 +55,7 @@ export const columns: ColumnDef<Unit>[] = [
     ),
   },
   {
-    accessorKey: "floor_number",
+    accessorKey: "floor_name",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} label="Floor" />
     ),

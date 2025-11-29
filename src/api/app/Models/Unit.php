@@ -59,6 +59,31 @@ class Unit extends Model
     }
 
     /**
+     * Get floor name
+     * 
+     * @return string
+     */
+    public function getFloorNameAttribute(): string
+    {
+        switch ($this->floor_number) {
+            case -2:
+                return 'Basement 1';
+            case -1:
+                return 'Basement';
+            case 0:
+                return 'Ground Floor';
+            case 1:
+                return '1st Floor';
+            case 2:
+                return '2nd Floor';
+            case 3:
+                return '3rd Floor';
+            default:
+                return $this->floor_number . 'th Floor';
+        }
+    }
+
+    /**
      * Get if the unit is rentable
      * 
      * @return bool
@@ -80,7 +105,7 @@ class Unit extends Model
      */
     public function leases(): HasMany
     {
-        return $this->hasMany(UnitLease::class);
+        return $this->hasMany(UnitLease::class)->latest();
     }
 
     /**
@@ -100,7 +125,7 @@ class Unit extends Model
      */
     public function owners(): HasMany
     {
-        return $this->hasMany(UnitOwner::class, 'unit_id');
+        return $this->hasMany(UnitOwner::class, 'unit_id')->latest();
     }
 
     /**

@@ -92,9 +92,7 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
       
       await updateUser(user.id, formData);
 
-      toast.success("User updated successfully!", {
-        position: "top-right",
-      });
+      toast.success("User updated successfully!");
       onSuccess?.();
     } catch (error) {
       const err = error as ApiError;
@@ -109,9 +107,7 @@ export function EditUserForm({ user, onSuccess }: EditUserFormProps) {
           });
         });
       } else {
-        toast.error(err.message || "Failed to update user", {
-          position: "top-right",
-        });
+        toast.error(err.message || "Failed to update user");
       }
     } finally {
       setIsSubmitting(false);

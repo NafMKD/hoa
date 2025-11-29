@@ -57,9 +57,7 @@ export function OwnershipForm({ unitId, onSuccess }: OwnershipFormProps) {
 
       await createOwnership(unitId, formData);
 
-      toast.success("Ownership created successfully", {
-        position: "top-right",
-      });
+      toast.success("Ownership created successfully");
       reset();
       onSuccess?.();
     } catch (error) {
@@ -68,19 +66,13 @@ export function OwnershipForm({ unitId, onSuccess }: OwnershipFormProps) {
       if (err.status === 422 && err.data?.errors) {
         Object.entries(err.data.errors).forEach(([field, messages]) => {
           const msg = Array.isArray(messages) ? messages[0] : messages;
-          if (field === "unit_id") {
-            toast.error(msg as string, { position: "top-right" });
-            return;
-          }
           setError(field as keyof FormValues, {
             type: "server",
             message: msg as string,
           });
         });
       } else {
-        toast.error(err.message || "Failed to create ownership", {
-          position: "top-right",
-        });
+        toast.error(err.message || "Failed to create ownership");
       }
     }
   };

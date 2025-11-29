@@ -64,9 +64,7 @@ export function AddDocumentTemplateForm({
 
       await createDocumentTemplate(formData);
 
-      toast.success("Document Template created successfully!", {
-        position: "top-right",
-      });
+      toast.success("Document Template created successfully!");
 
       onSuccess?.();
     } catch (error) {
@@ -84,9 +82,7 @@ export function AddDocumentTemplateForm({
           });
         });
       } else {
-        toast.error(err.message || "Failed to create template", {
-          position: "top-right",
-        });
+        toast.error(err.message || "Failed to create template");
       }
     } finally {
       setIsSubmitting(false);

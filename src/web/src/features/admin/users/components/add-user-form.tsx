@@ -75,9 +75,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
       }
 
       await createUser(formData);
-      toast.success("User added successfully!", {
-        position: "top-right",
-      });
+      toast.success("User added successfully!");
       onSuccess?.();
     } catch (error) {
       const err = error as ApiError;
@@ -93,9 +91,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
           });
         });
       } else {
-        toast.error(err.message || "Failed to add user", {
-          position: "top-right",
-        });
+        toast.error(err.message || "Failed to add user");
       }
     } finally {
       setIsSubmitting(false);

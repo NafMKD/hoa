@@ -127,9 +127,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
           });
         });
       } else {
-        toast.error(err.message || "Failed to add unit", {
-          position: "top-right",
-        });
+        toast.error(err.message || "Failed to add unit");
       }
     } finally {
       setIsSubmitting(false);

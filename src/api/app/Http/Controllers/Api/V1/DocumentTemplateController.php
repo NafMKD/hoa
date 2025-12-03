@@ -113,8 +113,6 @@ class DocumentTemplateController extends Controller
                 'message' => $e->getMessage(),
             ], 400);
         } catch (\Exception $e) {
-            // Log the exception 
-            Log::error('Error creating document template: ' . $e->getMessage());
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNKNOWN_ERROR,

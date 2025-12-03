@@ -62,13 +62,23 @@ class UnitController extends Controller
             $units = $this->units->all($perPage, $filters);
 
             $units->load(['currentOwner']);
-            
+
             return UnitResource::collection($units);
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -95,11 +105,28 @@ class UnitController extends Controller
             $unit = $this->units->create($data);
 
             return response()->json(new UnitResource($unit), 201);
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (ValidationException $e) {
+            // Return validation errors in array format
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -115,23 +142,33 @@ class UnitController extends Controller
             $this->authorize('view', $unit);
 
             $unit->load([
-                'building', 
-                'owners', 
-                'owners.owner', 
+                'building',
+                'owners',
+                'owners.owner',
                 'owners.document',
-                'currentOwner', 
-                'currentOwner.owner', 
-                'currentOwner.document', 
-                'leases', 
+                'currentOwner',
+                'currentOwner.owner',
+                'currentOwner.document',
+                'leases',
                 'currentLease',
             ]);
 
             return response()->json(new UnitResource($unit));
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -159,11 +196,28 @@ class UnitController extends Controller
             $updated = $this->units->update($unit, $data);
 
             return response()->json(new UnitResource($updated));
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (ValidationException $e) {
+            // Return validation errors in array format
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -184,11 +238,21 @@ class UnitController extends Controller
                 'status' => self::_SUCCESS,
                 'message' => 'Unit deleted successfully',
             ]);
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -373,7 +437,7 @@ class UnitController extends Controller
 
             $validated['created_by'] = Auth::id();
 
-            $owner = $this->owners->create($unit, $validated); 
+            $owner = $this->owners->create($unit, $validated);
 
             return response()->json(new UnitOwnerResource($owner), 201);
         } catch (AuthorizationException) {
@@ -458,6 +522,50 @@ class UnitController extends Controller
             ], 403);
         } catch (\Exception $e) {
             Log::error('Error deactivating unit owner: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Change status of the unit
+     * 
+     * @param Request $request
+     * @param Unit $unit
+     * @return JsonResponse
+     */
+    public function changeUnitStatus(Request $request, Unit $unit): JsonResponse
+    {
+        try {
+            $this->authorize('update', $unit);
+
+            $data = $request->validate([
+                'status' => ['required', 'string', Rule::in(self::_UNIT_STATUSES)],
+            ]);
+
+            $updated = $this->units->changeStatus($unit, $data['status']);
+
+            return response()->json(new UnitResource($updated));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (ValidationException $e) {
+            // Return validation errors in array format
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNKNOWN_ERROR,

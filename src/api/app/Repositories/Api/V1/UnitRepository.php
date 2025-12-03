@@ -8,9 +8,7 @@ use App\Models\Unit;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Document;
+use Illuminate\Support\Facades\Log;
 
 class UnitRepository
 {
@@ -119,5 +117,45 @@ class UnitRepository
 
             return $unit->delete();
         });
+    }
+    
+
+    /**
+     * Change the status of a unit.
+     * 
+     * @param Unit $unit
+     * @param string $status
+     * @return Unit
+     * @throws RepositoryException
+     */
+    public function changeStatus(Unit $unit, string $status): Unit
+    {
+        // check if the status is `owner_occupied` and the unit doesn't have an owner 
+        if ($status === Controller::_UNIT_STATUSES[1] && !$unit->currentOwner) {
+            throw new RepositoryException('Cannot change status to owner occupied without an assigned owner.');
+        }
+
+        // check if the status is `rented` and the unit doesn't have an active lease
+        if ($status === Controller::_UNIT_STATUSES[0] && !$unit->currentLease) {
+            throw new RepositoryException('Cannot change status to rented without an active lease.');
+        }
+
+        // check if the unit status is `rented` and have an active lease
+        if ($unit->status = Controller::_UNIT_STATUSES[0] && $unit->currentLease) {
+            throw new RepositoryException('Cannot change status while there is an active lease.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $unit->status = $status;
+            $unit->save();
+
+            DB::commit();
+            return $unit;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Failed to change unit status: ' . $e->getMessage());
+            throw new RepositoryException('Failed to change unit status: ' . $e->getMessage());
+        }
     }
 }

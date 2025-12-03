@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
+import type { ApiError } from "@/types/api-error";
 import {
   Card,
   CardContent,
@@ -11,13 +12,18 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchUnitDetail } from "./lib/units";
+import { fetchUnitDetail, changeUnitStatus } from "./lib/units";
 import type { Unit } from "@/types/types";
 import { Link, useParams } from "@tanstack/react-router";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { IconArrowLeft, IconArrowLeftCircle, IconFileText, IconEye } from "@tabler/icons-react";
+import {
+  IconArrowLeft,
+  IconArrowLeftCircle,
+  IconFileText,
+  IconEye,
+} from "@tabler/icons-react";
 import {
   Table,
   TableBody,
@@ -34,12 +40,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 // Simple helper to guess file type by extension
 function getFileType(url?: string | null): "image" | "pdf" | "unknown" {
   if (!url) return "unknown";
   const lower = url.toLowerCase();
-  if (lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".webp")) {
+  if (
+    lower.endsWith(".png") ||
+    lower.endsWith(".jpg") ||
+    lower.endsWith(".jpeg") ||
+    lower.endsWith(".webp")
+  ) {
     return "image";
   }
   if (lower.endsWith(".pdf")) {
@@ -54,10 +66,14 @@ type PreviewFile = {
 };
 
 export function UnitDetail() {
-  const { unitId } = useParams({ from: "/_authenticated/admin/units/$unitId/" });
+  const { unitId } = useParams({
+    from: "/_authenticated/admin/units/$unitId/",
+  });
   const [unit, setUnit] = useState<Unit | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [statusModal, setStatusModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [unitStatus, setUnitStatus] = useState<string>("");
   const [previewFile, setPreviewFile] = useState<PreviewFile | null>(null);
 
   useEffect(() => {
@@ -72,16 +88,9 @@ export function UnitDetail() {
     loadUnit();
   }, [unitId]);
 
-  const owners = useMemo(
-    () =>
-      (unit as any)?.owners ?? [],
-    [unit]
-  );
+  const owners = useMemo(() => (unit as any)?.owners ?? [], [unit]);
 
-  const leases = useMemo(
-    () => unit?.leases ?? [],
-    [unit]
-  );
+  const leases = useMemo(() => unit?.leases ?? [], [unit]);
 
   const ownersCount = owners?.length ?? 0;
   const leasesCount = leases?.length ?? 0;
@@ -89,6 +98,29 @@ export function UnitDetail() {
   const handleOpenPreview = (file: PreviewFile | null) => {
     setPreviewFile(file);
   };
+
+  const handleChangeStatus = async () => {
+    if (!unit) return;
+    if (!unitStatus) {
+      toast.error("Please select a valid status.");
+      return;
+    }
+    try {
+      setIsSaving(true);
+      await changeUnitStatus(unitId, unitStatus);
+      setUnit((prev) => (prev ? { ...prev, status: unitStatus } : prev));
+      setStatusModal(false);
+      toast.success("Unit status updated successfully.");
+    } catch (error: any) {;
+      if (error.status === 400 && error.data) {
+        toast.error(`${error.data?.message}`);
+        return
+      }
+      toast.error("Failed to update unit status.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -173,7 +205,7 @@ export function UnitDetail() {
                     variant="outline"
                     className="text-xs font-medium rounded-full px-2 py-0.5"
                   >
-                    {unit.status}
+                    { unit.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) }
                   </Badge>
                 )}
               </CardTitle>
@@ -194,6 +226,16 @@ export function UnitDetail() {
                 <span className="inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-muted text-xs font-semibold">
                   {leasesCount}
                 </span>
+              </div>
+              <div className="flex items-center gap-1 rounded-full border">
+                <Button
+                  variant="secondary"
+                  className="bg:primary text-white hover:bg-primary/90 rounded-full px-3 py-1"
+                  size="sm"
+                  onClick={() => setStatusModal(true)}
+                >
+                  Change Status
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -254,7 +296,9 @@ export function UnitDetail() {
         {/* --- OWNERS / LEASES TABS (elegant + obvious + functional) --- */}
         <Card className="shadow-sm border-muted/60">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold">Relationships</CardTitle>
+            <CardTitle className="text-lg font-semibold">
+              Relationships
+            </CardTitle>
             <CardDescription>
               Owners and lease history for this unit.
             </CardDescription>
@@ -264,13 +308,19 @@ export function UnitDetail() {
             <Tabs defaultValue="owners" className="w-full">
               <div className="flex flex-col gap-3 border-b pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:inline-flex bg-muted/50">
-                  <TabsTrigger value="owners" className="flex items-center gap-2">
+                  <TabsTrigger
+                    value="owners"
+                    className="flex items-center gap-2"
+                  >
                     <span>Owners</span>
                     <span className="inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-background text-xs font-semibold border">
                       {ownersCount}
                     </span>
                   </TabsTrigger>
-                  <TabsTrigger value="leases" className="flex items-center gap-2">
+                  <TabsTrigger
+                    value="leases"
+                    className="flex items-center gap-2"
+                  >
                     <span>Leases</span>
                     <span className="inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-background text-xs font-semibold border">
                       {leasesCount}
@@ -304,15 +354,22 @@ export function UnitDetail() {
                         <TableHeader className="bg-muted/40 sticky top-0 z-10">
                           <TableRow>
                             <TableHead className="w-[35%]">Name</TableHead>
-                            <TableHead className="w-[18%]">Start date</TableHead>
+                            <TableHead className="w-[18%]">
+                              Start date
+                            </TableHead>
                             <TableHead className="w-[18%]">End date</TableHead>
-                            <TableHead className="w-[15%] text-center">File</TableHead>
+                            <TableHead className="w-[15%] text-center">
+                              File
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {owners.map((unit_ownership: any) => {
-                            const docUrl = unit_ownership.ownership_document?.url || null;
-                            const docName =unit_ownership.ownership_document?.file_name || "Ownership document";
+                            const docUrl =
+                              unit_ownership.ownership_document?.url || null;
+                            const docName =
+                              unit_ownership.ownership_document?.file_name ||
+                              "Ownership document";
 
                             return (
                               <TableRow
@@ -323,12 +380,12 @@ export function UnitDetail() {
                                   {unit_ownership.owner.full_name || "—"}
                                   {unit_ownership.status === "Active" && (
                                     <span className="ml-5">
-                                    <Badge
-                                      variant="secondary"
-                                      className="bg-green-500 text-white dark:bg-green-600"
-                                    >
-                                      {unit_ownership.status}
-                                    </Badge>
+                                      <Badge
+                                        variant="secondary"
+                                        className="bg-green-500 text-white dark:bg-green-600"
+                                      >
+                                        {unit_ownership.status}
+                                      </Badge>
                                     </span>
                                   )}
                                 </TableCell>
@@ -390,10 +447,16 @@ export function UnitDetail() {
                       <Table>
                         <TableHeader className="bg-muted/40 sticky top-0 z-10">
                           <TableRow>
-                            <TableHead className="w-[35%]">Name / Tenant</TableHead>
-                            <TableHead className="w-[18%]">Start date</TableHead>
+                            <TableHead className="w-[35%]">
+                              Name / Tenant
+                            </TableHead>
+                            <TableHead className="w-[18%]">
+                              Start date
+                            </TableHead>
                             <TableHead className="w-[18%]">End date</TableHead>
-                            <TableHead className="w-[15%] text-center">File</TableHead>
+                            <TableHead className="w-[15%] text-center">
+                              File
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -415,7 +478,10 @@ export function UnitDetail() {
                               `Lease #${lease.id}`;
 
                             return (
-                              <TableRow key={lease.id} className="hover:bg-muted/40">
+                              <TableRow
+                                key={lease.id}
+                                className="hover:bg-muted/40"
+                              >
                                 <TableCell className="font-medium">
                                   {displayName}
                                   {lease.status && (
@@ -467,12 +533,19 @@ export function UnitDetail() {
       </Main>
 
       {/* FILE PREVIEW MODAL */}
-      <Dialog open={!!previewFile} onOpenChange={(open) => !open && handleOpenPreview(null)}>
+      <Dialog
+        open={!!previewFile}
+        onOpenChange={(open) => !open && handleOpenPreview(null)}
+      >
         <DialogContent className="max-w-6xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
               <IconFileText size={18} />
-              <span>{previewFile?.title ? ((previewFile.title).split(".")[0]).toUpperCase() : "Document preview"}</span>
+              <span>
+                {previewFile?.title
+                  ? previewFile.title.split(".")[0].toUpperCase()
+                  : "Document preview"}
+              </span>
             </DialogTitle>
             <DialogDescription>
               Preview of the selected document file.
@@ -509,6 +582,38 @@ export function UnitDetail() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Status */}
+      <Dialog open={statusModal} onOpenChange={setStatusModal}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Change Unit Status</DialogTitle>
+            <DialogDescription>
+              Select a new status for this unit.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <select
+              className="w-full border px-3 py-2 rounded-md text-sm"
+              defaultValue={unit.status}
+              onChange={(e) => setUnitStatus(e.target.value)}
+            >
+              <option value="rented">Rented</option>
+              <option value="owner_occupied">Owner Occupied</option>
+              <option value="vacant">Vacant</option>
+            </select>
+
+            <Button
+              disabled={isSaving}
+              className="bg-primary text-white hover:bg-primary/90 w-full"
+              onClick={async () => handleChangeStatus()}
+            >
+              {isSaving ? "Saving…" : "Save"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

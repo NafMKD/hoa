@@ -10,6 +10,9 @@ Route::get('/{unit}', [UnitController::class,  'show'])->name('show');
 Route::put('/{unit}', [UnitController::class,  'update'])->name('update');
 Route::delete('/{unit}', [UnitController::class,  'destroy'])->name('destroy');
 
+// unit status
+Route::post('/{unit}/status', [UnitController::class,  'changeUnitStatus'])->name('status');
+
 // Unit lease
 Route::post('/{unit}/leases', [UnitController::class,  'storeUnitLease'])->name('leases.store');
 Route::delete('/{unit}/leases/{lease}', [UnitController::class,  'destroyUnitLease'])->name('leases.store');

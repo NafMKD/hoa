@@ -21,7 +21,7 @@ class DocumentTemplateResource extends JsonResource
             'category'      => $this->category,
             'sub_category'  => $this->sub_category,
             'name'          => $this->name,
-            'path'          => $this->path ? URL::to(Storage::url($this->path)) : null,
+            'url'           => $this->url ? URL::to(Storage::url($this->path)) : null,
             'placeholders'  => $this->placeholders,
             'description'   => $this->description,
             'version'       => $this->version,

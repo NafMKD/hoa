@@ -78,17 +78,17 @@ export type TenantLeaseResource = {
 
 export type DocumentTemplate = {
   id: string | number;           
-  category: string | number;      
-  sub_category: string | number;  
-  name: string | number;          
-  path: string | number;          
-  placeholders: string | number;  
-  description: string | number;   
+  category: string;      
+  sub_category: string;  
+  name: string;          
+  url: string;          
+  placeholders: string;  
+  description: string;   
   version: string | number;       
-  created_by: string | number;  
-  updated_by: string | number;  
-  created_at: string | number;    
-  updated_at: string | number;    
+  created_by: string;  
+  updated_by: string;  
+  created_at: string;    
+  updated_at: string;    
 };
 
 export type DocumentTemplatePaginatedResponse = {

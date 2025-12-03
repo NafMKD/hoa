@@ -29,6 +29,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -467,12 +468,15 @@ export function UnitDetail() {
 
       {/* FILE PREVIEW MODAL */}
       <Dialog open={!!previewFile} onOpenChange={(open) => !open && handleOpenPreview(null)}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-6xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
               <IconFileText size={18} />
-              <span>{previewFile?.title ?? "Document preview"}</span>
+              <span>{previewFile?.title ? ((previewFile.title).split(".")[0]).toUpperCase() : "Document preview"}</span>
             </DialogTitle>
+            <DialogDescription>
+              Preview of the selected document file.
+            </DialogDescription>
           </DialogHeader>
           {previewFile && (
             <div className="mt-2">

@@ -81,12 +81,13 @@ export type DocumentTemplate = {
   category: string;      
   sub_category: string;  
   name: string;          
-  url: string;          
+  url: string;       
+  pdf_url: string;   
   placeholders: string;  
   description: string;   
   version: string | number;       
-  created_by: string;  
-  updated_by: string;  
+  created_by: User;  
+  updated_by: User;  
   created_at: string;    
   updated_at: string;    
 };

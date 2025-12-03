@@ -8,6 +8,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentTemplateRepository
@@ -71,6 +72,8 @@ class DocumentTemplateRepository
             ]);
 
             DB::commit();
+            // Generate PDF version of the template
+            $this->createPdf($template);
             return $template;
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -254,6 +257,57 @@ class DocumentTemplateRepository
             return $pdfOutputPath;
         } catch (\Throwable $e) {
             throw new RepositoryException('Failed to generate PDF: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create a pdf from the uploaded template and save the path to the template record.
+     * 
+     * @param DocumentTemplate $template
+     * @return DocumentTemplate
+     *  
+     */
+    public function createPdf(DocumentTemplate $template): DocumentTemplate
+    {
+        DB::beginTransaction();
+
+        try {
+            $source = storage_path('app/public/' . $template->path);
+            $pdfOutputName = "{$template->sub_category}_v{$template->version}.pdf";
+            $pdfOutputPath = "template_documents/{$template->category}/{$pdfOutputName}";
+
+            // Load template
+            $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($source);
+
+            // Save to temporary DOCX (required by PhpWord PDF conversion)
+            $tempDocx = tempnam(sys_get_temp_dir(), 'tmp_docx_') . '.docx';
+            $templateProcessor->saveAs($tempDocx);
+
+            // Ensure output folder exists
+            Storage::disk('public')->makeDirectory("template_documents/{$template->category}");
+
+            // Set PDF renderer
+            \PhpOffice\PhpWord\Settings::setPdfRendererName(\PhpOffice\PhpWord\Settings::PDF_RENDERER_DOMPDF);
+            \PhpOffice\PhpWord\Settings::setPdfRendererPath(base_path('vendor/dompdf/dompdf'));
+
+            // Load DOCX and save as PDF
+            $phpWord = \PhpOffice\PhpWord\IOFactory::load($tempDocx);
+            $pdfWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'PDF');
+            $pdfWriter->save(storage_path("app/public/{$pdfOutputPath}"));
+
+            // Delete temporary DOCX
+            unlink($tempDocx);
+
+            // Update template record with pdf path
+            $template->pdf_path = $pdfOutputPath;
+            $template->save();
+
+            DB::commit();
+            return $template;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Error creating PDF from template: ' . $e->getMessage());
+            throw new RepositoryException('Failed to create PDF from template');
         }
     }
 }

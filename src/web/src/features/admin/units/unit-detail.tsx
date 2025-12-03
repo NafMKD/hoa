@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
-import type { ApiError } from "@/types/api-error";
 import {
   Card,
   CardContent,

@@ -66,9 +66,7 @@ export function AddBuildingForm({ onSuccess }: AddBuildingFormProps) {
           });
         });
       } else {
-        toast.error(err.message || "Failed to add building", {
-          position: "top-right",
-        });
+        toast.error(err.message || "Failed to add building");
       }
     } finally {
       setIsSubmitting(false);

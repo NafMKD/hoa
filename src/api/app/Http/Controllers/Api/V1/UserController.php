@@ -10,7 +10,10 @@ use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
+use App\Exceptions\RepositoryException;
+
 
 class UserController extends Controller
 {
@@ -44,13 +47,23 @@ class UserController extends Controller
             $filters = compact('search', 'role', 'status');
 
             $users = $this->users->all($perPage, $filters);
-    
+
             return UserResource::collection($users);
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
-                'message' => self::_UNAUTHORIZED
+                'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -59,9 +72,9 @@ class UserController extends Controller
      * filtered by role if provided.
      * 
      * @param  Request  $request
-     * @return JsonResponse
+     * @return AnonymousResourceCollection|JsonResponse
      */
-    public function search(Request $request): JsonResponse
+    public function search(Request $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $this->authorize('viewAny', User::class);
@@ -74,12 +87,22 @@ class UserController extends Controller
 
             $users = $this->users->search($term, $filters);
 
-            return response()->json($users);
-        } catch (AuthorizationException $e) {
+            return UserResource::collection($users);
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
-                'message' => self::_UNAUTHORIZED
+                'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -102,11 +125,28 @@ class UserController extends Controller
             $user = $this->users->changeStatus($user, $data['status']);
 
             return response()->json(new UserResource($user));
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
-                'message' => self::_UNAUTHORIZED
+                'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (ValidationException $e) {
+            // Return validation errors in array format
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -126,9 +166,9 @@ class UserController extends Controller
                 'phone'      => [
                     'required',
                     'string',
-                    'regex:/^0\d{9}$/', 
+                    'regex:/^0\d{9}$/',
                     'unique:users,phone',
-                ],  
+                ],
                 'email'      => ['nullable', 'email', 'unique:users,email'],
                 'password'   => ['nullable', 'string', 'min:8'],
                 'city'       => ['nullable', 'string', 'max:255'],
@@ -136,22 +176,39 @@ class UserController extends Controller
                 'woreda'     => ['nullable', 'string', 'max:255'],
                 'house_number' => ['nullable', 'string', 'max:50'],
                 'role'       => ['required', 'string', Rule::in(self::_ROLES)],
-                'id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.self::_MAX_FILE_SIZE], 
+                'id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
             ]);
 
             // if password is not provided, generate a random one
             if (empty($data['password'])) {
-                $data['password'] = self::_DEFAULT_PASSWORD; 
+                $data['password'] = self::_DEFAULT_PASSWORD;
             }
-    
+
             $user = $this->users->create($data);
-    
+
             return response()->json(new UserResource($user), 201);
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
-                'message' => self::_UNAUTHORIZED
+                'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (ValidationException $e) {
+            // Return validation errors in array format
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -164,16 +221,26 @@ class UserController extends Controller
     public function show(User $user): JsonResponse
     {
         try {
-            $this->authorize('view', [User::class, $user]); 
+            $this->authorize('view', [User::class, $user]);
 
             $user->load(['idFile']);
-    
+
             return response()->json(new UserResource($user));
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
-                'message' => self::_UNAUTHORIZED
+                'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -188,7 +255,7 @@ class UserController extends Controller
     {
         try {
             $this->authorize('update', [User::class, $user]);
-    
+
             $data = $request->validate([
                 'first_name' => ['sometimes', 'string', 'max:255'],
                 'last_name'  => ['sometimes', 'string', 'max:255'],
@@ -199,17 +266,34 @@ class UserController extends Controller
                 'sub_city'   => ['nullable', 'string', 'max:255'],
                 'woreda'     => ['nullable', 'string', 'max:255'],
                 'role'       => ['sometimes', 'string', Rule::in(self::_ROLES)],
-                'id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.self::_MAX_FILE_SIZE],
+                'id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
             ]);
-    
+
             $updated = $this->users->update($user, $data);
-    
+
             return response()->json(new UserResource($updated));
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
-                'message' => self::_UNAUTHORIZED
+                'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (ValidationException $e) {
+            // Return validation errors in array format
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 
@@ -223,18 +307,28 @@ class UserController extends Controller
     {
         try {
             $this->authorize('delete', User::class);
-    
+
             $this->users->delete($user);
-    
+
             return response()->json([
                 'status' => self::_SUCCESS,
                 'message' => 'User deleted successfully'
             ]);
-        } catch (AuthorizationException $e) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
-                'message' => self::_UNAUTHORIZED
+                'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
         }
     }
 }

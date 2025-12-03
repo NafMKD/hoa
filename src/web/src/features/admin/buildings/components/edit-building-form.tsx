@@ -58,9 +58,7 @@ export function EditBuildingForm({ building, onSuccess }: EditBuildingFormProps)
 
       await updateBuilding(building.id, formData);
 
-      toast.success("Building updated successfully!", {
-        position: "top-right",
-      });
+      toast.success("Building updated successfully!");
       onSuccess?.();
     } catch (error) {
       const err = error as ApiError;
@@ -73,9 +71,7 @@ export function EditBuildingForm({ building, onSuccess }: EditBuildingFormProps)
           });
         });
       } else {
-        toast.error(err.message || "Failed to update building", {
-          position: "top-right",
-        });
+        toast.error(err.message || "Failed to update building");
       }
     } finally {
       setIsSubmitting(false);

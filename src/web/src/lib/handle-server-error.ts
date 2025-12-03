@@ -20,7 +20,5 @@ export function handleServerError(error: unknown) {
     errMsg = error.response?.data.title;
   }
 
-  toast.error(errMsg, {
-    position: "top-right",
-  });
+  toast.error(errMsg);
 }

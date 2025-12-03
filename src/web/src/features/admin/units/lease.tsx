@@ -219,6 +219,8 @@ export function Leases() {
         fd.append("witness_3_full_name", leaseValues.witness_3_full_name);
       if (leaseValues.notes) fd.append("notes", leaseValues.notes);
 
+      console.log("Submitting lease with data:", Array.from(fd.entries()));
+      
       // Submit to API
       await submitLease(fd);
 

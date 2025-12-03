@@ -64,3 +64,11 @@ export const updateUnit = (unitId: string | number, formData: FormData) =>
  */
 export const deleteUnit = (unitId: string | number) =>
   handleApi<void>(api.delete(`/v1/units/${unitId}`));
+
+/**
+ * Change status
+ */
+export const changeUnitStatus = (unitId: string | number, status: string) =>
+  handleApi<Unit>(
+    api.post(`/v1/units/${unitId}/status`, { status: status })
+  );

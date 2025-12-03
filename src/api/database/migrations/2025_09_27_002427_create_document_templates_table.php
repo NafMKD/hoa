@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('sub_category');
             $table->string('name');
             $table->string('path');
+            $table->string('pdf_path')->nullable();
             $table->json('placeholders')->nullable();
             $table->text('description')->nullable();
             $table->unsignedInteger('version')->default(1);

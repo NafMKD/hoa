@@ -30,6 +30,7 @@ import type { Unit } from "@/types/types";
 import { IconPlus } from "@tabler/icons-react";
 import { EditUnitForm } from "./components/form/edit-unit-form";
 import { Spinner } from "@/components/ui/spinner";
+import { OwnershipForm } from "./components/form/ownership-form";
 
 export function Units() {
   const [pagination, setPagination] = React.useState<PaginationState>({
@@ -44,7 +45,9 @@ export function Units() {
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [open, setOpen] = useState(false);
   const [editUnit, setEditUnit] = useState<Unit | null>(null);
+  const [addOwnership, setAddOwnership] = useState<Unit | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isOwnershipOpen, setIsOwnershipOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,7 +76,7 @@ export function Units() {
     getPaginationRowModel: getPaginationRowModel(),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
-    meta: { setEditUnit, setIsEditOpen },
+    meta: { setEditUnit, setIsEditOpen, setAddOwnership, setIsOwnershipOpen },
   });
 
   return (
@@ -168,6 +171,31 @@ export function Units() {
                         setData(res.data);
                         setPageCount(res.meta.last_page);
                       });
+                    }}
+                  />
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <Sheet open={isOwnershipOpen} onOpenChange={setIsOwnershipOpen}>
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-lg overflow-auto"
+            >
+              <SheetHeader>
+                <SheetTitle className="text-center">Add Owner</SheetTitle>
+                <SheetDescription className="text-center">
+                  Assign the unit owner below.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 pb-10">
+                {addOwnership && (
+                  <OwnershipForm
+                    unitId={addOwnership.id as number}
+                    onSuccess={() => {
+                      setIsOwnershipOpen(false);
+                      setAddOwnership(null);
                     }}
                   />
                 )}

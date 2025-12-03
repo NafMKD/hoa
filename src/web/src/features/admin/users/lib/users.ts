@@ -1,5 +1,5 @@
 import api, { handleApi } from "@/lib/api";
-import type { IdNamePair, User, UserPaginatedResponse } from "@/types/types";
+import type { IdNamePair, User, UserPaginatedResponse, UserSelectOption } from "@/types/types";
 
 export const fetchUsers = async (
   page: string,
@@ -51,7 +51,16 @@ export const updateUserStatus = (userId: string, status: string) =>
   handleApi<User>(api.patch(`/v1/users/${userId}/status`, { status }));
 
 export const updateUser = (userID: string | number, data: FormData) =>
-  handleApi<User>(api.put(`/v1/users/${userID}`, data));
+  handleApi<User>(
+    api.post(`/v1/users/${userID}`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  );
 
-export const fetchUserNames = async (): Promise<IdNamePair[]> => 
+export const fetchUserNames = async (): Promise<IdNamePair[]> =>
   handleApi<IdNamePair[]>(api.get(`/v1/users/names/all`));
+
+export const searchUsers = async (query: string): Promise<UserSelectOption> =>
+  handleApi<UserSelectOption>(api.get(`/v1/users/search`, {
+    params: { term: query },
+  }));

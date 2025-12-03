@@ -22,16 +22,25 @@ class UnitResource extends JsonResource
             }),
             'name'             => $this->name,
             'floor_number'     => $this->floor_number,
-            'owners'           => $this->whenLoaded('owners'),
-            'currentOwner'     => $this->whenLoaded('currentOwner'),
+            'floor_name'       => $this->floor_name,
+            'owners'           => $this->whenLoaded('owners', function () {
+                return UnitOwnerResource::collection($this->owners);
+            }),
+            'currentOwner'     => $this->whenLoaded('currentOwner', function () {
+                return new UnitOwnerResource($this->currentOwner);
+            }),
             'unit_type'        => $this->unit_type,
             'type_name'        => $this->type,
             'size_m2'          => $this->size_m2,
             'status'           => $this->status,
             'status_name'      => ucwords(str_replace('_', ' ', $this->status)),
             'isRentable'       => $this->isRentable,
-            'currentLease'     => $this->whenLoaded('currentLease'),
-            'leases'           => $this->whenLoaded('leases'),
+            'currentLease'     => $this->whenLoaded('currentLease', function () {
+                return new UnitLeaseResource($this->currentLease);
+            }),
+            'leases'           => $this->whenLoaded('leases', function () {
+                return UnitLeaseResource::collection($this->leases);
+            }),
             'created_at'       => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),
             'updated_at'       => \Carbon\Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];

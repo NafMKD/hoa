@@ -99,6 +99,8 @@ export function BuildingDetail() {
     );
   }
 
+  const totalUnits = building.units ? building.units.length : 0;
+
   return (
     <>
       <Header fixed>
@@ -120,41 +122,66 @@ export function BuildingDetail() {
           </Button>
         </div>
 
-        <Card className="shadow-sm border-muted">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-semibold">Building - {building.name}</CardTitle>
+        <Card className="border-muted shadow-sm">
+          <CardHeader className="space-y-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="flex flex-1 flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <CardTitle className="text-xl font-semibold leading-tight">
+                      Building - {building.name}
+                  </CardTitle>
+                </div>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Detailed information and management options for this building.
+                </CardDescription>
+                <div className="mt-2 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Address
+                    </p>
+                    <p className="text-sm font-medium break-all">{building.address || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Floors
+                    </p>
+                    <p className="text-sm font-medium break-all">{building.floors || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Units per Floor
+                    </p>
+                    <p className="text-sm font-medium break-all">{building.units_per_floor || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Created At
+                    </p>
+                    <p className="text-sm font-medium break-all">{building.created_at || "—"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Updated At
+                    </p>
+                    <p className="text-sm font-medium break-all">{building.updated_at || "—"}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid w-full max-w-xs grid-cols-2 gap-3 rounded-lg border bg-muted/40 p-3 text-sm md:grid-cols-1">
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Total units
+                  </p>
+                  <p className="text-lg font-semibold">{totalUnits}</p>
+                </div>
+              </div>
             </div>
-            <CardDescription className="text-muted-foreground">
-              Basic building information
-            </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-            <div>
-              <p className="text-sm text-muted-foreground">Address</p>
-              <p className="font-medium">{building.address || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Floors</p>
-              <p className="font-medium">{building.floors || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Units per Floor</p>
-              <p className="font-medium">{building.units_per_floor || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Created At</p>
-              <p className="font-medium">{building.created_at || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Updated At</p>
-              <p className="font-medium">{building.updated_at || "—"}</p>
-            </div>
-          </CardContent>
         </Card>
 
         <Tabs defaultValue="units" className="w-full">
-          <TabsList className="flex flex-wrap gap-2">
+          <TabsList className="flex flex-wrap gap-2 w-full">
             <TabsTrigger value="units">Units</TabsTrigger>
             <TabsTrigger value="note">Note</TabsTrigger>
           </TabsList>

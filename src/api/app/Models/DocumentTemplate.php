@@ -21,6 +21,7 @@ class DocumentTemplate extends Model
         'sub_category',
         'name',
         'path',
+        'pdf_path',
         'placeholders',
         'description',
         'version',

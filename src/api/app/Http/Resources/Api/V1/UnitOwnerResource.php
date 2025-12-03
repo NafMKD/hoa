@@ -25,8 +25,8 @@ class UnitOwnerResource extends JsonResource
             'ownership_document' => $this->whenLoaded('document', function () {
                 return new DocumentResource($this->document);
             }),
-            'start_date'         => $this->start_date,
-            'end_date'           => $this->end_date,
+            'start_date'       => \Carbon\Carbon::parse($this->start_date)->toFormattedDateString(),
+            'end_date'       => $this->end_date ? \Carbon\Carbon::parse($this->end_date)->toFormattedDateString() : null,
             'status'             => ucwords(str_replace('_', ' ', $this->status)),
             'created_by'         => $this->whenLoaded('creator', function () {
                 return new UserResource($this->creator);
@@ -34,8 +34,8 @@ class UnitOwnerResource extends JsonResource
             'updated_by'         => $this->whenLoaded('updater', function () {
                 return new UserResource($this->updater);
             }),
-            'created_at'         => $this->created_at,
-            'updated_at'         => $this->updated_at,
+            'created_at'       => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),
+            'updated_at'       => \Carbon\Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];
     }
 }

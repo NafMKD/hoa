@@ -11,10 +11,16 @@ export type User = {
   id: string | number;
   first_name: string;
   last_name: string;
+  full_name: string;
   phone: string | null;
   email: string;
   role: UserRole;
+  city: string | null;
+  sub_city: string | null;
+  woreda: string | null;
+  house_number: string | null;
   status: string;
+  idFile?: Document;
   owned_units?: UnitResource[];
   rented_units?: UnitResource[];
   leases?: TenantLeaseResource[];
@@ -24,6 +30,10 @@ export type User = {
   created_at: string;
   updated_at: string;
 };
+
+export type UserSelectOption = {
+  data: User[];
+}
 
 export type IdNamePair = {
   id: string | number;
@@ -68,17 +78,18 @@ export type TenantLeaseResource = {
 
 export type DocumentTemplate = {
   id: string | number;           
-  category: string | number;      
-  sub_category: string | number;  
-  name: string | number;          
-  path: string | number;          
-  placeholders: string | number;  
-  description: string | number;   
+  category: string;      
+  sub_category: string;  
+  name: string;          
+  url: string;       
+  pdf_url: string;   
+  placeholders: string;  
+  description: string;   
   version: string | number;       
-  created_by: string | number;  
-  updated_by: string | number;  
-  created_at: string | number;    
-  updated_at: string | number;    
+  created_by: User;  
+  updated_by: User;  
+  created_at: string;    
+  updated_at: string;    
 };
 
 export type DocumentTemplatePaginatedResponse = {
@@ -93,6 +104,7 @@ export type DocumentTemplatePaginatedResponse = {
 
 export type Document = {
   id: string | number;
+  url: string;
   file_path: string;
   file_name : string;
   mime_type : string;
@@ -130,15 +142,17 @@ export type Unit = {
   building?: IdNamePair; 
   name: string;
   floor_number: number | null;
-  owner?: User; 
+  floor_name?: string;
+  owners?: UnitOwnership[]; 
+  currentOwner?: UnitOwnership;
   unit_type: string;
   type_name: string;
   size_m2: number | null;
   status: string;
+  status_name: string;
   isRentable: boolean;
-  ownership_file?: Document; 
-  leases?: TenantLeaseResource[]; 
-  tenant?: User; 
+  currentLease?: TenantLeaseResource;
+  leases?: TenantLeaseResource[];
   created_at: string;
   updated_at: string;
 };
@@ -159,3 +173,16 @@ export type UnitFormData = {
   unit_statuses: string[] | null;
   data: IdNamePair[];
 };
+
+export type UnitOwnership = {
+  id: string | number;
+  unit?: UnitResource;
+  owner?: User;
+  ownership_document?: Document;
+  start_date: string;
+  end_date: string | null;
+  created_by?: User;
+  updated_by?: User;
+  created_at: string;
+  updated_at: string;
+}

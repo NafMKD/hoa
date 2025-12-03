@@ -8,9 +8,7 @@ use App\Models\Unit;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Document;
+use Illuminate\Support\Facades\Log;
 
 class UnitRepository
 {
@@ -68,12 +66,9 @@ class UnitRepository
         DB::beginTransaction();
 
         try {
-            if (isset($data['ownership_file_id']) && $data['ownership_file_id'] instanceof UploadedFile) {
-                $data['ownership_file_id'] = $this->uploadOwnershipFile($data['ownership_file_id']);
-            }
 
             if (!isset($data['status'])) {
-                $data['status'] = 'owner_occupied';
+                $data['status'] = 'vacant';
             }
 
             $unit = Unit::create($data);
@@ -98,16 +93,6 @@ class UnitRepository
         DB::beginTransaction();
 
         try {
-            if (isset($data['ownership_file_id']) && $data['ownership_file_id'] instanceof UploadedFile) {
-                // Delete old ownership file
-                if ($unit->ownershipFile && Storage::disk('public')->exists($unit->ownershipFile->file_path)) {
-                    Storage::disk('public')->delete($unit->ownershipFile->file_path);
-                    $unit->ownershipFile->delete();
-                }
-
-                $data['ownership_file_id'] = $this->uploadOwnershipFile($data['ownership_file_id']);
-            }
-
             $unit->update($data);
 
             DB::commit();
@@ -127,36 +112,50 @@ class UnitRepository
     public function delete(Unit $unit): ?bool
     {
         return DB::transaction(function () use ($unit) {
-            // Delete ownership file if exists
-            if ($unit->ownershipFile && Storage::disk('public')->exists($unit->ownershipFile->file_path)) {
-                Storage::disk('public')->delete($unit->ownershipFile->file_path);
-                $unit->ownershipFile->delete();
-            }
 
             // TODO: Handle related entities (e.g., leases, tenants) 
 
             return $unit->delete();
         });
     }
+    
 
     /**
-     * Handle uploading the ownership file.
+     * Change the status of a unit.
      * 
-     * @param UploadedFile $file
-     * @return int
+     * @param Unit $unit
+     * @param string $status
+     * @return Unit
+     * @throws RepositoryException
      */
-    private function uploadOwnershipFile(UploadedFile $file): int
+    public function changeStatus(Unit $unit, string $status): Unit
     {
-        $path = $file->store(Controller::_DOCUMENT_TYPES[1], 'public');
+        // check if the status is `owner_occupied` and the unit doesn't have an owner 
+        if ($status === Controller::_UNIT_STATUSES[1] && !$unit->currentOwner) {
+            throw new RepositoryException('Cannot change status to owner occupied without an assigned owner.');
+        }
 
-        $document = Document::create([
-            'file_path' => $path,
-            'file_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getClientMimeType(),
-            'file_size' => $file->getSize(),
-            'category'  => Controller::_DOCUMENT_TYPES[1],
-        ]);
+        // check if the status is `rented` and the unit doesn't have an active lease
+        if ($status === Controller::_UNIT_STATUSES[0] && !$unit->currentLease) {
+            throw new RepositoryException('Cannot change status to rented without an active lease.');
+        }
 
-        return $document->id;
+        // check if the unit status is `rented` and have an active lease
+        if ($unit->status = Controller::_UNIT_STATUSES[0] && $unit->currentLease) {
+            throw new RepositoryException('Cannot change status while there is an active lease.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $unit->status = $status;
+            $unit->save();
+
+            DB::commit();
+            return $unit;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Failed to change unit status: ' . $e->getMessage());
+            throw new RepositoryException('Failed to change unit status: ' . $e->getMessage());
+        }
     }
 }

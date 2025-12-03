@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 class UnitLease extends Model
 {
@@ -44,8 +43,8 @@ class UnitLease extends Model
     protected function casts(): array
     {
         return [
-            'lease_start_date' => Carbon::class,
-            'lease_end_date' => Carbon::class,
+            'lease_start_date' => 'datetime',
+            'lease_end_date' => 'datetime',
             'agreement_amount' => 'decimal:2',
         ];
     }

@@ -137,9 +137,7 @@ export function EditUnitForm({ unit, onSuccess }: EditUnitFormProps) {
           });
         });
       } else {
-        toast.error(err.message || "Failed to update unit", {
-          position: "top-right",
-        });
+        toast.error(err.message || "Failed to update unit");
       }
     } finally {
       setIsSubmitting(false);

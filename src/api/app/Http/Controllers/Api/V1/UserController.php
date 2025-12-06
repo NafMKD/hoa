@@ -107,6 +107,79 @@ class UserController extends Controller
     }
 
     /**
+     * Get users for rental roles (homeowner, tenant, representative).
+     * 
+     * @param  Request  $request
+     * @return AnonymousResourceCollection|JsonResponse
+     */
+    public function getUsersByRole(Request $request): AnonymousResourceCollection|JsonResponse
+    {
+        try {
+            $this->authorize('viewAny', User::class);
+            $role = $request->query('role');
+
+            if (!in_array($role, array_slice(self::_ROLES, 3))) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'Invalid role specified. Allowed roles: homeowner, tenant, representative.',
+                ], 400);
+            }
+
+
+            $users = $this->users->getUsersByRole($role);
+
+            return UserResource::collection($users);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Get active users.
+     * 
+     * @param  Request  $request
+     * @return AnonymousResourceCollection|JsonResponse
+     */
+    public function getActiveUsers(Request $request): AnonymousResourceCollection|JsonResponse
+    {
+        try {
+            $this->authorize('viewAny', User::class);
+
+            $users = $this->users->getActiveUsers();
+
+            return UserResource::collection($users);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
      * Change user status (activate/inactive/suspend).
      * 
      * @param  Request  $request

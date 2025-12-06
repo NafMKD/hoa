@@ -1,23 +1,18 @@
-export async function fetchRenters(): Promise<
-  Array<{ id: number; first_name: string; last_name: string; phone?: string }>
-> {
-  // TODO: replace with real API
-  await new Promise((r) => setTimeout(r, 50));
-  return [
-    { id: 101, first_name: "Alem", last_name: "Bekele", phone: "0912345678" },
-    { id: 102, first_name: "Martha", last_name: "Yared", phone: "0911111111" },
-  ];
-}
+import api, { handleApi } from "@/lib/api";
+import type { DocumentTemplatePaginatedResponse } from "@/types/types";
 
-export async function submitLease(
-  formData: FormData
-): Promise<{ pdf_url?: string; lease_id?: number }> {
-  // TODO: replace with real POST to backend
-  // Example:
-  // const res = await fetch("/api/admin/leases", { method: "POST", body: formData });
-  // return await res.json();
-  console.log("Submitting lease with formData:", formData);
-  
-  await new Promise((r) => setTimeout(r, 1200));
-  return { pdf_url: "/dummy/lease.pdf", lease_id: 555 };
-}
+/**
+ * Fetch lease document templates
+ */
+export const fetchLeaseTemplates = () => 
+  handleApi<DocumentTemplatePaginatedResponse[]>(api.get(`/v1/document-templates/all`, { params: { category : 'lease_agreement' }}));
+
+/**
+ * Submit lease agreement for processing
+ */
+export const submitLeaseAgreement = (unitId: string, formData: FormData) =>
+  handleApi(
+    api.post(`/v1/units/${unitId}/leases`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  );

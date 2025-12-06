@@ -3,6 +3,7 @@
 import { z } from "zod";
 import {
   StepLeaseSchema,
+  StepRepresentativeExistingSchema,
   StepRepresentativeSchema,
   StepTenantExistingSchema,
   StepTenantNewSchema,
@@ -20,6 +21,7 @@ export type StepTypeValues = z.infer<typeof StepTypeSchema>;
 export type StepTenantExistingValues = z.infer<typeof StepTenantExistingSchema>;
 export type StepTenantNewValues = z.infer<typeof StepTenantNewSchema>;
 export type StepRepresentativeValues = z.infer<typeof StepRepresentativeSchema>;
+export type StepRepresentativeExistingValues = z.infer<typeof StepRepresentativeExistingSchema>;
 export type StepLeaseValues = z.infer<typeof StepLeaseSchema>;
 
 // Global state values type for the Leases component

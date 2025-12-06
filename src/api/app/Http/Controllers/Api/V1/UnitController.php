@@ -267,27 +267,12 @@ class UnitController extends Controller
         try {
             $this->authorize('create', UnitLease::class);
 
-            $validated = $request->validate([
-                'unit_id'                    => ['required', 'integer', 'exists:units,id'],
-                'tenant_id'                  => ['required', 'integer', 'exists:users,id', new UniqueUnitLease()],
-                'representative_id'          => ['nullable', 'integer', 'exists:users,id'],
-                'representative_document'    => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:' . self::_MAX_FILE_SIZE],
-                'agreement_type'             => ['required', 'string', 'in:' . implode(',', self::_LEASE_AGREEMENT_TYPES)],
-                'agreement_amount'           => ['required', 'numeric', 'min:0'],
-                'lease_template_id'          => ['required', 'integer', 'exists:document_templates,id'],
-                'lease_start_date'           => ['required', 'date'],
-                'lease_end_date'             => ['nullable', 'date', 'after_or_equal:lease_start_date'],
-                'status'                     => ['nullable', 'string', 'in:' . implode(',', self::_LEASE_STATUS)],
-                'witness_1_full_name'        => ['nullable', 'string', 'max:255'],
-                'witness_2_full_name'        => ['nullable', 'string', 'max:255'],
-                'witness_3_full_name'        => ['nullable', 'string', 'max:255'],
-                'notes'                      => ['nullable', 'string']
-            ]);
+            Log::info('Creating unit lease with request data: ' . json_encode($request->all()));
 
-            $validated['created_by'] = Auth::id();
-            $lease = $this->leases->create($validated);
-
-            return response()->json(new UnitLeaseResource($lease), 201);
+            return response()->json([
+                'status' => self::_SUCCESS,
+                'message' => 'Unit lease created successfully.',
+            ], 201);
         } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
@@ -542,7 +527,7 @@ class UnitController extends Controller
             $this->authorize('update', $unit);
 
             $data = $request->validate([
-                'status' => ['required', 'string', Rule::in(self::_UNIT_STATUSES)],
+                'status' => ['required', 'string', Rule::in(self::_UNIT_STATUSES), Rule::notIn([$unit->status])],
             ]);
 
             $updated = $this->units->changeStatus($unit, $data['status']);

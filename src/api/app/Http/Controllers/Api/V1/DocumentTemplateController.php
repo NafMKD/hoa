@@ -72,6 +72,42 @@ class DocumentTemplateController extends Controller
     }
 
     /**
+     * Get all templates without pagination.
+     * 
+     * @return AnonymousResourceCollection|JsonResponse
+     */
+    public function all(): AnonymousResourceCollection|JsonResponse
+    {
+        try {
+            $this->authorize('viewAny', DocumentTemplate::class);
+            $validated = request()->validate([
+                'category' => ['required', 'string', 'max:255', Rule::in(self::_DOCUMENT_TEMPLATE_CATEGORIES)],
+            ]); 
+            
+            $templates = $this->templates->getAll( $validated['category']);
+
+            return DocumentTemplateResource::collection($templates);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            // Log the exception 
+            Log::error('Error fetching all document templates: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
      * Store a newly created template.
      * 
      * @param Request $request

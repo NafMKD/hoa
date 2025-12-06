@@ -36,6 +36,20 @@ class DocumentTemplateRepository
     }
 
     /**
+     * Get all templates without pagination.
+     * 
+     * @param string $category
+     * @return Collection
+     */
+    public function getAll(string $category): Collection
+    {
+        return DocumentTemplate::query()
+            ->where('category', $category)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
      * Create a new document template.
      * 
      * @param array<string, mixed> $data

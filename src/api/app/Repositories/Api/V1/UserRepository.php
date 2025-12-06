@@ -89,6 +89,36 @@ class UserRepository
     }
 
     /**
+     * Get users by role for selection.
+     * 
+     * @param  string  $role
+     * @return Collection
+     */
+    public function getUsersByRole(string $role): Collection
+    {
+        return User::query()
+            ->where('role', $role)
+            ->where('status', 'active')
+            ->orderBy('first_name', 'asc')
+            ->orderBy('last_name', 'asc')
+            ->get();
+    }
+
+    /**
+     * Get active users.
+     * 
+     * @return Collection
+     */
+    public function getActiveUsers(): Collection
+    {
+        return User::query()
+            ->where('status', 'active')
+            ->orderBy('first_name', 'asc')
+            ->orderBy('last_name', 'asc')
+            ->get();
+    }
+
+    /**
      * Create new user.
      * 
      * @param  array<string, mixed>  $data

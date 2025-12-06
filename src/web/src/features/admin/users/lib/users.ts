@@ -60,7 +60,7 @@ export const updateUser = (userID: string | number, data: FormData) =>
 export const fetchUserNames = async (): Promise<IdNamePair[]> =>
   handleApi<IdNamePair[]>(api.get(`/v1/users/names/all`));
 
-export const searchUsers = async (query: string): Promise<UserSelectOption> =>
+export const searchUsers = async (query: string, role?: string, status?:string ): Promise<UserSelectOption> =>
   handleApi<UserSelectOption>(api.get(`/v1/users/search`, {
-    params: { term: query },
+    params: { term: query, role: role, status: status },
   }));

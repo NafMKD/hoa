@@ -80,6 +80,7 @@ export function UnitDetail() {
       try {
         const data = await fetchUnitDetail(unitId as string);
         setUnit(data);
+        setUnitStatus(data.status || "");
       } finally {
         setIsLoading(false);
       }
@@ -567,7 +568,7 @@ export function UnitDetail() {
               )}
               {getFileType(previewFile.url) === "unknown" && (
                 <div className="text-sm text-muted-foreground">
-                  Cannot preview this file type.{" "}
+                  Cannot preview this file type.
                   <a
                     href={previewFile.url}
                     target="_blank"

@@ -213,10 +213,6 @@ class UnitLeaseRepository
                 throw new RepositoryException('Invalid leasing_by or renter_type value.');
             }
 
-            // change the unit status to rented
-            $unit->status = Controller::_UNIT_STATUSES[0];
-            $unit->save();
-
             // TODO: generate lease document
             // $unitLease = $this->generateLeaseDocument($unitLease);
 

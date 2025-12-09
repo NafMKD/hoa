@@ -26,7 +26,7 @@ import {
   STEP_ORDER,
   type StepRepresentativeExistingValues,
 } from "./components/leases/types";
-import { router } from "@/QueryClient";
+import { useNavigate } from "@tanstack/react-router";
 
 // Import Step Components
 import { StepType } from "./components/leases/steps/step-type";
@@ -49,6 +49,7 @@ export function Leases() {
   const { unitId } = useParams({
     from: "/_authenticated/admin/units/$unitId/leases/",
   });
+  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState<StepKey>("type");
   const [completed, setCompleted] = useState<Record<StepKey, boolean>>({
     type: false,
@@ -238,8 +239,15 @@ export function Leases() {
       const lease = await submitLeaseAgreement(unitId,fd);
 
       toast.success("Lease submitted successfully!");
+      
       // navigate to lease
-      router.navigate({ to: `/admin/units/$unitId/leases/$leaseId`, params: { unitId: unitId, leaseId: lease.id.toString() } });
+      await navigate({
+        to: "/admin/units/$unitId/leases/$leaseId",
+        params: {
+          unitId: unitId,
+          leaseId: lease.id as string,
+        },
+      });
     } catch (err: any) {
       console.error("Lease submission failed", err);
       if (err?.status === 422 && err?.response?.data?.message) {

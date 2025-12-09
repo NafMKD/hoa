@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\NumberToWords;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -127,5 +128,29 @@ class UnitLease extends Model
     public function leaseTemplate(): BelongsTo
     {
         return $this->belongsTo(DocumentTemplate::class, 'lease_template_id');
+    }
+
+    /**
+     * Get the amount in words
+     * 
+     * @return string
+     */
+    public function getAmountInWordsAttribute(): string
+    {
+        $number = (int) $this->agreement_amount;
+        return NumberToWords::toAmharic($number);
+    }
+
+    /**
+     * Get the lease term in years
+     * 
+     * @return int
+     */
+    public function getLeaseTermInYearsAttribute(): int
+    {
+        if ($this->lease_end_date && $this->lease_start_date) {
+            return $this->lease_end_date->diffInYears($this->lease_start_date);
+        }
+        return 2;
     }
 }

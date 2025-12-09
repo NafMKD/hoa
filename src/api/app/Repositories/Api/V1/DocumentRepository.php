@@ -23,32 +23,34 @@ class DocumentRepository
      */
     public function create(UploadedFile $file, string $category): Document
     {
-        DB::beginTransaction();
+        $inParentTransaction = DB::transactionLevel() > 0;
+
         try {
-            // 1. Upload file to public storage
+            if (! $inParentTransaction) {
+                DB::beginTransaction();
+            }
+
             $storagePath = $file->store($category, 'public');
 
-            // 2. Create the Document record
             $document = Document::create([
                 'file_path' => $storagePath,
                 'file_name' => $file->getClientOriginalName(),
                 'mime_type' => $file->getClientMimeType(),
                 'file_size' => $file->getSize(),
-                'category' => $category
+                'category' => $category,
             ]);
 
-            DB::commit();
-            return $document;
-
-        } catch (Throwable $e) {
-            DB::rollBack();
-            Log::error("Document creation failed for category '{$category}': " . $e->getMessage());
-
-            if (isset($storagePath) && Storage::disk('public')->exists($storagePath)) {
-                Storage::disk('public')->delete($storagePath);
+            if (! $inParentTransaction) {
+                DB::commit();
             }
 
-            throw new RepositoryException('Failed to create document and upload file.');
+            return $document;
+        } catch (Throwable $e) {
+            if (! $inParentTransaction) {
+                DB::rollBack();
+            }
+            Log::error("Document creation failed: " . $e->getMessage(), ['exception' => $e]);
+            throw new RepositoryException("Failed to create document");
         }
     }
 
@@ -71,5 +73,35 @@ class DocumentRepository
             // 2. Delete the Document record (using model's delete method, which is soft delete if enabled)
             return $document->delete();
         });
+    }
+
+    /**
+     * Create a document record from existing file path.
+     * 
+     * @param string $filePath
+     * @param string $category
+     * @return Document
+     * @throws RepositoryException
+     */
+    public function createFromPath(string $filePath, string $category): Document
+    {
+        try {
+            $fileName = basename($filePath);
+            $mimeType = mime_content_type($filePath) ?: 'application/octet-stream';
+            $fileSize = filesize($filePath) ?: 0;
+
+            $document = Document::create([
+                'file_path' => $filePath,
+                'file_name' => $fileName,
+                'mime_type' => $mimeType,
+                'file_size' => $fileSize,
+                'category' => $category,
+            ]);
+
+            return $document;
+        } catch (Throwable $e) {
+            Log::error("Document creation from path failed: " . $e->getMessage(), ['exception' => $e]);
+            throw new RepositoryException("Failed to create document from path");
+        }
     }
 }

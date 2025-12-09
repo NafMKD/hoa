@@ -23,12 +23,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { IconPlus } from "@tabler/icons-react";
+import { IconHelp, IconPlus } from "@tabler/icons-react";
 
 import { fetchDocumentTemplates } from "./lib/templates";
 import { columns } from "./components/columns";
 import type { DocumentTemplate } from "@/types/types";
 import { AddDocumentTemplateForm } from "./components/add-template-form";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export function DocumentTemplates() {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -44,6 +46,8 @@ export function DocumentTemplates() {
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [open, setOpen] = useState(false);
+
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,6 +80,41 @@ export function DocumentTemplates() {
     onRowSelectionChange: setRowSelection
   });
 
+  function CopyTag({ text }: { text: string }) {
+    return (
+      <span
+        onClick={() => {
+          navigator.clipboard.writeText(text);
+          toast(`Copied ${text} to clipboard!`);
+        }}
+        className="cursor-pointer px-2 py-0.5 rounded-md bg-muted text-xs hover:bg-muted/70"
+      >
+        {text}
+      </span>
+    );
+  }
+  
+  function HelpSection({
+    title,
+    items,
+  }: {
+    title: string;
+    items: { label: string; value: string }[];
+  }) {
+    return (
+      <section>
+        <h3 className="font-semibold text-lg">{title}</h3>
+        <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+          {items.map((item, i) => (
+            <p key={i}>
+              {item.label}: <CopyTag text={item.value} />
+            </p>
+          ))}
+        </div>
+      </section>
+    );
+  }
+  
   return (
     <>
       <Header fixed>
@@ -89,12 +128,25 @@ export function DocumentTemplates() {
       <Main>
         <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Document Templates</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Document Templates
+            </h2>
             <p className="text-muted-foreground">
               Manage system document templates here.
             </p>
           </div>
+          <div className="flex items-center gap-2">
+            {/* Help Button */}
+            <Button
+              variant="outline"
+              onClick={() => setHelpOpen(true)}
+              className="flex items-center"
+            >
+              <IconHelp className="mr-1 h-4 w-4" />
+              Help
+            </Button>
 
+          {/* Add Template Button */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button onClick={() => setOpen(true)}>
@@ -103,9 +155,14 @@ export function DocumentTemplates() {
               </Button>
             </SheetTrigger>
 
-            <SheetContent side="right" className="w-full sm:max-w-lg overflow-auto">
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-lg overflow-auto"
+            >
               <SheetHeader>
-                <SheetTitle className="text-center">Add New Template</SheetTitle>
+                <SheetTitle className="text-center">
+                  Add New Template
+                </SheetTitle>
                 <SheetDescription className="text-center">
                   Fill in template information below.
                 </SheetDescription>
@@ -129,6 +186,8 @@ export function DocumentTemplates() {
               </div>
             </SheetContent>
           </Sheet>
+          
+          </div>
         </div>
 
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
@@ -143,6 +202,107 @@ export function DocumentTemplates() {
             <DataTable table={table} onChange={setSearch} />
           )}
         </div>
+
+        <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl font-bold">
+                Template Variable Guide
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground text-center mt-1">
+                  Click any variable to copy it to your clipboard.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              {/* Category */}
+              <section>
+                <h3 className="font-semibold text-lg">
+                  Lease Document Creation
+                </h3>
+                <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                  <p>
+                    Category Name: <CopyTag text="lease_agreement" />
+                  </p>
+                  <p>
+                    Sub Category Name: <CopyTag text="lease_agreement" />
+                  </p>
+                </div>
+              </section>
+
+              {/* Owner */}
+              <HelpSection
+                title="Owner Information"
+                items={[
+                  { label: "Owner Name", value: "{{unit.owner.full_name}}" },
+                  { label: "City", value: "{{unit.owner.city}}" },
+                  { label: "Sub City", value: "{{unit.owner.sub_city}}" },
+                  { label: "Woreda", value: "{{unit.owner.woreda}}" },
+                  {
+                    label: "House Number",
+                    value: "{{unit.owner.house_number}}",
+                  },
+                  { label: "Phone Number", value: "{{unit.owner.phone}}" },
+                ]}
+              />
+
+              {/* Representative */}
+              <HelpSection
+                title="Representative Information"
+                items={[
+                  { label: "Name", value: "{{representative.full_name}}" },
+                ]}
+              />
+
+              {/* Tenant */}
+              <HelpSection
+                title="Tenant Information"
+                items={[
+                  { label: "Name", value: "{{tenant.full_name}}" },
+                  { label: "City", value: "{{tenant.city}}" },
+                  { label: "Sub City", value: "{{tenant.sub_city}}" },
+                  { label: "Woreda", value: "{{tenant.woreda}}" },
+                  { label: "House Number", value: "{{tenant.house_number}}" },
+                  { label: "Phone Number", value: "{{tenant.phone}}" },
+                ]}
+              />
+
+              {/* House */}
+              <HelpSection
+                title="House Details"
+                items={[
+                  { label: "Block", value: "{{unit.building.name}}" },
+                  { label: "Unit Number", value: "{{unit.name}}" },
+                  { label: "Unit Type", value: "{{unit.unit_type}}" },
+                ]}
+              />
+
+              {/* Lease */}
+              <HelpSection
+                title="Lease Details"
+                items={[
+                  { label: "Lessor Name", value: "{{unit.lessor.name}}" },
+                  { label: "Lease Amount", value: "{{agreement_amount}}" },
+                  {
+                    label: "Lease Amount (Words)",
+                    value: "{{amount_in_words}}",
+                  },
+                  { label: "Lease Term", value: "{{lease_term_in_years}}" },
+                  { label: "Today Date", value: "{{today_date}}" },
+                ]}
+              />
+
+              {/* Witnesses */}
+              <HelpSection
+                title="Witnesses"
+                items={[
+                  { label: "Witness 1", value: "{{witness_1_full_name}}" },
+                  { label: "Witness 2", value: "{{witness_2_full_name}}" },
+                ]}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </Main>
     </>
   );

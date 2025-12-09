@@ -27,6 +27,7 @@ interface StepRepresentativeProps {
   setRepresentativeExistingValues: (values: StepRepresentativeExistingValues) => void;
   representativeValues?: StepRepresentativeValues | null;
   tenantExistingValues?: StepTenantExistingValues | null;
+  unitId?: string;
   markCompleted: (step: "representative", ok: boolean) => void;
   goNext: () => void;
   goPrev: () => void;
@@ -38,6 +39,7 @@ export function StepRepresentative({
   setRepresentativeExistingValues,
   representativeValues,
   tenantExistingValues,
+  unitId,
   markCompleted,
   goNext,
   goPrev,
@@ -105,7 +107,7 @@ export function StepRepresentative({
                     value={field.value ?? null}
                     onChange={field.onChange}
                     status="active"
-                    disabledIds={tenantExistingValues?.tenant_id ? [tenantExistingValues.tenant_id] : undefined}
+                    disabledIds={tenantExistingValues?.tenant_id ? [tenantExistingValues.tenant_id, unitId as unknown as number] : [unitId as unknown as number]}
                   />
                 )}
               />

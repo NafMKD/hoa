@@ -33,7 +33,7 @@ class UnitOwnerRepository
     public function create(unit $unit, array $data): UnitOwner
     {
         DB::beginTransaction();
-
+        $document = null;
         try {
             // Handle ownership document upload
             if (isset($data['ownership_file']) && $data['ownership_file'] instanceof UploadedFile) {
@@ -70,6 +70,9 @@ class UnitOwnerRepository
             return $owner;
         } catch (\Throwable $e) {
             DB::rollBack();
+            if ($document && Storage::disk('public')->exists($document->file_path)) {
+                Storage::disk('public')->delete($document->file_path);
+            }
             Log::error('Unit owner creation failed: ' . $e->getMessage());
             if ($e instanceof RepositoryException) throw $e;
             throw new RepositoryException('Failed to create unit owner.');

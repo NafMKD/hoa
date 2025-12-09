@@ -156,9 +156,7 @@ export function Leases() {
       fd.append("renter_type", typeValues.renterType);
       if (typeValues.leasingBy === "representative" && typeValues.representativeType) {
         fd.append("representative_type", typeValues.representativeType);
-      } else {
-        fd.append("representative_type", "none");
-      }
+      } 
 
       // tenant
       if (typeValues.renterType === "existing") {
@@ -262,6 +260,7 @@ export function Leases() {
             setTenantNewValues={setTenantNewValues}
             tenantExistingValues={tenantExistingValues}
             tenantNewValues={tenantNewValues}
+            unitId={unitId}
             markCompleted={markCompleted}
             goNext={goNext}
             goPrev={goPrev}
@@ -275,6 +274,7 @@ export function Leases() {
             setRepresentativeExistingValues={setRepresentativeExistingValues}
             representativeValues={representativeValues}
             tenantExistingValues={tenantExistingValues}
+            unitId={unitId}
             markCompleted={markCompleted}
             goNext={goNext}
             goPrev={goPrev}

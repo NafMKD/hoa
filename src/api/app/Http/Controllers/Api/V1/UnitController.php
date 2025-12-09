@@ -260,14 +260,122 @@ class UnitController extends Controller
      * Create a unit lease.
      * 
      * @param Request $request
+     * @param Unit $unit
      * @return JsonResponse
      */
-    public function storeUnitLease(Request $request): JsonResponse
+    public function storeUnitLease(Request $request, Unit $unit): JsonResponse
     {
         try {
             $this->authorize('create', UnitLease::class);
 
-            Log::info('Creating unit lease with request data: ' . json_encode($request->all()));
+            $rules = [
+
+                // -------------------------
+                // Leasing Type
+                // -------------------------
+                'leasing_by' => ['required', 'in:owner,representative'],
+                'renter_type' => ['required', 'in:new,existing'],
+
+                // Representative type only if leasing_by = representative
+                'representative_type' => [
+                    'required_if:leasing_by,representative',
+                    'in:existing,new'
+                ],
+
+                // -------------------------
+                // Tenant (Existing or New)
+                // -------------------------
+                // Existing
+                'tenant_id' => [
+                    'required_if:renter_type,existing',
+                    'integer',
+                    'exists:users,id',
+                    new UniqueUnitLease($unit->id)
+                ],
+
+                // New Tenant fields
+                'tenant_first_name' => ['required_if:renter_type,new', 'string', 'max:255'],
+                'tenant_last_name'  => ['required_if:renter_type,new', 'string', 'max:255'],
+                'tenant_phone'      => ['required_if:renter_type,new', 'string', 'max:20'],
+                'tenant_email'      => ['nullable', 'email'],
+                'tenant_id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
+
+                // -------------------------
+                // Representative (only if leasing_by = representative)
+                // -------------------------
+
+                // Existing representative
+                'representative_id' => [
+                    'required_if:representative_type,existing',
+                    'integer',
+                    'exists:users,id'
+                ],
+
+                // New representative fields
+                'representative_first_name' => ['required_if:representative_type,new', 'string', 'max:255'],
+                'representative_last_name'  => ['required_if:representative_type,new', 'string', 'max:255'],
+                'representative_phone'      => ['required_if:representative_type,new', 'string', 'max:20'],
+                'representative_email'      => ['nullable', 'email'],
+                'representative_id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
+
+                // Representative document for NEW representative
+                
+
+                // -------------------------
+                // Lease Fields
+                // -------------------------
+                'agreement_amount'   => ['required', 'numeric', 'min:0'],
+                'lease_template_id'  => ['required', 'integer', 'exists:document_templates,id'],
+                'lease_start_date'   => ['required', 'date'],
+                'lease_end_date'     => ['nullable', 'date', 'after_or_equal:lease_start_date'],
+                'lease_representative_document' => [
+                    'required_if:leasing_by,representative',
+                    'file',
+                    'mimes:jpg,jpeg,png,pdf',
+                    'max:' . self::_MAX_FILE_SIZE
+                ],
+                'notes'              => ['nullable', 'string'],
+                'witness_1_full_name' => ['nullable', 'string', 'max:255'],
+                'witness_2_full_name' => ['nullable', 'string', 'max:255'],
+            ];
+
+            // Check if the unit has an owner
+            if (!$unit->currentOwner) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'Unit must have an owner before creating a lease.',
+                ], 400);
+            }
+
+            // Check if the tenant is not the owner
+            if ($request->input('renter_type') === 'existing' && $unit->currentOwner->owner_id == $request->input('tenant_id')) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'The tenant cannot be the owner of the unit.',
+                ], 400);
+            }
+
+            // Check if the representative is not the owner
+            if ($request->input('leasing_by') === 'representative' && $request->input('representative_type') === 'existing' && $unit->currentOwner->owner_id == $request->input('representative_id')) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'The representative cannot be the owner of the unit.',
+                ], 400);
+            }
+
+            // Check if the tenant is not the same as the representative
+            if ($request->input('leasing_by') === 'representative') {
+                if ($request->input('renter_type') === 'existing' && $request->input('representative_type') === 'existing' && $request->input('tenant_id') == $request->input('representative_id')) {
+                    return response()->json([
+                        'status' => self::_ERROR,
+                        'message' => 'The tenant and representative cannot be the same person.',
+                    ], 400);
+                }
+            }
+
+            $validated = $request->validate($rules);
+
+            $this->leases->create($unit, $validated);
 
             return response()->json([
                 'status' => self::_SUCCESS,

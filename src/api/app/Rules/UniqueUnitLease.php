@@ -11,6 +11,10 @@ class UniqueUnitLease implements ValidationRule, DataAwareRule
 {
     protected array $data = [];
 
+    public function __construct(protected int $unitId)
+    {
+    }
+    
     /**
      * Set the data for DataAwareRule.
      */
@@ -29,8 +33,8 @@ class UniqueUnitLease implements ValidationRule, DataAwareRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $unitId = $this->data['unit_id'] ?? null;
-        $tenantId = $this->data['tenant_id'] ?? null;
+        $unitId = $this->unitId;
+        $tenantId = $value;
         $startDate = $this->data['lease_start_date'] ?? null;
         $endDate = $this->data['lease_end_date'] ?? null;
 

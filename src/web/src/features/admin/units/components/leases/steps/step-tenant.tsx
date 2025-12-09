@@ -27,6 +27,7 @@ interface StepTenantProps {
   setTenantNewValues: (values: StepTenantNewValues) => void;
   tenantExistingValues?: StepTenantExistingValues | null;
   tenantNewValues?: StepTenantNewValues | null;
+  unitId?: string;
   markCompleted: (step: "tenant", ok: boolean) => void;
   goNext: () => void;
   goPrev: () => void;
@@ -38,6 +39,7 @@ export function StepTenant({
   setTenantNewValues,
   tenantExistingValues,
   tenantNewValues,
+  unitId,
   markCompleted,
   goNext,
   goPrev,
@@ -226,6 +228,7 @@ export function StepTenant({
                     value={field.value ?? null}
                     onChange={field.onChange}
                     status="active"
+                    disabledIds={[unitId as unknown as number]} 
                   />
                 )}
               />

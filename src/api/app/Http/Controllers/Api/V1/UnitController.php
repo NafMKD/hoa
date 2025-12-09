@@ -295,11 +295,15 @@ class UnitController extends Controller
                 ],
 
                 // New Tenant fields
-                'tenant_first_name' => ['required_if:renter_type,new', 'string', 'max:255'],
-                'tenant_last_name'  => ['required_if:renter_type,new', 'string', 'max:255'],
-                'tenant_phone'      => ['required_if:renter_type,new', 'string', 'max:20'],
-                'tenant_email'      => ['nullable', 'email'],
-                'tenant_id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
+                'tenant_first_name'     => ['required_if:renter_type,new', 'string', 'max:255'],
+                'tenant_last_name'      => ['required_if:renter_type,new', 'string', 'max:255'],
+                'tenant_phone'          => ['required_if:renter_type,new', 'string', 'max:20'],
+                'tenant_city'           => ['nullable', 'string', 'max:255'],
+                'tenant_sub_city'       => ['nullable', 'string', 'max:255'],
+                'tenant_woreda'         => ['nullable', 'string', 'max:50'],
+                'tenant_house_number'   => ['nullable', 'string', 'max:50'],
+                'tenant_email'          => ['nullable', 'email'],
+                'tenant_id_file'        => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
 
                 // -------------------------
                 // Representative (only if leasing_by = representative)
@@ -313,11 +317,15 @@ class UnitController extends Controller
                 ],
 
                 // New representative fields
-                'representative_first_name' => ['required_if:representative_type,new', 'string', 'max:255'],
-                'representative_last_name'  => ['required_if:representative_type,new', 'string', 'max:255'],
-                'representative_phone'      => ['required_if:representative_type,new', 'string', 'max:20'],
-                'representative_email'      => ['nullable', 'email'],
-                'representative_id_file'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
+                'representative_first_name'     => ['required_if:representative_type,new', 'string', 'max:255'],
+                'representative_last_name'      => ['required_if:representative_type,new', 'string', 'max:255'],
+                'representative_phone'          => ['required_if:representative_type,new', 'string', 'max:20'],
+                'representative_city'           => ['nullable', 'string', 'max:255'],
+                'representative_sub_city'       => ['nullable', 'string', 'max:255'],
+                'representative_woreda'         => ['nullable', 'string', 'max:50'],
+                'representative_house_number'   => ['nullable', 'string', 'max:50'],
+                'representative_email'          => ['nullable', 'email'],
+                'representative_id_file'        => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
 
                 // Representative document for NEW representative
                 
@@ -339,6 +347,14 @@ class UnitController extends Controller
                 'witness_1_full_name' => ['nullable', 'string', 'max:255'],
                 'witness_2_full_name' => ['nullable', 'string', 'max:255'],
             ];
+
+            // check if the unit is already leased
+            if ($unit->currentLease) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'Unit is already leased. Cannot create a new lease until the current lease is terminated.',
+                ], 400);
+            }
 
             // Check if the unit has an owner
             if (!$unit->currentOwner) {

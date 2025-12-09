@@ -168,6 +168,10 @@ export function Leases() {
         fd.append("tenant_first_name", tenantNewValues.first_name);
         fd.append("tenant_last_name", tenantNewValues.last_name);
         fd.append("tenant_phone", tenantNewValues.phone);
+        if (tenantNewValues.city) fd.append("tenant_city", tenantNewValues.city);
+        if (tenantNewValues.sub_city) fd.append("tenant_sub_city", tenantNewValues.sub_city);
+        if (tenantNewValues.woreda) fd.append("tenant_woreda", tenantNewValues.woreda);
+        if (tenantNewValues.house_number) fd.append("tenant_house_number", tenantNewValues.house_number);
         if (tenantNewValues.email) fd.append("tenant_email", tenantNewValues.email);
         fd.append("tenant_role", "tenant");
         if (tenantNewValues.id_file && tenantNewValues.id_file instanceof File) {
@@ -189,8 +193,11 @@ export function Leases() {
           );
           fd.append("representative_last_name", representativeValues.last_name);
           fd.append("representative_phone", representativeValues.phone);
-          if (representativeValues.email)
-            fd.append("representative_email", representativeValues.email);
+          if (representativeValues.city) fd.append("representative_city", representativeValues.city);
+          if (representativeValues.sub_city) fd.append("representative_sub_city", representativeValues.sub_city);
+          if (representativeValues.woreda) fd.append("representative_woreda", representativeValues.woreda);
+          if (representativeValues.house_number) fd.append("representative_house_number", representativeValues.house_number);
+          if (representativeValues.email) fd.append("representative_email", representativeValues.email);
           fd.append("representative_role", "representative");
           if (
             representativeValues.id_file &&

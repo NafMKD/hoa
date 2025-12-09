@@ -64,3 +64,20 @@ export const searchUsers = async (query: string, role?: string, status?:string )
   handleApi<UserSelectOption>(api.get(`/v1/users/search`, {
     params: { term: query, role: role, status: status },
   }));
+
+export const importUsers = (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return handleApi<{
+    message?: string;
+    failed?: Array<{ phone: string; reason?: string } | string>;
+  }>(
+    api.post("/v1/import/users", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+  );
+};
+  

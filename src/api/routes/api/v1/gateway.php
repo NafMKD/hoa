@@ -1,5 +1,6 @@
 <?php 
 
+use App\Http\Controllers\ImportController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->name('api.v1.auth.')->group(function () { 
@@ -23,3 +24,6 @@ Route::prefix('fees')->middleware('auth:sanctum')->name('api.v1.fees.')->group(f
 Route::prefix('invoices')->middleware('auth:sanctum')->name('api.v1.invoices.')->group(function () { 
     require __DIR__.'/invoice.php';
 });
+Route::post('/import/users', [ImportController::class, 'importUsers'])->middleware('auth:sanctum')->name('api.v1.import.users');
+Route::post('/import/buildings', [ImportController::class, 'importBuildings'])->middleware('auth:sanctum')->name('api.v1.import.buildings');
+Route::post('/import/units', [ImportController::class, 'importUnits'])->middleware('auth:sanctum');

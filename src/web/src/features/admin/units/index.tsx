@@ -6,7 +6,7 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { fetchUnits } from "./lib/units";
 import { columns } from "./components/columns";
 import { DataTable } from "@/components/data-table/data-table";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   getCoreRowModel,
   getPaginationRowModel,
@@ -31,6 +31,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { EditUnitForm } from "./components/form/edit-unit-form";
 import { Spinner } from "@/components/ui/spinner";
 import { OwnershipForm } from "./components/form/ownership-form";
+import { ImportUnitsDialog } from "./components/import-units-dialog";
 
 export function Units() {
   const [pagination, setPagination] = React.useState<PaginationState>({
@@ -49,21 +50,22 @@ export function Units() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isOwnershipOpen, setIsOwnershipOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const page = pagination.pageIndex + 1;
-      const res = await fetchUnits(
-        page.toString(),
-        pagination.pageSize.toString(),
-        debouncedSearch
-      );
-      setData(res.data);
-      setPageCount(res.meta.last_page);
-      setIsLoading(false);
-    };
-
-    fetchData();
+  const refreshUnits = useCallback(async () => {
+    setIsLoading(true);
+    const page = pagination.pageIndex + 1;
+    const res = await fetchUnits(
+      page.toString(),
+      pagination.pageSize.toString(),
+      debouncedSearch
+    );
+    setData(res.data);
+    setPageCount(res.meta.last_page);
+    setIsLoading(false);
   }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
+
+  useEffect(() => {
+    refreshUnits();
+  }, [refreshUnits]);
 
   const table = useReactTable({
     data,
@@ -90,7 +92,7 @@ export function Units() {
       </Header>
 
       <Main>
-        <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Units</h2>
             <p className="text-muted-foreground">
@@ -98,52 +100,53 @@ export function Units() {
             </p>
           </div>
 
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button onClick={() => setOpen(true)}>
-                {open ? (
-                  <>
-                    <Spinner className="h-8 w-8" />
-                    Loading...
-                  </>
-                ) : (
-                  <>
-                    <IconPlus className="mr-1 h-4 w-4" />
-                    Add Unit
-                  </>
-                )}
-              </Button>
-            </SheetTrigger>
+          {/* Right-side actions */}
+          <div className="flex flex-wrap items-center gap-2">
+            <ImportUnitsDialog
+              onSuccess={refreshUnits}
+              templateUrl="/templates/units-import-template.xlsx"
+            />
 
-            <SheetContent
-              side="right"
-              className="w-full sm:max-w-lg overflow-auto"
-            >
-              <SheetHeader>
-                <SheetTitle className="text-center">Add New Unit</SheetTitle>
-                <SheetDescription className="text-center">
-                  Fill in unit information below.
-                </SheetDescription>
-              </SheetHeader>
-              <div className="mt-6 pb-10">
-                <AddUnitForm
-                  onSuccess={() => {
-                    setOpen(false);
-                    const page = pagination.pageIndex + 1;
-                    fetchUnits(
-                      page.toString(),
-                      pagination.pageSize.toString(),
-                      debouncedSearch
-                    ).then((res) => {
-                      setData(res.data);
-                      setPageCount(res.meta.last_page);
-                    });
-                  }}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <Button onClick={() => setOpen(true)} className="gap-2">
+                  {open ? (
+                    <>
+                      <Spinner className="h-4 w-4" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <IconPlus className="h-4 w-4" />
+                      Add Unit
+                    </>
+                  )}
+                </Button>
+              </SheetTrigger>
 
+              <SheetContent
+                side="right"
+                className="w-full sm:max-w-lg overflow-auto"
+              >
+                <SheetHeader>
+                  <SheetTitle className="text-center">Add New Unit</SheetTitle>
+                  <SheetDescription className="text-center">
+                    Fill in unit information below.
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="mt-6 pb-10">
+                  <AddUnitForm
+                    onSuccess={() => {
+                      setOpen(false);
+                      refreshUnits();
+                    }}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Edit Unit */}
           <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
             <SheetContent
               side="right"
@@ -162,15 +165,7 @@ export function Units() {
                     onSuccess={() => {
                       setIsEditOpen(false);
                       setEditUnit(null);
-                      const page = pagination.pageIndex + 1;
-                      fetchUnits(
-                        page.toString(),
-                        pagination.pageSize.toString(),
-                        debouncedSearch
-                      ).then((res) => {
-                        setData(res.data);
-                        setPageCount(res.meta.last_page);
-                      });
+                      refreshUnits();
                     }}
                   />
                 )}
@@ -178,6 +173,7 @@ export function Units() {
             </SheetContent>
           </Sheet>
 
+          {/* Add Ownership */}
           <Sheet open={isOwnershipOpen} onOpenChange={setIsOwnershipOpen}>
             <SheetContent
               side="right"

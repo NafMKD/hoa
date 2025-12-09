@@ -67,9 +67,9 @@ class Unit extends Model
     {
         switch ($this->floor_number) {
             case -2:
-                return 'Basement 1';
+                return 'Parking';
             case -1:
-                return 'Basement';
+                return 'Sub Basement';
             case 0:
                 return 'Ground Floor';
             case 1:

@@ -96,3 +96,26 @@ export const terminateUnitLease = (unitId: string, leaseId: string) =>
   handleApi<UnitLeaseResource>(
     api.post(`/v1/units/${unitId}/leases/${leaseId}/terminate`)
   );
+
+/**
+ * Import units from file
+ */
+export const importUnits = (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return handleApi<{
+    message?: string;
+    failed?: Array<
+      | { name?: string; unit_name?: string; phone?: string; reason?: string }
+      | string
+    >;
+  }>(
+    api.post("/v1/import/units", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+  );
+};
+  

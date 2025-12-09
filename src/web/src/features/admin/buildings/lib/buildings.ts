@@ -52,3 +52,20 @@ export const deleteBuilding = (buildingId: string | number) =>
 
 export const fetchBuildingNames = async (): Promise<UnitFormData> => 
   handleApi<UnitFormData>(api.get("/v1/buildings/names/all"));
+
+export const importBuildings = (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return handleApi<{
+    message?: string;
+    failed?: Array<{ name: string; reason?: string } | string>;
+  }>(
+    api.post("/v1/import/buildings", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+  );
+};
+  

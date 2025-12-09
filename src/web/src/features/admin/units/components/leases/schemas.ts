@@ -32,6 +32,10 @@ export const StepTenantNewSchema = z.object({
     .max(255),
   email: z.string().email().optional().or(z.literal("")).transform((v) => (v === "" ? null : v)).nullable(),
   role: z.enum(["tenant"]).optional(),
+  city: z.string().optional().or(z.literal("")),
+  sub_city: z.string().optional().or(z.literal("")),
+  woreda: z.string().optional().or(z.literal("")),
+  house_number: z.string().optional().or(z.literal("")),
   id_file: z
     .instanceof(File)
     .optional()
@@ -48,6 +52,10 @@ export const StepRepresentativeSchema = z.object({
     .max(255),
   email: z.string().email().optional().or(z.literal("")).transform((v) => (v === "" ? null : v)).nullable(),
   role: z.enum(["representative"]).optional(),
+  city: z.string().optional().or(z.literal("")),
+  sub_city: z.string().optional().or(z.literal("")),
+  woreda: z.string().optional().or(z.literal("")),
+  house_number: z.string().optional().or(z.literal("")),
   id_file: z.instanceof(File).optional().nullable(),
 });
 

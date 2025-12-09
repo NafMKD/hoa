@@ -146,6 +146,62 @@ export function StepTenant({
             </FormItem>
           )}
         />
+        { /* City */}
+        <FormField
+          control={formNew.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>City</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        { /* Sub City */}
+        <FormField
+          control={formNew.control}
+          name="sub_city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sub City</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        { /* Woreda */}
+        <FormField
+          control={formNew.control}
+          name="woreda"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Woreda</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        { /* House Number */}
+        <FormField
+          control={formNew.control}
+          name="house_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>House Number</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         {/* Role */}
         <FormField
           control={formNew.control}

@@ -97,7 +97,8 @@ export function StepRepresentative({
           >
             <div className="w-1/3">
               <Label className="mb-2">
-                Choose an existing representative <span className="text-red-500">*</span>
+                Choose an existing representative{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <Controller
                 name="representative_id"
@@ -107,7 +108,14 @@ export function StepRepresentative({
                     value={field.value ?? null}
                     onChange={field.onChange}
                     status="active"
-                    disabledIds={tenantExistingValues?.tenant_id ? [tenantExistingValues.tenant_id, unitId as unknown as number] : [unitId as unknown as number]}
+                    disabledIds={
+                      tenantExistingValues?.tenant_id
+                        ? [
+                            tenantExistingValues.tenant_id,
+                            unitId as unknown as number,
+                          ]
+                        : [unitId as unknown as number]
+                    }
                   />
                 )}
               />
@@ -195,6 +203,62 @@ export function StepRepresentative({
                           {...field}
                           value={field.value ?? ""}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* City */}
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Sub City */}
+                <FormField
+                  control={form.control}
+                  name="sub_city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sub City</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Woreda */}
+                <FormField
+                  control={form.control}
+                  name="woreda"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Woreda</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* House Number */}
+                <FormField
+                  control={form.control}
+                  name="house_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>House Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

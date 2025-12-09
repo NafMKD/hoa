@@ -48,7 +48,8 @@ import { toast } from "sonner"
 // You can adjust these imports to match your actual API module names.
 import {
   fetchUnitLeaseDetail,
-  changeUnitLeaseStatus,
+  activateUnitLease,
+  terminateUnitLease
 } from "./lib/units"
 import type { UnitLeaseResource } from "@/types/types"
 
@@ -111,10 +112,7 @@ export function UnitLeaseDetail() {
 
   const [lease, setLease] = useState<UnitLeaseResource | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-
-  const [statusModal, setStatusModal] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [leaseStatus, setLeaseStatus] = useState<string>("")
 
   const [previewFile, setPreviewFile] = useState<PreviewFile | null>(null)
 
@@ -123,7 +121,6 @@ export function UnitLeaseDetail() {
       try {
         const data = await fetchUnitLeaseDetail(unitId as string, leaseId as string)
         setLease(data)
-        setLeaseStatus(data?.status || "")
       } catch (e) {
         toast.error("Failed to load lease details.")
       } finally {
@@ -167,28 +164,43 @@ export function UnitLeaseDetail() {
 
   const handleOpenPreview = (file: PreviewFile | null) => setPreviewFile(file)
 
-  const handleChangeStatus = async () => {
-    if (!lease) return
-    if (!leaseStatus) {
-      toast.error("Please select a valid status.")
-      return
-    }
+  const handleActivate = async (leaseId: number) => {
+    if (!lease) return;
+  
     try {
-      setIsSaving(true)
-      await changeUnitLeaseStatus(unitId as string, leaseId as string, leaseStatus)
-      setLease((prev) => (prev ? { ...prev, status: leaseStatus } : prev))
-      setStatusModal(false)
-      toast.success("Lease status updated successfully.")
+      setIsSaving(true);
+      await activateUnitLease(unitId as string, leaseId.toString());
+      setLease((prev) => (prev ? { ...prev, status: "active" } : prev));
+      toast.success("Lease activated successfully.");
     } catch (error: any) {
       if (error?.status === 400 && error?.data) {
-        toast.error(`${error.data?.message}`)
-        return
+        toast.error(`${error.data?.message}`);
+        return;
       }
-      toast.error("Failed to update lease status.")
+      toast.error("Failed to activate lease.");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
+
+  const handleTerminate = async (leaseId: number) => {
+    if (!lease) return;
+  
+    try {
+      setIsSaving(true);
+      await terminateUnitLease(unitId as string, leaseId.toString());
+      setLease((prev) => (prev ? { ...prev, status: "terminated" } : prev));
+      toast.success("Lease terminated successfully.");
+    } catch (error: any) {
+      if (error?.status === 400 && error?.data) {
+        toast.error(`${error.data?.message}`);
+        return;
+      }
+      toast.error("Failed to terminate lease.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // ----------------- LOADING STATE -----------------
   if (isLoading) {
@@ -342,14 +354,27 @@ export function UnitLeaseDetail() {
                 </span>
               </div>
               <div className="flex items-center gap-1 rounded-full border">
-                <Button
-                  variant="secondary"
-                  className="bg:primary text-white hover:bg-primary/90 rounded-full px-3 py-1"
-                  size="sm"
-                  onClick={() => setStatusModal(true)}
-                >
-                  Change Status
-                </Button>
+                {lease.status === "active" ? (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="rounded-full px-3 py-1"
+                    onClick={() => handleTerminate(lease.id as number)}
+                    disabled={isSaving}
+                  >
+                    { isSaving ? "Terminating..." : "Terminate Lease" }
+                  </Button>
+                ) : lease.status === "draft" ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="bg-emerald-500 text-white hover:bg-emerald-50 hover:text-black rounded-full px-3 py-1"
+                    onClick={() => handleActivate(lease.id as number)}
+                    disabled={isSaving}
+                  >
+                    { isSaving ? "Activating..." : "Activate Lease" }
+                  </Button>
+                ) : null}
               </div>
             </div>
           </CardHeader>
@@ -981,41 +1006,7 @@ export function UnitLeaseDetail() {
             </div>
           )}
         </DialogContent>
-      </Dialog>
-
-      {/* CHANGE LEASE STATUS */}
-      <Dialog open={statusModal} onOpenChange={setStatusModal}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Change Lease Status</DialogTitle>
-            <DialogDescription>
-              Select a new status for this lease.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3">
-            <select
-              className="w-full border px-3 py-2 rounded-md text-sm bg-background"
-              defaultValue={lease.status ?? ""}
-              onChange={(e) => setLeaseStatus(e.target.value)}
-            >
-              <option value="">Select status</option>
-              <option value="active">Active</option>
-              <option value="expired">Expired</option>
-              <option value="terminated">Terminated</option>
-              <option value="draft">Draft</option>
-            </select>
-
-            <Button
-              disabled={isSaving}
-              className="bg-primary text-white hover:bg-primary/90 w-full"
-              onClick={handleChangeStatus}
-            >
-              {isSaving ? "Saving…" : "Save"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      </Dialog>      
     </>
   );
 }

@@ -507,15 +507,17 @@ class UnitController extends Controller
     /**
      * Terminate the specified unit lease.
      * 
+     * @param Unit $unit
      * @param UnitLease $lease
      * @return JsonResponse
      */
-    public function terminateUnitLease(UnitLease $lease): JsonResponse
+    public function terminateUnitLease(Unit $unit, UnitLease $lease): JsonResponse
     {
         try {
             $this->authorize('terminate', $lease);
+            $this->authorize('update', $unit);
 
-            $terminatedLease = $this->leases->terminateLeaseById($lease->id);
+            $terminatedLease = $this->leases->terminateLeaseById($lease);
 
             return response()->json(new UnitLeaseResource($terminatedLease));
         } catch (AuthorizationException) {
@@ -540,15 +542,17 @@ class UnitController extends Controller
     /**
      * Activate the specified unit lease.
      * 
+     * @param Unit $unit
      * @param UnitLease $lease
      * @return JsonResponse
      */
-    public function activateUnitLease(UnitLease $lease): JsonResponse
+    public function activateUnitLease(Unit $unit, UnitLease $lease): JsonResponse
     {
         try {
             $this->authorize('activate', $lease);
+            $this->authorize('update', $unit);
 
-            $activatedLease = $this->leases->activateDraftLease($lease->id);
+            $activatedLease = $this->leases->activateDraftLease($lease);
 
             return response()->json(new UnitLeaseResource($activatedLease));
         } catch (AuthorizationException) {

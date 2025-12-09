@@ -82,15 +82,17 @@ export const fetchUnitLeaseDetail = (unitId: string, leaseId: string) =>
   );
 
 /**
- * Change unit lease status
+ * Activate unit lease
  */
-export const changeUnitLeaseStatus = (
-  unitId: string,
-  leaseId: string,
-  status: string
-) => 
+export const activateUnitLease = (unitId: string, leaseId: string) =>
   handleApi<UnitLeaseResource>(
-    api.post(`/v1/units/${unitId}/leases/${leaseId}/status`, {
-      status: status,
-    })
+    api.post(`/v1/units/${unitId}/leases/${leaseId}/activate`)
+  );
+
+/**
+ * Terminate unit lease
+ */
+export const terminateUnitLease = (unitId: string, leaseId: string) =>
+  handleApi<UnitLeaseResource>(
+    api.post(`/v1/units/${unitId}/leases/${leaseId}/terminate`)
   );

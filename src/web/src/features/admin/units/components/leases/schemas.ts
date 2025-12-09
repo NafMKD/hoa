@@ -6,11 +6,20 @@ import { z } from "zod";
 export const StepTypeSchema = z.object({
   renterType: z.enum(["existing", "new"]),
   leasingBy: z.enum(["owner", "representative"]),
-});
+  representativeType: z.enum(["existing", "new"]).optional(),
+}).refine(
+  (data) =>
+    data.leasingBy !== "representative" ||
+    (data.leasingBy === "representative" && !!data.representativeType),
+  {
+    path: ["representativeType"],
+    message: "Please select representative type.",
+  }
+);
 
 /* Tenant - existing */
 export const StepTenantExistingSchema = z.object({
-  tenant_id: z.string().min(1, "Select a tenant"),
+  tenant_id: z.number().min(1, "Select a tenant"),
 });
 
 /* Tenant - new (same validation as backend expects for users) */
@@ -23,8 +32,12 @@ export const StepTenantNewSchema = z.object({
     .max(255),
   email: z.string().email().optional().or(z.literal("")).transform((v) => (v === "" ? null : v)).nullable(),
   role: z.enum(["tenant"]).optional(),
+  city: z.string().optional().or(z.literal("")),
+  sub_city: z.string().optional().or(z.literal("")),
+  woreda: z.string().optional().or(z.literal("")),
+  house_number: z.string().optional().or(z.literal("")),
   id_file: z
-    .any()
+    .instanceof(File)
     .optional()
     .nullable(), // will be handled in formData upload
 });
@@ -39,18 +52,26 @@ export const StepRepresentativeSchema = z.object({
     .max(255),
   email: z.string().email().optional().or(z.literal("")).transform((v) => (v === "" ? null : v)).nullable(),
   role: z.enum(["representative"]).optional(),
-  id_file: z.any().optional().nullable(),
+  city: z.string().optional().or(z.literal("")),
+  sub_city: z.string().optional().or(z.literal("")),
+  woreda: z.string().optional().or(z.literal("")),
+  house_number: z.string().optional().or(z.literal("")),
+  id_file: z.instanceof(File).optional().nullable(),
+});
+
+/* Representative - existing */
+export const StepRepresentativeExistingSchema = z.object({
+  representative_id: z.number().min(1, "Select a representative"),
 });
 
 /* Lease details */
 export const StepLeaseSchema = z.object({
-  agreement_amount: z.coerce.number().min(0),
-  lease_template_id: z.string().min(1),
+  agreement_amount: z.number().min(0),
+  lease_template_id: z.string().trim().min(1, "Lease template is required"),
   lease_start_date: z.string().min(1),
   lease_end_date: z.string().optional().nullable(),
-  representative_document: z.any().optional().nullable(),
+  representative_document: z.instanceof(File).optional().nullable(),
   witness_1_full_name: z.string().optional().nullable(),
   witness_2_full_name: z.string().optional().nullable(),
-  witness_3_full_name: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
 });

@@ -15,6 +15,7 @@ Route::post('/{unit}/status', [UnitController::class,  'changeUnitStatus'])->nam
 
 // Unit lease
 Route::post('/{unit}/leases', [UnitController::class,  'storeUnitLease'])->name('leases.store');
+Route::get('/{unit}/leases/{lease}', [UnitController::class,  'showUnitLease'])->name('leases.show');
 Route::delete('/{unit}/leases/{lease}', [UnitController::class,  'destroyUnitLease'])->name('leases.store');
 Route::post('/{unit}/leases/{lease}/activate', [UnitController::class,  'activateUnitLease'])->name('leases.activate');
 Route::post('/{unit}/leases/{lease}/terminate', [UnitController::class,  'terminateUnitLease'])->name('leases.terminate');

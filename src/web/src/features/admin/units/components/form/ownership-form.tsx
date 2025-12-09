@@ -94,6 +94,7 @@ export function OwnershipForm({ unitId, onSuccess }: OwnershipFormProps) {
                   value={field.value}
                   onChange={(val) => field.onChange(val)}
                   error={errors.user_id?.message}
+                  status="active"
                 />
               )}
             />

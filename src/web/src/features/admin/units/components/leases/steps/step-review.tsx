@@ -8,7 +8,10 @@ import type {
   StepTenantNewValues,
   StepRepresentativeValues,
   StepLeaseValues,
+  StepRepresentativeExistingValues,
 } from "../types";
+import { Link } from "@tanstack/react-router";
+import React from "react";
 
 interface ReviewStepProps {
   // State values collected from Leases.tsx
@@ -16,6 +19,7 @@ interface ReviewStepProps {
   tenantExistingValues: StepTenantExistingValues | null;
   tenantNewValues: StepTenantNewValues | null;
   representativeValues: StepRepresentativeValues | null;
+  representativeExistingValues: StepRepresentativeExistingValues | null;
   leaseValues: StepLeaseValues | null;
   
   representativeRequired: boolean;
@@ -35,18 +39,28 @@ const getSectionData = (
   props: ReviewStepProps
 ): Record<string, any> | null => {
   switch (section) {
-    case "type":
-      if (!props.typeValues) return null;
-      return {
-        "Renter Type": formatKey(props.typeValues.renterType),
-        "Leasing By": formatKey(props.typeValues.leasingBy),
+    case "type": {
+      const t = props.typeValues;
+      if (!t) return null;
+
+      const base = {
+        "Renter Type": formatKey(t.renterType),
+        "Leasing By": formatKey(t.leasingBy),
       };
-      
+
+      return t.representativeType
+        ? {
+            ...base,
+            "Representative Type": formatKey(t.representativeType),
+          }
+        : base;
+    }
+
     case "tenant":
       if (props.typeValues?.renterType === "existing") {
         if (!props.tenantExistingValues) return null;
         return {
-          "Tenant ID": props.tenantExistingValues.tenant_id,
+          "Tenant ID": <Link to={`/admin/users/$userId`} params={{userId: props.tenantExistingValues.tenant_id.toString()}} target="_blank">{props.tenantExistingValues.tenant_id}</Link>,
         };
       } else {
         if (!props.tenantNewValues) return null;
@@ -55,31 +69,46 @@ const getSectionData = (
           "Last Name": props.tenantNewValues.last_name,
           Phone: props.tenantNewValues.phone,
           Email: props.tenantNewValues.email || "N/A",
-          "ID File Attached": props.tenantNewValues.id_file?.[0]?.name ? "Yes" : "No",
+          "ID File Attached": props.tenantNewValues.id_file?.name
+            ? "Yes"
+            : "No",
         };
       }
-      
+
     case "representative":
-      if (!props.representativeRequired || !props.representativeValues) return null;
-      return {
-        "First Name": props.representativeValues.first_name,
-        "Last Name": props.representativeValues.last_name,
-        Phone: props.representativeValues.phone,
-        Email: props.representativeValues.email || "N/A",
-        "ID File Attached": props.representativeValues.id_file?.[0]?.name ? "Yes" : "No",
-      };
-      
+      if (!props.representativeRequired) return null;
+
+      if (props.typeValues?.representativeType === "existing") {
+        if (!props.representativeExistingValues) return null;
+        return {
+          "Representative ID": <Link to={`/admin/users/$userId`} params={{userId: props.representativeExistingValues.representative_id.toString()}} target="_blank"> {props.representativeExistingValues.representative_id} </Link>
+        };
+      } else {
+        if (!props.representativeValues) return null;
+        return {
+          "First Name": props.representativeValues.first_name,
+          "Last Name": props.representativeValues.last_name,
+          Phone: props.representativeValues.phone,
+          Email: props.representativeValues.email || "N/A",
+          "ID File Attached": props.representativeValues.id_file?.name
+            ? "Yes"
+            : "No",
+        };
+      }
+
     case "lease":
       if (!props.leaseValues) return null;
       return {
-        // "Unit ID": props.leaseValues.unit_id,
-        // "Agreement Type": formatKey(props.leaseValues.agreement_type),
         "Agreement Amount": `ETB ${props.leaseValues.agreement_amount?.toLocaleString()}`,
         "Start Date": props.leaseValues.lease_start_date,
         "End Date": props.leaseValues.lease_end_date || "Open-ended",
         Notes: props.leaseValues.notes || "None",
+        "Document Template ID": props.leaseValues.lease_template_id ? <Link to={`/admin/templates/$templateId`} params={{templateId: props.leaseValues.lease_template_id}} target="_blank"> {props.leaseValues.lease_template_id} </Link> : "Default Template", 
+        "Representative Document": props.leaseValues.representative_document ? "Yes" : "No",
+        "Witness 1 Name": props.leaseValues.witness_1_full_name || "N/A",
+        "Witness 2 Name": props.leaseValues.witness_2_full_name || "N/A",
       };
-      
+
     default:
       return {};
   }
@@ -100,7 +129,9 @@ const ReviewSection = ({ title, data }: { title: string; data: Record<string, an
           <div key={key} className="flex flex-col">
             <span className="text-muted-foreground font-medium">{key}</span>
             <span className="font-medium text-gray-800 break-words">
-              {String(value) || "N/A"}
+            {React.isValidElement(value)
+                ? value
+                : String(value) ?? "N/A"}
             </span>
           </div>
         ))}

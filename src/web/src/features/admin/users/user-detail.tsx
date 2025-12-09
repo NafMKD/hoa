@@ -383,11 +383,11 @@ export function UserDetail() {
               user.leases.map((lease) => (
                 <Card key={lease.id} className="hover:shadow transition">
                   <CardHeader>
-                    <CardTitle>{lease.title || `Lease #${lease.id}`}</CardTitle>
+                    <CardTitle>{ `Lease #${lease.id}`}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      {lease.description || "No details available"}
+                      {lease.notes || "No details available"}
                     </p>
                   </CardContent>
                 </Card>

@@ -150,6 +150,7 @@ class UnitController extends Controller
                 'currentOwner.owner',
                 'currentOwner.document',
                 'leases',
+                'leases.tenant',
                 'currentLease',
             ]);
 
@@ -260,34 +261,140 @@ class UnitController extends Controller
      * Create a unit lease.
      * 
      * @param Request $request
-     * @return JsonResponse
+     * @param Unit $unit
+     * @return UnitLeaseResource|JsonResponse
      */
-    public function storeUnitLease(Request $request): JsonResponse
+    public function storeUnitLease(Request $request, Unit $unit): UnitLeaseResource|JsonResponse
     {
         try {
             $this->authorize('create', UnitLease::class);
 
-            $validated = $request->validate([
-                'unit_id'                    => ['required', 'integer', 'exists:units,id'],
-                'tenant_id'                  => ['required', 'integer', 'exists:users,id', new UniqueUnitLease()],
-                'representative_id'          => ['nullable', 'integer', 'exists:users,id'],
-                'representative_document'    => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:' . self::_MAX_FILE_SIZE],
-                'agreement_type'             => ['required', 'string', 'in:' . implode(',', self::_LEASE_AGREEMENT_TYPES)],
-                'agreement_amount'           => ['required', 'numeric', 'min:0'],
-                'lease_template_id'          => ['required', 'integer', 'exists:document_templates,id'],
-                'lease_start_date'           => ['required', 'date'],
-                'lease_end_date'             => ['nullable', 'date', 'after_or_equal:lease_start_date'],
-                'status'                     => ['nullable', 'string', 'in:' . implode(',', self::_LEASE_STATUS)],
-                'witness_1_full_name'        => ['nullable', 'string', 'max:255'],
-                'witness_2_full_name'        => ['nullable', 'string', 'max:255'],
-                'witness_3_full_name'        => ['nullable', 'string', 'max:255'],
-                'notes'                      => ['nullable', 'string']
-            ]);
+            $rules = [
 
-            $validated['created_by'] = Auth::id();
-            $lease = $this->leases->create($validated);
+                // -------------------------
+                // Leasing Type
+                // -------------------------
+                'leasing_by' => ['required', 'in:owner,representative'],
+                'renter_type' => ['required', 'in:new,existing'],
 
-            return response()->json(new UnitLeaseResource($lease), 201);
+                // Representative type only if leasing_by = representative
+                'representative_type' => [
+                    'required_if:leasing_by,representative',
+                    'in:existing,new'
+                ],
+
+                // -------------------------
+                // Tenant (Existing or New)
+                // -------------------------
+                // Existing
+                'tenant_id' => [
+                    'required_if:renter_type,existing',
+                    'integer',
+                    'exists:users,id',
+                    new UniqueUnitLease($unit->id)
+                ],
+
+                // New Tenant fields
+                'tenant_first_name'     => ['required_if:renter_type,new', 'string', 'max:255'],
+                'tenant_last_name'      => ['required_if:renter_type,new', 'string', 'max:255'],
+                'tenant_phone'          => ['required_if:renter_type,new', 'string', 'max:20'],
+                'tenant_city'           => ['nullable', 'string', 'max:255'],
+                'tenant_sub_city'       => ['nullable', 'string', 'max:255'],
+                'tenant_woreda'         => ['nullable', 'string', 'max:50'],
+                'tenant_house_number'   => ['nullable', 'string', 'max:50'],
+                'tenant_email'          => ['nullable', 'email'],
+                'tenant_id_file'        => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
+
+                // -------------------------
+                // Representative (only if leasing_by = representative)
+                // -------------------------
+
+                // Existing representative
+                'representative_id' => [
+                    'required_if:representative_type,existing',
+                    'integer',
+                    'exists:users,id'
+                ],
+
+                // New representative fields
+                'representative_first_name'     => ['required_if:representative_type,new', 'string', 'max:255'],
+                'representative_last_name'      => ['required_if:representative_type,new', 'string', 'max:255'],
+                'representative_phone'          => ['required_if:representative_type,new', 'string', 'max:20'],
+                'representative_city'           => ['nullable', 'string', 'max:255'],
+                'representative_sub_city'       => ['nullable', 'string', 'max:255'],
+                'representative_woreda'         => ['nullable', 'string', 'max:50'],
+                'representative_house_number'   => ['nullable', 'string', 'max:50'],
+                'representative_email'          => ['nullable', 'email'],
+                'representative_id_file'        => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
+
+                // Representative document for NEW representative
+                
+
+                // -------------------------
+                // Lease Fields
+                // -------------------------
+                'agreement_amount'   => ['required', 'numeric', 'min:0'],
+                'lease_template_id'  => ['required', 'integer', 'exists:document_templates,id'],
+                'lease_start_date'   => ['required', 'date'],
+                'lease_end_date'     => ['nullable', 'date', 'after_or_equal:lease_start_date'],
+                'lease_representative_document' => [
+                    'required_if:leasing_by,representative',
+                    'file',
+                    'mimes:jpg,jpeg,png,pdf',
+                    'max:' . self::_MAX_FILE_SIZE
+                ],
+                'notes'              => ['nullable', 'string'],
+                'witness_1_full_name' => ['nullable', 'string', 'max:255'],
+                'witness_2_full_name' => ['nullable', 'string', 'max:255'],
+            ];
+
+            // check if the unit is already leased
+            if ($unit->currentLease) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'Unit is already leased. Cannot create a new lease until the current lease is terminated.',
+                ], 400);
+            }
+
+            // Check if the unit has an owner
+            if (!$unit->currentOwner) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'Unit must have an owner before creating a lease.',
+                ], 400);
+            }
+
+            // Check if the tenant is not the owner
+            if ($request->input('renter_type') === 'existing' && $unit->currentOwner->owner_id == $request->input('tenant_id')) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'The tenant cannot be the owner of the unit.',
+                ], 400);
+            }
+
+            // Check if the representative is not the owner
+            if ($request->input('leasing_by') === 'representative' && $request->input('representative_type') === 'existing' && $unit->currentOwner->owner_id == $request->input('representative_id')) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'The representative cannot be the owner of the unit.',
+                ], 400);
+            }
+
+            // Check if the tenant is not the same as the representative
+            if ($request->input('leasing_by') === 'representative') {
+                if ($request->input('renter_type') === 'existing' && $request->input('representative_type') === 'existing' && $request->input('tenant_id') == $request->input('representative_id')) {
+                    return response()->json([
+                        'status' => self::_ERROR,
+                        'message' => 'The tenant and representative cannot be the same person.',
+                    ], 400);
+                }
+            }
+
+            $validated = $request->validate($rules);
+
+            $lease = $this->leases->create($unit, $validated);
+
+            return new UnitLeaseResource($lease);
         } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
@@ -307,6 +414,53 @@ class UnitController extends Controller
             ], 400);
         } catch (\Exception $e) {
             Log::error('Error creating tenant lease: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Display the specified unit lease.
+     * 
+     * @param Unit $unit
+     * @param UnitLease $lease
+     * @return JsonResponse
+     */
+    public function showUnitLease(Unit $unit, UnitLease $lease): JsonResponse
+    {
+        try {
+            $this->authorize('view', $lease);
+            $this->authorize('view', $unit);
+
+            $lease->load([
+                'unit',
+                'unit.building',
+                'unit.currentOwner',
+                'unit.currentOwner.owner',
+                'unit.currentOwner.document',
+                'tenant',
+                'representative',
+                'creator',
+                'updater',
+                'document',
+                'leaseTemplate',
+                'representativeDocument',
+            ]);
+
+            return response()->json(new UnitLeaseResource($lease));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNKNOWN_ERROR,
@@ -353,15 +507,17 @@ class UnitController extends Controller
     /**
      * Terminate the specified unit lease.
      * 
+     * @param Unit $unit
      * @param UnitLease $lease
      * @return JsonResponse
      */
-    public function terminateUnitLease(UnitLease $lease): JsonResponse
+    public function terminateUnitLease(Unit $unit, UnitLease $lease): JsonResponse
     {
         try {
             $this->authorize('terminate', $lease);
+            $this->authorize('update', $unit);
 
-            $terminatedLease = $this->leases->terminateLeaseById($lease->id);
+            $terminatedLease = $this->leases->terminateLeaseById($lease);
 
             return response()->json(new UnitLeaseResource($terminatedLease));
         } catch (AuthorizationException) {
@@ -386,15 +542,17 @@ class UnitController extends Controller
     /**
      * Activate the specified unit lease.
      * 
+     * @param Unit $unit
      * @param UnitLease $lease
      * @return JsonResponse
      */
-    public function activateUnitLease(UnitLease $lease): JsonResponse
+    public function activateUnitLease(Unit $unit, UnitLease $lease): JsonResponse
     {
         try {
             $this->authorize('activate', $lease);
+            $this->authorize('update', $unit);
 
-            $activatedLease = $this->leases->activateDraftLease($lease->id);
+            $activatedLease = $this->leases->activateDraftLease($lease);
 
             return response()->json(new UnitLeaseResource($activatedLease));
         } catch (AuthorizationException) {
@@ -542,7 +700,7 @@ class UnitController extends Controller
             $this->authorize('update', $unit);
 
             $data = $request->validate([
-                'status' => ['required', 'string', Rule::in(self::_UNIT_STATUSES)],
+                'status' => ['required', 'string', Rule::in(self::_UNIT_STATUSES), Rule::notIn([$unit->status])],
             ]);
 
             $updated = $this->units->changeStatus($unit, $data['status']);

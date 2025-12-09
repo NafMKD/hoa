@@ -21,9 +21,12 @@ interface UserSelectProps {
   value?: number | null;
   onChange: (value: number | null) => void;
   error?: string;
+  role?: string;
+  status?: string;
+  disabledIds?: number[];
 }
 
-export function UserSelect({ value, onChange, error }: UserSelectProps) {
+export function UserSelect({ value, onChange, error, role, status, disabledIds }: UserSelectProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState<User[]>([]);
@@ -41,7 +44,7 @@ export function UserSelect({ value, onChange, error }: UserSelectProps) {
     const timeout = setTimeout(async () => {
       try {
         setLoading(true);
-        const users = await searchUsers(query);
+        const users = await searchUsers(query, role, status);
         setOptions(users.data);          
       } finally {
         setLoading(false);
@@ -112,8 +115,11 @@ export function UserSelect({ value, onChange, error }: UserSelectProps) {
                       <CommandItem
                         key={user.id}
                         value={user.full_name}
-                        onSelect={() => handleSelect(user)}
-                        className="cursor-pointer"
+                        onSelect={() => {
+                          if (!disabledIds?.includes(user.id as number)) handleSelect(user);
+                        }}
+                        disabled={disabledIds?.includes(user.id as number)}
+                        className={disabledIds?.includes(user.id as number) ? "opacity-50 pointer-events-none" : "cursor-pointer"}
                       >
                         <div className="flex flex-col">
                           <span>{user.full_name}</span>

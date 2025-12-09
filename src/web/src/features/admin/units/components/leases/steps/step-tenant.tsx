@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconArrowLeft } from "@tabler/icons-react";
 import {
@@ -12,25 +12,22 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { StepTenantExistingSchema, StepTenantNewSchema } from "../schemas";
 import type {
   StepTenantExistingValues,
   StepTenantNewValues,
   StepTypeValues,
 } from "../types";
+import { UserSelect } from "@/features/admin/users/components/user-select";
+import { Label } from "@/components/ui/label";
 
 interface StepTenantProps {
   typeValues: StepTypeValues | null;
-  renters: Array<{ id: number; first_name: string; last_name: string }>;
   setTenantExistingValues: (values: StepTenantExistingValues) => void;
   setTenantNewValues: (values: StepTenantNewValues) => void;
+  tenantExistingValues?: StepTenantExistingValues | null;
+  tenantNewValues?: StepTenantNewValues | null;
+  unitId?: string;
   markCompleted: (step: "tenant", ok: boolean) => void;
   goNext: () => void;
   goPrev: () => void;
@@ -38,9 +35,11 @@ interface StepTenantProps {
 
 export function StepTenant({
   typeValues,
-  renters,
   setTenantExistingValues,
   setTenantNewValues,
+  tenantExistingValues,
+  tenantNewValues,
+  unitId,
   markCompleted,
   goNext,
   goPrev,
@@ -50,7 +49,7 @@ export function StepTenant({
   // --- Existing Tenant Form ---
   const formExisting = useForm<StepTenantExistingValues>({
     resolver: zodResolver(StepTenantExistingSchema),
-    defaultValues: { tenant_id: "" },
+    defaultValues: { tenant_id: tenantExistingValues?.tenant_id },
     mode: "onChange", // Good practice for immediate feedback
   });
 
@@ -65,12 +64,12 @@ export function StepTenant({
     // FIX: Removed 'as any' for better type safety
     resolver: zodResolver(StepTenantNewSchema as any),
     defaultValues: {
-      first_name: "",
-      last_name: "",
-      phone: "",
-      email: "",
+      first_name: tenantNewValues?.first_name || "",
+      last_name: tenantNewValues?.last_name || "",
+      phone: tenantNewValues?.phone || "",
+      email: tenantNewValues?.email || "",
       role: "tenant",
-      id_file: null,
+      id_file: tenantNewValues?.id_file || null,
     },
     mode: "onChange", // Good practice for immediate feedback
   });
@@ -147,6 +146,62 @@ export function StepTenant({
             </FormItem>
           )}
         />
+        { /* City */}
+        <FormField
+          control={formNew.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>City</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        { /* Sub City */}
+        <FormField
+          control={formNew.control}
+          name="sub_city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sub City</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        { /* Woreda */}
+        <FormField
+          control={formNew.control}
+          name="woreda"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Woreda</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        { /* House Number */}
+        <FormField
+          control={formNew.control}
+          name="house_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>House Number</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         {/* Role */}
         <FormField
           control={formNew.control}
@@ -195,7 +250,7 @@ export function StepTenant({
       </div>
 
       {/* Footer Buttons */}
-      <div className="pt-4 items-center space-x-4">
+      <div className="pt-4 flex items-center space-x-4">
         <Button variant="outline" onClick={goPrev} type="button">
           <IconArrowLeft size={16} className="mr-2" />
           Back
@@ -219,36 +274,23 @@ export function StepTenant({
             className="space-y-6"
           >
             {/* Tenant Select Field */}
-            <FormField
-              control={formExisting.control}
-              name="tenant_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Choose an existing renter</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-1/3">
-                        <SelectValue placeholder="Select renter..." />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {renters.map((r) => (
-                        <SelectItem key={r.id} value={String(r.id)}>
-                          {r.first_name} {r.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            <div className="w-1/3">
+              <Label className="mb-2">Choose an existing renter <span className="text-red-500">*</span></Label>
+              <Controller
+                name="tenant_id"
+                control={formExisting.control}
+                render={({ field }) => (
+                  <UserSelect
+                    value={field.value ?? null}
+                    onChange={field.onChange}
+                    status="active"
+                    disabledIds={[unitId as unknown as number]} 
+                  />
+                )}
+              />
+            </div>
             {/* Footer Buttons */}
-            <div className="pt-4 items-center space-x-4">
+            <div className="pt-4 flex items-center space-x-4">
               <Button variant="outline" onClick={goPrev} type="button">
                 <IconArrowLeft size={16} className="mr-2" />
                 Back

@@ -1,5 +1,5 @@
 import api, { handleApi } from "@/lib/api";
-import type { Unit, UnitPaginatedResponse } from "@/types/types";
+import type { Unit, UnitLeaseResource, UnitPaginatedResponse } from "@/types/types";
 
 /**
  * Fetch paginated units
@@ -71,4 +71,28 @@ export const deleteUnit = (unitId: string | number) =>
 export const changeUnitStatus = (unitId: string | number, status: string) =>
   handleApi<Unit>(
     api.post(`/v1/units/${unitId}/status`, { status: status })
+  );
+
+/**
+ * Fetch unit lease details
+ */
+export const fetchUnitLeaseDetail = (unitId: string, leaseId: string) =>
+  handleApi<UnitLeaseResource>(
+    api.get(`/v1/units/${unitId}/leases/${leaseId}`)
+  );
+
+/**
+ * Activate unit lease
+ */
+export const activateUnitLease = (unitId: string, leaseId: string) =>
+  handleApi<UnitLeaseResource>(
+    api.post(`/v1/units/${unitId}/leases/${leaseId}/activate`)
+  );
+
+/**
+ * Terminate unit lease
+ */
+export const terminateUnitLease = (unitId: string, leaseId: string) =>
+  handleApi<UnitLeaseResource>(
+    api.post(`/v1/units/${unitId}/leases/${leaseId}/terminate`)
   );

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
   IconArrowLeft,
   IconCircleCheck,
 } from "@tabler/icons-react";
-import { fetchRenters, submitLease } from "./lib/lease";
+import { submitLeaseAgreement } from "./lib/lease";
 import {
   type StepKey,
   type StepTypeValues,
@@ -24,7 +24,9 @@ import {
   type StepRepresentativeValues,
   type StepLeaseValues,
   STEP_ORDER,
+  type StepRepresentativeExistingValues,
 } from "./components/leases/types";
+import { useNavigate } from "@tanstack/react-router";
 
 // Import Step Components
 import { StepType } from "./components/leases/steps/step-type";
@@ -35,6 +37,8 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { ReviewStep } from "./components/leases/steps/step-review";
+import { Link, useParams } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 /**
  * -------------------------
@@ -42,6 +46,10 @@ import { ReviewStep } from "./components/leases/steps/step-review";
  * -------------------------
  */
 export function Leases() {
+  const { unitId } = useParams({
+    from: "/_authenticated/admin/units/$unitId/leases/",
+  });
+  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState<StepKey>("type");
   const [completed, setCompleted] = useState<Record<StepKey, boolean>>({
     type: false,
@@ -59,24 +67,12 @@ export function Leases() {
     useState<StepTenantNewValues | null>(null);
   const [representativeValues, setRepresentativeValues] =
     useState<StepRepresentativeValues | null>(null);
+  const [representativeExistingValues, setRepresentativeExistingValues] =
+    useState<StepRepresentativeExistingValues | null>(null);
   const [leaseValues, setLeaseValues] = useState<StepLeaseValues | null>(null);
 
-  const [renters, setRenters] = useState<
-    Array<{ id: number; first_name: string; last_name: string }>
-  >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
-
-  // Load existing renters for the dropdown
-  useEffect(() => {
-    let mounted = true;
-    fetchRenters().then((r) => {
-      if (mounted) setRenters(r);
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   // Helper to determine if representative step is required
   const representativeRequired = useMemo(() => {
@@ -125,6 +121,7 @@ export function Leases() {
     setTenantExistingValues(null);
     setTenantNewValues(null);
     setRepresentativeValues(null);
+    setRepresentativeExistingValues(null);
     setLeaseValues(null);
   }, []);
 
@@ -157,43 +154,63 @@ export function Leases() {
       }
 
       const fd = new FormData();
+      fd.append("leasing_by", typeValues.leasingBy);
+      fd.append("renter_type", typeValues.renterType);
+      if (typeValues.leasingBy === "representative" && typeValues.representativeType) {
+        fd.append("representative_type", typeValues.representativeType);
+      } 
 
       // tenant
       if (typeValues.renterType === "existing") {
         if (!tenantExistingValues) throw new Error("Tenant selection missing");
-        fd.append("tenant_id", tenantExistingValues.tenant_id);
+        fd.append("tenant_id", tenantExistingValues.tenant_id.toString());
       } else {
         if (!tenantNewValues) throw new Error("New tenant info missing");
-        fd.append("first_name", tenantNewValues.first_name);
-        fd.append("last_name", tenantNewValues.last_name);
-        fd.append("phone", tenantNewValues.phone);
-        if (tenantNewValues.email) fd.append("email", tenantNewValues.email);
-        fd.append("role", "tenant");
-        if (tenantNewValues.id_file && tenantNewValues.id_file.length > 0) {
-          fd.append("id_file", tenantNewValues.id_file[0] as Blob);
+        fd.append("tenant_first_name", tenantNewValues.first_name);
+        fd.append("tenant_last_name", tenantNewValues.last_name);
+        fd.append("tenant_phone", tenantNewValues.phone);
+        if (tenantNewValues.city) fd.append("tenant_city", tenantNewValues.city);
+        if (tenantNewValues.sub_city) fd.append("tenant_sub_city", tenantNewValues.sub_city);
+        if (tenantNewValues.woreda) fd.append("tenant_woreda", tenantNewValues.woreda);
+        if (tenantNewValues.house_number) fd.append("tenant_house_number", tenantNewValues.house_number);
+        if (tenantNewValues.email) fd.append("tenant_email", tenantNewValues.email);
+        fd.append("tenant_role", "tenant");
+        if (tenantNewValues.id_file && tenantNewValues.id_file instanceof File) {
+          fd.append("tenant_id_file", tenantNewValues.id_file as Blob);
         }
       }
 
       // representative
       if (typeValues.leasingBy === "representative") {
-        if (!representativeValues)
-          throw new Error("Representative info missing");
-        fd.append("representative_first_name", representativeValues.first_name);
-        fd.append("representative_last_name", representativeValues.last_name);
-        fd.append("representative_phone", representativeValues.phone);
-        if (representativeValues.email)
-          fd.append("representative_email", representativeValues.email);
-        fd.append("representative_role", "representative");
-        if (
-          representativeValues.id_file &&
-          representativeValues.id_file.length > 0
-        ) {
+        if (typeValues.representativeType === "existing") {
+          if (!representativeExistingValues) throw new Error("Representative selection missing");
+          fd.append('representative_id', representativeExistingValues.representative_id.toString());
+        } else {
+          if (!representativeValues)
+            throw new Error("Representative info missing");
           fd.append(
-            "representative_document",
-            representativeValues.id_file[0] as Blob
+            "representative_first_name",
+            representativeValues.first_name
           );
+          fd.append("representative_last_name", representativeValues.last_name);
+          fd.append("representative_phone", representativeValues.phone);
+          if (representativeValues.city) fd.append("representative_city", representativeValues.city);
+          if (representativeValues.sub_city) fd.append("representative_sub_city", representativeValues.sub_city);
+          if (representativeValues.woreda) fd.append("representative_woreda", representativeValues.woreda);
+          if (representativeValues.house_number) fd.append("representative_house_number", representativeValues.house_number);
+          if (representativeValues.email) fd.append("representative_email", representativeValues.email);
+          fd.append("representative_role", "representative");
+          if (
+            representativeValues.id_file &&
+            representativeValues.id_file instanceof File
+          ) {
+            fd.append(
+              "representative_id_file",
+              representativeValues.id_file as Blob
+            );
+          }
         }
-      }
+      }   
 
       // Lease fields
       fd.append("agreement_amount", String(leaseValues.agreement_amount));
@@ -204,28 +221,40 @@ export function Leases() {
         fd.append("lease_end_date", leaseValues.lease_end_date);
       if (
         leaseValues.representative_document &&
-        leaseValues.representative_document.length > 0
+        leaseValues.representative_document instanceof File
       ) {
         fd.append(
           "representative_document",
-          leaseValues.representative_document[0] as Blob
+          leaseValues.representative_document as Blob
         );
       }
       if (leaseValues.witness_1_full_name)
         fd.append("witness_1_full_name", leaseValues.witness_1_full_name);
       if (leaseValues.witness_2_full_name)
         fd.append("witness_2_full_name", leaseValues.witness_2_full_name);
-      if (leaseValues.witness_3_full_name)
-        fd.append("witness_3_full_name", leaseValues.witness_3_full_name);
-      if (leaseValues.notes) fd.append("notes", leaseValues.notes);
 
-      console.log("Submitting lease with data:", Array.from(fd.entries()));
+      if (leaseValues.notes) fd.append("notes", leaseValues.notes);
       
       // Submit to API
-      await submitLease(fd);
+      const lease = await submitLeaseAgreement(unitId,fd);
 
+      toast.success("Lease submitted successfully!");
+      
+      // navigate to lease
+      await navigate({
+        to: "/admin/units/$unitId/leases/$leaseId",
+        params: {
+          unitId: unitId,
+          leaseId: lease.id as string,
+        },
+      });
     } catch (err: any) {
-      console.error(err);
+      console.error("Lease submission failed", err);
+      if (err?.status === 422 && err?.response?.data?.message) {
+        toast.error(`Failed to submit lease: ${err.response.data.message}`);
+      }
+      
+      toast.error("Failed to submit lease. Please try again.");
       setSubmissionError(err?.message || "Unable to submit lease");
     } finally {
       setIsSubmitting(false);
@@ -249,9 +278,11 @@ export function Leases() {
         return (
           <StepTenant
             typeValues={typeValues}
-            renters={renters}
             setTenantExistingValues={setTenantExistingValues}
             setTenantNewValues={setTenantNewValues}
+            tenantExistingValues={tenantExistingValues}
+            tenantNewValues={tenantNewValues}
+            unitId={unitId}
             markCompleted={markCompleted}
             goNext={goNext}
             goPrev={goPrev}
@@ -260,7 +291,12 @@ export function Leases() {
       case "representative":
         return representativeRequired ? (
           <StepRepresentative
+            typeValues={typeValues}
             setRepresentativeValues={setRepresentativeValues}
+            setRepresentativeExistingValues={setRepresentativeExistingValues}
+            representativeValues={representativeValues}
+            tenantExistingValues={tenantExistingValues}
+            unitId={unitId}
             markCompleted={markCompleted}
             goNext={goNext}
             goPrev={goPrev}
@@ -275,6 +311,7 @@ export function Leases() {
           <StepLease
             typeValues={typeValues}
             setLeaseValues={setLeaseValues}
+            leaseValues={leaseValues}
             markCompleted={markCompleted}
             goNext={goNext}
             goPrev={goPrev}
@@ -287,6 +324,7 @@ export function Leases() {
             tenantExistingValues={tenantExistingValues}
             tenantNewValues={tenantNewValues}
             representativeValues={representativeValues}
+            representativeExistingValues={representativeExistingValues}
             leaseValues={leaseValues}
             representativeRequired={representativeRequired}
             goPrev={goPrev}
@@ -312,9 +350,11 @@ export function Leases() {
       <Main className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-10">
           <h1 className="text-2xl font-bold tracking-tight">Add New Lease</h1>
-          <Button variant="outline" onClick={() => window.history.back()}>
-            <IconArrowLeft size={16} className="mr-1" />
-            Back
+          <Button variant="outline" asChild>
+            <Link to="/admin/units">
+              <IconArrowLeft size={16} className="mr-1" />
+              Back
+            </Link>
           </Button>
         </div>
 

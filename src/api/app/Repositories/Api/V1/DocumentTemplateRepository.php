@@ -36,6 +36,20 @@ class DocumentTemplateRepository
     }
 
     /**
+     * Get all templates without pagination.
+     * 
+     * @param string $category
+     * @return Collection
+     */
+    public function getAll(string $category): Collection
+    {
+        return DocumentTemplate::query()
+            ->where('category', $category)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
      * Create a new document template.
      * 
      * @param array<string, mixed> $data
@@ -72,8 +86,9 @@ class DocumentTemplateRepository
             ]);
 
             DB::commit();
-            // Generate PDF version of the template
-            $this->createPdf($template);
+            // TODO: Generate PDF version of the template
+            // $this->createPdf($template);
+            
             return $template;
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -288,8 +303,8 @@ class DocumentTemplateRepository
 
             // Set PDF renderer
             \PhpOffice\PhpWord\Settings::setPdfRendererName(\PhpOffice\PhpWord\Settings::PDF_RENDERER_DOMPDF);
-            \PhpOffice\PhpWord\Settings::setPdfRendererPath(base_path('vendor/dompdf/dompdf'));
-
+            \PhpOffice\PhpWord\Settings::setPdfRendererPath(base_path('vendor/mpdf/mpdf'));
+            
             // Load DOCX and save as PDF
             $phpWord = \PhpOffice\PhpWord\IOFactory::load($tempDocx);
             $pdfWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'PDF');

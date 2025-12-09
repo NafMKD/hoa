@@ -66,7 +66,13 @@ class UserRepository
      */
     public function search(string $term, array $filers = []): Collection
     {
+        $allowedRoles = array_slice(
+            Controller::_ROLES, 
+            -3 
+        );
+
         $query = User::query()
+            ->whereIn('role', $allowedRoles)
             ->where(function ($q) use ($term) {
                 $q->where('first_name', 'like', "%{$term}%")
                   ->orWhere('last_name', 'like', "%{$term}%")
@@ -89,6 +95,36 @@ class UserRepository
     }
 
     /**
+     * Get users by role for selection.
+     * 
+     * @param  string  $role
+     * @return Collection
+     */
+    public function getUsersByRole(string $role): Collection
+    {
+        return User::query()
+            ->where('role', $role)
+            ->where('status', 'active')
+            ->orderBy('first_name', 'asc')
+            ->orderBy('last_name', 'asc')
+            ->get();
+    }
+
+    /**
+     * Get active users.
+     * 
+     * @return Collection
+     */
+    public function getActiveUsers(): Collection
+    {
+        return User::query()
+            ->where('status', 'active')
+            ->orderBy('first_name', 'asc')
+            ->orderBy('last_name', 'asc')
+            ->get();
+    }
+
+    /**
      * Create new user.
      * 
      * @param  array<string, mixed>  $data
@@ -97,13 +133,18 @@ class UserRepository
      */
     public function create(array $data): User
     {
-        DB::beginTransaction();
+        // Detect if we're inside a parent transaction
+        $inParentTransaction = DB::transactionLevel() > 0;
 
         try {
+            if (! $inParentTransaction) {
+                DB::beginTransaction();
+            }
+
             if (isset($data['id_file'])) {
                 $document = $this->documentRepository->create(
                     $data['id_file'],
-                    Controller::_DOCUMENT_TYPES[0] // 'id_files'
+                    Controller::_DOCUMENT_TYPES[0]
                 );
 
                 $data['id_file'] = $document->id;
@@ -111,11 +152,20 @@ class UserRepository
 
             $user = User::create($data);
 
-            DB::commit();
+            if (! $inParentTransaction) {
+                DB::commit();
+            }
+
             return $user;
+
         } catch (\Throwable $e) {
-            DB::rollBack();
-            Log::error('User creation failed: ' . $e->getMessage());
+
+            if (! $inParentTransaction) {
+                DB::rollBack();
+            }
+
+            Log::error("User creation failed: " . $e->getMessage());
+
             throw new RepositoryException('Failed to create user');
         }
     }

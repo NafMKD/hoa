@@ -94,6 +94,7 @@ class Unit extends Model
 
         if ($this->currentLease != null) return false;
 
+        if ($this->currentOwner == null) return false;
 
         return true;
     }

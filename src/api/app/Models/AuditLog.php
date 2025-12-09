@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AuditLog extends Model
 {
+    public $timestamps = false;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -20,6 +22,7 @@ class AuditLog extends Model
         'changes',
         'ip_address',
         'user_agent',
+        'created_at',
     ];
 
     /**

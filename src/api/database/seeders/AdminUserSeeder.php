@@ -14,16 +14,16 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['phone' => '0911551455'], // unique identifier
+            ['phone' => env('ADMIN_PHONE')], // unique identifier
             [
-                'first_name' => 'Anteneh',
-                'last_name'  => 'M.',
-                'email'      => 'anteneh@gmail.com',
-                'city'       => 'Addis Ababa',
-                'sub_city'    => 'Lemi Kura',
-                'woreda'       => 'Woreda 13',
-                'house_number' => 'SA01',
-                'password'   => Hash::make('12345678'),
+                'first_name' => env('ADMIN_FIRST_NAME'),
+                'last_name'  => env('ADMIN_LAST_NAME'),
+                'email'      => env('ADMIN_EMAIL'),
+                'city'       => env('ADMIN_CITY'),
+                'sub_city'   => env('ADMIN_SUB_CITY'),
+                'woreda'     => env('ADMIN_WOREDA'),
+                'house_number' => env('ADMIN_HOUSE_NUMBER'),
+                'password'   => Hash::make(env('ADMIN_PASSWORD')),
                 'role'       => 'admin',
                 'email_verified_at' => now(),
             ]

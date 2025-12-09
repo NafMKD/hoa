@@ -10,6 +10,7 @@ use App\Models\UnitLease;
 use App\Models\Unit;
 use App\Models\UnitOwner;
 use App\Models\User;
+use App\Observers\AuditLogObserver;
 use App\Policies\Api\V1\BuildingPolicy;
 use App\Policies\Api\V1\DocumentTemplatePolicy;
 use App\Policies\Api\V1\FeePolicy;
@@ -36,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Policies
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(Building::class, BuildingPolicy::class);
         Gate::policy(Unit::class, UnitPolicy::class);
@@ -44,5 +46,15 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Fee::class, FeePolicy::class);
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(UnitOwner::class, UnitOwnerPolicy::class);
+
+        // Observers
+        User::observe(AuditLogObserver::class);
+        Building::observe(AuditLogObserver::class);
+        Unit::observe(AuditLogObserver::class);
+        DocumentTemplate::observe(AuditLogObserver::class);
+        UnitLease::observe(AuditLogObserver::class);
+        Fee::observe(AuditLogObserver::class);
+        Invoice::observe(AuditLogObserver::class);
+        UnitOwner::observe(AuditLogObserver::class);
     }
 }

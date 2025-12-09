@@ -1,5 +1,5 @@
 import api, { handleApi } from "@/lib/api";
-import type { DocumentTemplatePaginatedResponse } from "@/types/types";
+import type { DocumentTemplatePaginatedResponse, UnitLeaseResource } from "@/types/types";
 
 /**
  * Fetch lease document templates
@@ -11,7 +11,7 @@ export const fetchLeaseTemplates = () =>
  * Submit lease agreement for processing
  */
 export const submitLeaseAgreement = (unitId: string, formData: FormData) =>
-  handleApi(
+  handleApi<UnitLeaseResource>(
     api.post(`/v1/units/${unitId}/leases`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     })

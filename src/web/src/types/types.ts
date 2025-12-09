@@ -23,7 +23,7 @@ export type User = {
   idFile?: Document;
   owned_units?: UnitResource[];
   rented_units?: UnitResource[];
-  leases?: TenantLeaseResource[];
+  leases?: UnitLeaseResource[];
   created_templates?: DocumentTemplate[];
   updated_templates?: DocumentTemplate[];
   last_login_at?: string | null;
@@ -60,18 +60,25 @@ export type UnitResource = {
   type_name: string;
 };
 
-export type TenantLeaseResource = {
-  id: string | number;
-  title: string;
-  description: string | null;
-  lease_number: string;
-  property_name: string;
-  unit_number: string;
-  start_date: string;
-  end_date: string;
+export type UnitLeaseResource = {
+  id: number | string;
+  unit?: Unit | null;
+  tenant?: User | null;
+  representative?: User | null;
+  representative_document?: Document | null;
+  agreement_type: string | null;
+  agreement_amount: number | string | null;
+  lease_template?: DocumentTemplate | null;
+  lease_document?: Document | null;
+  lease_start_date: string | null;
+  lease_end_date: string | null;
   status: string;
-  rent_amount: number;
-  currency: string;
+  witness_1_full_name: string | null;
+  witness_2_full_name: string | null;
+  witness_3_full_name: string | null;
+  notes: string | null;
+  created_by?: User | null;
+  updated_by?: User | null;
   created_at: string;
   updated_at: string;
 };
@@ -122,7 +129,7 @@ export type Building = {
   units_per_floor: number;
   address: string;
   notes: string | null;
-  units?: UnitResource[];
+  units?: Unit[];
   created_at: string;
   updated_at: string;
 };
@@ -139,7 +146,7 @@ export type BuildingPaginatedResponse = {
 
 export type Unit = {
   id: string | number;
-  building?: IdNamePair; 
+  building?: Building; 
   name: string;
   floor_number: number | null;
   floor_name?: string;
@@ -151,8 +158,8 @@ export type Unit = {
   status: string;
   status_name: string;
   isRentable: boolean;
-  currentLease?: TenantLeaseResource;
-  leases?: TenantLeaseResource[];
+  currentLease?: UnitLeaseResource;
+  leases?: UnitLeaseResource[];
   created_at: string;
   updated_at: string;
 };
@@ -181,6 +188,7 @@ export type UnitOwnership = {
   ownership_document?: Document;
   start_date: string;
   end_date: string | null;
+  status: string;
   created_by?: User;
   updated_by?: User;
   created_at: string;

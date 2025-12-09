@@ -26,6 +26,7 @@ import {
   STEP_ORDER,
   type StepRepresentativeExistingValues,
 } from "./components/leases/types";
+import { router } from "@/QueryClient";
 
 // Import Step Components
 import { StepType } from "./components/leases/steps/step-type";
@@ -46,7 +47,7 @@ import { toast } from "sonner";
  */
 export function Leases() {
   const { unitId } = useParams({
-    from: "/_authenticated/admin/units/$unitId/leases",
+    from: "/_authenticated/admin/units/$unitId/leases/",
   });
   const [activeStep, setActiveStep] = useState<StepKey>("type");
   const [completed, setCompleted] = useState<Record<StepKey, boolean>>({
@@ -225,13 +226,19 @@ export function Leases() {
         fd.append("witness_2_full_name", leaseValues.witness_2_full_name);
 
       if (leaseValues.notes) fd.append("notes", leaseValues.notes);
-
-      console.log("Submitting lease with data:", Array.from(fd.entries()));
       
       // Submit to API
-      await submitLeaseAgreement(unitId,fd);
+      const lease = await submitLeaseAgreement(unitId,fd);
 
+      toast.success("Lease submitted successfully!");
+      // navigate to lease
+      router.navigate({ to: `/admin/units/$unitId/leases/$leaseId`, params: { unitId: unitId, leaseId: lease.id.toString() } });
     } catch (err: any) {
+      console.error("Lease submission failed", err);
+      if (err?.status === 422 && err?.response?.data?.message) {
+        toast.error(`Failed to submit lease: ${err.response.data.message}`);
+      }
+      
       toast.error("Failed to submit lease. Please try again.");
       setSubmissionError(err?.message || "Unable to submit lease");
     } finally {

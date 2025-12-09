@@ -150,6 +150,7 @@ class UnitController extends Controller
                 'currentOwner.owner',
                 'currentOwner.document',
                 'leases',
+                'leases.tenant',
                 'currentLease',
             ]);
 
@@ -261,9 +262,9 @@ class UnitController extends Controller
      * 
      * @param Request $request
      * @param Unit $unit
-     * @return JsonResponse
+     * @return UnitLeaseResource|JsonResponse
      */
-    public function storeUnitLease(Request $request, Unit $unit): JsonResponse
+    public function storeUnitLease(Request $request, Unit $unit): UnitLeaseResource|JsonResponse
     {
         try {
             $this->authorize('create', UnitLease::class);
@@ -375,12 +376,9 @@ class UnitController extends Controller
 
             $validated = $request->validate($rules);
 
-            $this->leases->create($unit, $validated);
+            $lease = $this->leases->create($unit, $validated);
 
-            return response()->json([
-                'status' => self::_SUCCESS,
-                'message' => 'Unit lease created successfully.',
-            ], 201);
+            return new UnitLeaseResource($lease);
         } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
@@ -400,6 +398,53 @@ class UnitController extends Controller
             ], 400);
         } catch (\Exception $e) {
             Log::error('Error creating tenant lease: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Display the specified unit lease.
+     * 
+     * @param Unit $unit
+     * @param UnitLease $lease
+     * @return JsonResponse
+     */
+    public function showUnitLease(Unit $unit, UnitLease $lease): JsonResponse
+    {
+        try {
+            $this->authorize('view', $lease);
+            $this->authorize('view', $unit);
+
+            $lease->load([
+                'unit',
+                'unit.building',
+                'unit.currentOwner',
+                'unit.currentOwner.owner',
+                'unit.currentOwner.document',
+                'tenant',
+                'representative',
+                'creator',
+                'updater',
+                'document',
+                'leaseTemplate',
+                'representativeDocument',
+            ]);
+
+            return response()->json(new UnitLeaseResource($lease));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNKNOWN_ERROR,

@@ -36,9 +36,9 @@ class UnitLeaseResource extends JsonResource
             'lease_document'            => $this->whenLoaded('document', function () {
                 return new DocumentResource($this->document);
             }),
-            'lease_start_date'          => $this->lease_start_date,
-            'lease_end_date'            => $this->lease_end_date,
-            'status'                    => ucwords(str_replace('_', ' ', $this->status)),
+            'lease_start_date'          => \Carbon\Carbon::parse($this->lease_start_date)->toFormattedDateString(),
+            'lease_end_date'            => \Carbon\Carbon::parse($this->lease_end_date)->toFormattedDateString(),
+            'status'                    => $this->status,
             'witness_1_full_name'       => $this->witness_1_full_name,
             'witness_2_full_name'       => $this->witness_2_full_name,
             'witness_3_full_name'       => $this->witness_3_full_name,
@@ -49,8 +49,8 @@ class UnitLeaseResource extends JsonResource
             'updated_by'                => $this->whenLoaded('updater', function () {
                 return new UserResource($this->updater);
             }),
-            'created_at'                => $this->created_at,
-            'updated_at'                => $this->updated_at,
+            'created_at'       => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),
+            'updated_at'       => \Carbon\Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];
     }
 }

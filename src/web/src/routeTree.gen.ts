@@ -25,7 +25,8 @@ import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/admin/templates/$templateId'
 import { Route as AuthenticatedAdminBuildingsBuildingIdRouteImport } from './routes/_authenticated/admin/buildings/$buildingId'
 import { Route as AuthenticatedAdminUnitsUnitIdIndexRouteImport } from './routes/_authenticated/admin/units/$unitId/index'
-import { Route as AuthenticatedAdminUnitsUnitIdLeasesRouteImport } from './routes/_authenticated/admin/units/$unitId/leases'
+import { Route as AuthenticatedAdminUnitsUnitIdLeasesIndexRouteImport } from './routes/_authenticated/admin/units/$unitId/leases/index'
+import { Route as AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRouteImport } from './routes/_authenticated/admin/units/$unitId/leases/$leaseId/index'
 
 const errors503Route = errors503RouteImport.update({
   id: '/(errors)/503',
@@ -115,10 +116,16 @@ const AuthenticatedAdminUnitsUnitIdIndexRoute =
     path: '/units/$unitId/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
-const AuthenticatedAdminUnitsUnitIdLeasesRoute =
-  AuthenticatedAdminUnitsUnitIdLeasesRouteImport.update({
-    id: '/units/$unitId/leases',
-    path: '/units/$unitId/leases',
+const AuthenticatedAdminUnitsUnitIdLeasesIndexRoute =
+  AuthenticatedAdminUnitsUnitIdLeasesIndexRouteImport.update({
+    id: '/units/$unitId/leases/',
+    path: '/units/$unitId/leases/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute =
+  AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRouteImport.update({
+    id: '/units/$unitId/leases/$leaseId/',
+    path: '/units/$unitId/leases/$leaseId/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 
@@ -138,8 +145,9 @@ export interface FileRoutesByFullPath {
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
-  '/admin/units/$unitId/leases': typeof AuthenticatedAdminUnitsUnitIdLeasesRoute
   '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdIndexRoute
+  '/admin/units/$unitId/leases': typeof AuthenticatedAdminUnitsUnitIdLeasesIndexRoute
+  '/admin/units/$unitId/leases/$leaseId': typeof AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
@@ -156,8 +164,9 @@ export interface FileRoutesByTo {
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
-  '/admin/units/$unitId/leases': typeof AuthenticatedAdminUnitsUnitIdLeasesRoute
   '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdIndexRoute
+  '/admin/units/$unitId/leases': typeof AuthenticatedAdminUnitsUnitIdLeasesIndexRoute
+  '/admin/units/$unitId/leases/$leaseId': typeof AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -176,8 +185,9 @@ export interface FileRoutesById {
   '/_authenticated/admin/templates/': typeof AuthenticatedAdminTemplatesIndexRoute
   '/_authenticated/admin/units/': typeof AuthenticatedAdminUnitsIndexRoute
   '/_authenticated/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
-  '/_authenticated/admin/units/$unitId/leases': typeof AuthenticatedAdminUnitsUnitIdLeasesRoute
   '/_authenticated/admin/units/$unitId/': typeof AuthenticatedAdminUnitsUnitIdIndexRoute
+  '/_authenticated/admin/units/$unitId/leases/': typeof AuthenticatedAdminUnitsUnitIdLeasesIndexRoute
+  '/_authenticated/admin/units/$unitId/leases/$leaseId/': typeof AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -197,8 +207,9 @@ export interface FileRouteTypes {
     | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
-    | '/admin/units/$unitId/leases'
     | '/admin/units/$unitId'
+    | '/admin/units/$unitId/leases'
+    | '/admin/units/$unitId/leases/$leaseId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
@@ -215,8 +226,9 @@ export interface FileRouteTypes {
     | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
-    | '/admin/units/$unitId/leases'
     | '/admin/units/$unitId'
+    | '/admin/units/$unitId/leases'
+    | '/admin/units/$unitId/leases/$leaseId'
   id:
     | '__root__'
     | '/_authenticated/admin'
@@ -234,8 +246,9 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/templates/'
     | '/_authenticated/admin/units/'
     | '/_authenticated/admin/users/'
-    | '/_authenticated/admin/units/$unitId/leases'
     | '/_authenticated/admin/units/$unitId/'
+    | '/_authenticated/admin/units/$unitId/leases/'
+    | '/_authenticated/admin/units/$unitId/leases/$leaseId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -362,11 +375,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/admin/units/$unitId/leases': {
-      id: '/_authenticated/admin/units/$unitId/leases'
+    '/_authenticated/admin/units/$unitId/leases/': {
+      id: '/_authenticated/admin/units/$unitId/leases/'
       path: '/units/$unitId/leases'
       fullPath: '/admin/units/$unitId/leases'
-      preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdLeasesRouteImport
+      preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdLeasesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/units/$unitId/leases/$leaseId/': {
+      id: '/_authenticated/admin/units/$unitId/leases/$leaseId/'
+      path: '/units/$unitId/leases/$leaseId'
+      fullPath: '/admin/units/$unitId/leases/$leaseId'
+      preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
   }
@@ -381,8 +401,9 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminTemplatesIndexRoute: typeof AuthenticatedAdminTemplatesIndexRoute
   AuthenticatedAdminUnitsIndexRoute: typeof AuthenticatedAdminUnitsIndexRoute
   AuthenticatedAdminUsersIndexRoute: typeof AuthenticatedAdminUsersIndexRoute
-  AuthenticatedAdminUnitsUnitIdLeasesRoute: typeof AuthenticatedAdminUnitsUnitIdLeasesRoute
   AuthenticatedAdminUnitsUnitIdIndexRoute: typeof AuthenticatedAdminUnitsUnitIdIndexRoute
+  AuthenticatedAdminUnitsUnitIdLeasesIndexRoute: typeof AuthenticatedAdminUnitsUnitIdLeasesIndexRoute
+  AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute: typeof AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
@@ -399,10 +420,12 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminTemplatesIndexRoute,
     AuthenticatedAdminUnitsIndexRoute: AuthenticatedAdminUnitsIndexRoute,
     AuthenticatedAdminUsersIndexRoute: AuthenticatedAdminUsersIndexRoute,
-    AuthenticatedAdminUnitsUnitIdLeasesRoute:
-      AuthenticatedAdminUnitsUnitIdLeasesRoute,
     AuthenticatedAdminUnitsUnitIdIndexRoute:
       AuthenticatedAdminUnitsUnitIdIndexRoute,
+    AuthenticatedAdminUnitsUnitIdLeasesIndexRoute:
+      AuthenticatedAdminUnitsUnitIdLeasesIndexRoute,
+    AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute:
+      AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute,
   }
 
 const AuthenticatedAdminRouteRouteWithChildren =

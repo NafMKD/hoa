@@ -455,26 +455,14 @@ export function UnitDetail() {
                             </TableHead>
                             <TableHead className="w-[18%]">End date</TableHead>
                             <TableHead className="w-[15%] text-center">
-                              File
+                              Action
                             </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {leases.map((lease: any) => {
-                            const docUrl =
-                              lease.document_url ||
-                              lease.file_url ||
-                              lease.file?.url;
-                            const docName =
-                              lease.document_name ||
-                              lease.file_name ||
-                              lease.file?.name ||
-                              `Lease #${lease.id}`;
-
                             const displayName =
-                              lease.tenant_name ||
-                              lease.tenant ||
-                              lease.name ||
+                              lease.tenant?.full_name ||
                               `Lease #${lease.id}`;
 
                             return (
@@ -491,32 +479,23 @@ export function UnitDetail() {
                                   )}
                                 </TableCell>
                                 <TableCell>
-                                  {lease.start_date || lease.startDate || "—"}
+                                  {lease.lease_start_date || "—"}
                                 </TableCell>
                                 <TableCell>
-                                  {lease.end_date || lease.endDate || "—"}
+                                  {lease.lease_end_date || "—"}
                                 </TableCell>
                                 <TableCell className="text-center">
-                                  {docUrl ? (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="inline-flex items-center gap-1 text-xs"
-                                      onClick={() =>
-                                        handleOpenPreview({
-                                          title: docName,
-                                          url: docUrl,
-                                        })
-                                      }
-                                    >
-                                      <IconEye size={14} />
-                                      <span>View</span>
-                                    </Button>
-                                  ) : (
-                                    <span className="text-xs text-muted-foreground">
-                                      —
-                                    </span>
-                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="inline-flex items-center gap-1 text-xs"
+                                    asChild
+                                  >
+                                    <Link to={`/admin/units/$unitId/leases/$leaseId`} params={{unitId: unit.id.toString(), leaseId: lease.id.toString()}}>
+                                    <IconEye size={14} />
+                                    <span>View</span>
+                                    </Link>
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             );

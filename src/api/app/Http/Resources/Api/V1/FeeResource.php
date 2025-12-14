@@ -25,9 +25,6 @@ class FeeResource extends JsonResource
             'last_recurring_date'   => $this->last_recurring_date,
             'next_recurring_date'   => $this->next_recurring_date,
             'is_penalizable'        => $this->is_penalizable,
-            // 'invoices'              => $this->whenLoaded('invoices', function () {
-            //     return InvoiceResource::collection($this->invoices);
-            // }),
             'created_at'            => $this->created_at,
             'updated_at'            => $this->updated_at,
         ];

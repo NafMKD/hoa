@@ -14,15 +14,25 @@ class FeeRepository
      * Get all fees with optional pagination.
      * 
      * @param int|null $perPage
+     * @param array $filters
      * @return Collection|LengthAwarePaginator
      */
-    public function all(?int $perPage = null): Collection|LengthAwarePaginator
+    public function all(?int $perPage = null, array $filters = []): Collection|LengthAwarePaginator
     {
-        if ($perPage) {
-            return Fee::paginate($perPage);
+        $query = Fee::query();
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
+            });
         }
 
-        return Fee::all();
+        $query->orderBy('created_at', 'desc');
+
+        return $perPage ? $query->paginate($perPage) : $query->get();;
     }
 
     /**

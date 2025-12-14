@@ -5,8 +5,7 @@ export type UserRole =
   | "tenant"
   | "homeowner"
   | "representative";
-
-
+  
 export type User = {
   id: string | number;
   first_name: string;
@@ -193,4 +192,29 @@ export type UnitOwnership = {
   updated_by?: User;
   created_at: string;
   updated_at: string;
+}
+
+export interface Fee {
+  id: number | string;
+  name: string;
+  description: string;
+  category: string;
+  amount: number | string; 
+  is_recurring: boolean;
+  recurring_period_months: number | null;
+  last_recurring_date: string | null;
+  next_recurring_date: string | null;
+  is_penalizable: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FeePaginatedResponse {
+  data: Fee[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
 }

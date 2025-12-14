@@ -3,7 +3,7 @@ import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDebounce } from "use-debounce";
 import {
   getCoreRowModel,
@@ -24,13 +24,19 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { IconHelp, IconPlus } from "@tabler/icons-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 import { fetchDocumentTemplates } from "./lib/templates";
 import { columns } from "./components/columns";
 import type { DocumentTemplate } from "@/types/types";
 import { AddDocumentTemplateForm } from "./components/add-template-form";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { toast } from "sonner";
 
 export function DocumentTemplates() {
   const [pagination, setPagination] = useState<PaginationState>({
@@ -39,33 +45,39 @@ export function DocumentTemplates() {
   });
 
   const [pageCount, setPageCount] = useState(0);
+  
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+
   const [data, setData] = useState<DocumentTemplate[]>([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 600);
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  
   const [open, setOpen] = useState(false);
-
   const [helpOpen, setHelpOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const page = pagination.pageIndex + 1;
+  const refreshTemplates = useCallback(async () => {
+    setIsLoading(true);
+    const page = pagination.pageIndex + 1;
 
-      const res = await fetchDocumentTemplates(
-        page.toString(),
-        pagination.pageSize.toString(),
-        debouncedSearch
-      );
+    const res = await fetchDocumentTemplates(
+      page.toString(),
+      pagination.pageSize.toString(),
+      debouncedSearch
+    );
 
-      setData(res.data);
-      setPageCount(res.meta.last_page);
-      setIsLoading(false);
-    };
-
-    fetchData();
+    setData(res.data);
+    setPageCount(res.meta.last_page);
+    setIsLoading(false);
+    
+    setIsInitialLoading(false);
   }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
+
+  useEffect(() => {
+    refreshTemplates();
+  }, [refreshTemplates]);
 
   const table = useReactTable({
     data,
@@ -77,7 +89,8 @@ export function DocumentTemplates() {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     enableRowSelection: true,
-    onRowSelectionChange: setRowSelection
+    onRowSelectionChange: setRowSelection,
+    meta: { isLoading },
   });
 
   function CopyTag({ text }: { text: string }) {
@@ -93,7 +106,7 @@ export function DocumentTemplates() {
       </span>
     );
   }
-  
+
   function HelpSection({
     title,
     items,
@@ -114,7 +127,7 @@ export function DocumentTemplates() {
       </section>
     );
   }
-  
+
   return (
     <>
       <Header fixed>
@@ -126,7 +139,7 @@ export function DocumentTemplates() {
       </Header>
 
       <Main>
-        <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
               Document Templates
@@ -135,71 +148,65 @@ export function DocumentTemplates() {
               Manage system document templates here.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            {/* Help Button */}
+
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
               onClick={() => setHelpOpen(true)}
-              className="flex items-center"
+              className="gap-2"
             >
-              <IconHelp className="mr-1 h-4 w-4" />
+              <IconHelp className="h-4 w-4" />
               Help
             </Button>
 
-          {/* Add Template Button */}
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button onClick={() => setOpen(true)}>
-                <IconPlus className="mr-1 h-4 w-4" />
-                Add Template
-              </Button>
-            </SheetTrigger>
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <Button onClick={() => setOpen(true)} className="gap-2">
+                  <IconPlus className="h-4 w-4" />
+                  Add Template
+                </Button>
+              </SheetTrigger>
 
-            <SheetContent
-              side="right"
-              className="w-full sm:max-w-lg overflow-auto"
-            >
-              <SheetHeader>
-                <SheetTitle className="text-center">
-                  Add New Template
-                </SheetTitle>
-                <SheetDescription className="text-center">
-                  Fill in template information below.
-                </SheetDescription>
-              </SheetHeader>
+              <SheetContent
+                side="right"
+                className="w-full sm:max-w-lg overflow-auto"
+              >
+                <SheetHeader>
+                  <SheetTitle className="text-center">
+                    Add New Template
+                  </SheetTitle>
+                  <SheetDescription className="text-center">
+                    Fill in template information below.
+                  </SheetDescription>
+                </SheetHeader>
 
-              <div className="mt-6 pb-10">
-                <AddDocumentTemplateForm
-                  onSuccess={() => {
-                    setOpen(false);
-                    const page = pagination.pageIndex + 1;
-                    fetchDocumentTemplates(
-                      page.toString(),
-                      pagination.pageSize.toString(),
-                      debouncedSearch
-                    ).then((res) => {
-                      setData(res.data);
-                      setPageCount(res.meta.last_page);
-                    });
-                  }}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
-          
+                <div className="mt-6 pb-10">
+                  <AddDocumentTemplateForm
+                    onSuccess={() => {
+                      setOpen(false);
+                      refreshTemplates();
+                    }}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          {isLoading ? (
+          {isInitialLoading ? (
             <DataTableSkeleton
               columnCount={6}
               filterCount={1}
-              cellWidths={["6rem", "10rem", "20rem", "20rem", "10rem", "6rem"]}
+              cellWidths={["2rem", "2rem", "12rem", "8rem", "2rem", "4rem"]}
               shrinkZero
             />
           ) : (
-            <DataTable table={table} onChange={setSearch} />
+            <DataTable
+              table={table}
+              onChange={setSearch}
+              searchValue={search}
+            />
           )}
         </div>
 
@@ -210,12 +217,11 @@ export function DocumentTemplates() {
                 Template Variable Guide
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground text-center mt-1">
-                  Click any variable to copy it to your clipboard.
+                Click any variable to copy it to your clipboard.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6 py-4">
-              {/* Category */}
               <section>
                 <h3 className="font-semibold text-lg">
                   Lease Document Creation
@@ -230,7 +236,6 @@ export function DocumentTemplates() {
                 </div>
               </section>
 
-              {/* Owner */}
               <HelpSection
                 title="Owner Information"
                 items={[
@@ -246,7 +251,6 @@ export function DocumentTemplates() {
                 ]}
               />
 
-              {/* Representative */}
               <HelpSection
                 title="Representative Information"
                 items={[
@@ -254,7 +258,6 @@ export function DocumentTemplates() {
                 ]}
               />
 
-              {/* Tenant */}
               <HelpSection
                 title="Tenant Information"
                 items={[
@@ -266,8 +269,6 @@ export function DocumentTemplates() {
                   { label: "Phone Number", value: "{{tenant.phone}}" },
                 ]}
               />
-
-              {/* House */}
               <HelpSection
                 title="House Details"
                 items={[
@@ -277,7 +278,6 @@ export function DocumentTemplates() {
                 ]}
               />
 
-              {/* Lease */}
               <HelpSection
                 title="Lease Details"
                 items={[
@@ -291,8 +291,6 @@ export function DocumentTemplates() {
                   { label: "Today Date", value: "{{today_date}}" },
                 ]}
               />
-
-              {/* Witnesses */}
               <HelpSection
                 title="Witnesses"
                 items={[

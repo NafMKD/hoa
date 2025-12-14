@@ -39,7 +39,10 @@ export function Units() {
     pageSize: 10,
   });
   const [pageCount, setPageCount] = useState(0);
+
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+
   const [data, setData] = useState<Unit[]>([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 600);
@@ -61,6 +64,8 @@ export function Units() {
     setData(res.data);
     setPageCount(res.meta.last_page);
     setIsLoading(false);
+
+    setIsInitialLoading(false);
   }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
 
   useEffect(() => {
@@ -78,7 +83,7 @@ export function Units() {
     getPaginationRowModel: getPaginationRowModel(),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
-    meta: { setEditUnit, setIsEditOpen, setAddOwnership, setIsOwnershipOpen },
+    meta: { setEditUnit, setIsEditOpen, setAddOwnership, setIsOwnershipOpen, isLoading },
   });
 
   return (
@@ -201,24 +206,28 @@ export function Units() {
         </div>
 
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          {isLoading ? (
+          {isInitialLoading ? (
             <DataTableSkeleton
               columnCount={8}
               filterCount={1}
               cellWidths={[
-                "6rem",
-                "10rem",
-                "10rem",
-                "10rem",
-                "10rem",
-                "10rem",
-                "10rem",
-                "6rem",
+                "2rem",
+                "2rem",
+                "16rem",
+                "12rem",
+                "5rem",
+                "4rem",
+                "5rem",
+                "4rem",
               ]}
               shrinkZero
             />
           ) : (
-            <DataTable table={table} onChange={setSearch} />
+            <DataTable
+              table={table}
+              onChange={setSearch}
+              searchValue={search}
+            />
           )}
         </div>
       </Main>

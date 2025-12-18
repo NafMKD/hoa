@@ -96,7 +96,7 @@ export function Fees() {
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Fees</h2>
             <p className="text-muted-foreground">
-              Manage fees, recurring charges, and penalties here.
+              Manage fees, and recurring charges here.
             </p>
           </div>
 

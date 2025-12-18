@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { ApiError } from "@/types/api-error";
 import type { Fee } from "@/types/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // 1. Define Schema (Same as Add Form)
 const feeSchema = z.object({
@@ -141,7 +142,25 @@ export function EditFeeForm({ fee, onSuccess }: EditFeeFormProps) {
               <Label htmlFor="category">
                 Category <span className="text-red-500">*</span>
               </Label>
-              <Input id="category" {...form.register("category")} />
+              <Controller
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full cursor-pointer">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value={"administrational"}>Administrational</SelectItem>
+                        <SelectItem value={"special_assessment"}>Special Assessment</SelectItem>
+                        <SelectItem value={"other"}>Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {form.formState.errors.category && (
                 <p className="text-sm text-red-500">
                   {form.formState.errors.category.message}

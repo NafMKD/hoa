@@ -103,7 +103,7 @@ export function AddPaymentModal({ onSuccess }: AddPaymentModalProps) {
         <DialogHeader>
           <DialogTitle>Record Payment</DialogTitle>
           <DialogDescription>
-            Enter payment details manually.
+            Fields marked with <span className="text-red-500">*</span> are required.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

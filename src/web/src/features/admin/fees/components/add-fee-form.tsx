@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { createFee } from "../lib/fees";
 import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { ApiError } from "@/types/api-error";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // 1. Define Schema
 const feeSchema = z.object({
@@ -119,19 +120,41 @@ export function AddFeeForm({ onSuccess }: AddFeeFormProps) {
               <Label htmlFor="name">
                 Fee Name <span className="text-red-500">*</span>
               </Label>
-              <Input id="name" placeholder="e.g. Monthly Maintenance" {...form.register("name")} />
+              <Input
+                id="name"
+                placeholder="e.g. Monthly Maintenance"
+                {...form.register("name")}
+              />
               {form.formState.errors.name && (
                 <p className="text-sm text-red-500">
                   {form.formState.errors.name.message}
                 </p>
               )}
             </div>
-            
+
             <div className="flex flex-col gap-2 flex-1">
               <Label htmlFor="category">
                 Category <span className="text-red-500">*</span>
               </Label>
-              <Input id="category" placeholder="e.g. Utility, Service" {...form.register("category")} />
+              <Controller
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full cursor-pointer">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value={"administrational"}>Administrational</SelectItem>
+                        <SelectItem value={"special_assessment"}>Special Assessment</SelectItem>
+                        <SelectItem value={"other"}>Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {form.formState.errors.category && (
                 <p className="text-sm text-red-500">
                   {form.formState.errors.category.message}
@@ -178,10 +201,12 @@ export function AddFeeForm({ onSuccess }: AddFeeFormProps) {
             {/* Recurring Logic */}
             <div className="space-y-3 rounded-md border p-4">
               <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="is_recurring" 
+                <Checkbox
+                  id="is_recurring"
                   checked={isRecurring}
-                  onCheckedChange={(checked) => form.setValue("is_recurring", checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    form.setValue("is_recurring", checked as boolean)
+                  }
                 />
                 <Label htmlFor="is_recurring" className="cursor-pointer">
                   Is this a recurring fee?
@@ -190,14 +215,20 @@ export function AddFeeForm({ onSuccess }: AddFeeFormProps) {
 
               {isRecurring && (
                 <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
-                  <Label htmlFor="recurring_period_months" className="text-xs text-muted-foreground">
-                    Repeat every (Months) <span className="text-red-500">*</span>
+                  <Label
+                    htmlFor="recurring_period_months"
+                    className="text-xs text-muted-foreground"
+                  >
+                    Repeat every (Months){" "}
+                    <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="recurring_period_months"
                     type="number"
                     min="1"
-                    {...form.register("recurring_period_months", { valueAsNumber: true })}
+                    {...form.register("recurring_period_months", {
+                      valueAsNumber: true,
+                    })}
                   />
                   {form.formState.errors.recurring_period_months && (
                     <p className="text-sm text-red-500">
@@ -210,18 +241,21 @@ export function AddFeeForm({ onSuccess }: AddFeeFormProps) {
 
             {/* Penalizable Logic */}
             <div className="space-y-3 rounded-md border p-4">
-               <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="is_penalizable" 
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is_penalizable"
                   checked={form.watch("is_penalizable")}
-                  onCheckedChange={(checked) => form.setValue("is_penalizable", checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    form.setValue("is_penalizable", checked as boolean)
+                  }
                 />
                 <Label htmlFor="is_penalizable" className="cursor-pointer">
                   Can this fee incur penalties?
                 </Label>
               </div>
               <p className="text-xs text-muted-foreground">
-                If checked, late payments for this fee may generate automatic penalty records based on system settings.
+                If checked, late payments for this fee may generate automatic
+                penalty records based on system settings.
               </p>
             </div>
           </div>
@@ -239,7 +273,8 @@ export function AddFeeForm({ onSuccess }: AddFeeFormProps) {
       </CardContent>
       <CardFooter>
         <p className="text-sm text-muted-foreground">
-          Fields marked with <span className="text-red-500">*</span> are required.
+          Fields marked with <span className="text-red-500">*</span> are
+          required.
         </p>
       </CardFooter>
     </Card>

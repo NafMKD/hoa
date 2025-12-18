@@ -141,7 +141,7 @@ export function FeeDetail() {
                     {fee.name}
                   </CardTitle>
                   <Badge variant="secondary" className="capitalize">
-                    {fee.category}
+                    {fee.category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                   </Badge>
                 </div>
                 <CardDescription className="text-sm text-muted-foreground">
@@ -164,7 +164,7 @@ export function FeeDetail() {
                       Next Due
                     </p>
                     <p className="text-sm font-medium break-all">
-                      {formatDate(fee.next_recurring_date)}
+                      {fee.is_recurring ? formatDate(fee.next_recurring_date) : "—"}
                     </p>
                   </div>
                   <div className="space-y-1">
@@ -233,16 +233,16 @@ export function FeeDetail() {
                   <div className="flex justify-between border-b pb-2">
                     <span className="text-muted-foreground">Interval</span>
                     <span className="font-medium">
-                      {fee.recurring_period_months ? `${fee.recurring_period_months} Months` : "N/A"}
+                      { fee.is_recurring ? fee.recurring_period_months ? `${fee.recurring_period_months} Months` : "N/A" : "N/A" }
                     </span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
                     <span className="text-muted-foreground">Last Processed</span>
-                    <span className="font-medium">{formatDate(fee.last_recurring_date)}</span>
+                    <span className="font-medium">{fee.is_recurring ? formatDate(fee.last_recurring_date) : "—"}</span>
                   </div>
                   <div className="flex justify-between pt-1">
                     <span className="text-muted-foreground">Next Scheduled</span>
-                    <span className="font-medium">{formatDate(fee.next_recurring_date)}</span>
+                    <span className="font-medium">{fee.is_recurring ? formatDate(fee.next_recurring_date) : "—"}</span>
                   </div>
                 </CardContent>
               </Card>

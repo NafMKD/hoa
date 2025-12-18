@@ -58,7 +58,7 @@ export const columns: ColumnDef<Fee>[] = [
     accessorKey: "category",
     header: "Category",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("category")}</div>
+      <div className="capitalize">{row.original.category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</div>
     ),
   },
   {

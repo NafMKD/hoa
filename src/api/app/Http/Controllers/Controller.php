@@ -33,6 +33,8 @@ abstract class Controller
     const _FEE_FIXED_PENALTY = 100;
     const _PAYMENT_STATUSES = ['pending','confirmed','failed','refunded'];
     const _PAYMENT_METHODS = ['cash','bank_transfer', 'other'];
+    const _PAYMENT_TYPE = ['web', 'telegram'];
+    const _PAYMENT_PROCESSED_BY = ['system', 'manual'];
     const _USER_STATUSES = ['active','inactive','suspended'];
     const _DEFAULT_PASSWORD = '12345678';
 }

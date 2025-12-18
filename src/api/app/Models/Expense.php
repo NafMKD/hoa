@@ -34,7 +34,7 @@ class Expense extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'decimal:2',
+            'amount' => 'float',
             'expense_date' => 'date',
         ];
     }

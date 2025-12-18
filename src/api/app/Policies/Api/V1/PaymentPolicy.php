@@ -57,10 +57,27 @@ class PaymentPolicy
     }
 
     /**
-     * Only admin and creator can mark a payment as failed.
+     * Only admin and accountant can mark a payment as failed.
      */
     public function markFailed(User $authUser, Payment $payment): bool
     {
+        return $authUser->hasRole(Controller::_ROLES[0]) || $authUser->hasRole(Controller::_ROLES[1]);
+    }
+
+    /**
+     * Only admin can refund a payment.
+     */
+    public function markRefund(User $authUser, Payment $payment): bool
+    {
         return $authUser->hasRole(Controller::_ROLES[0]);
     }
+
+    /**
+     * Only admin and accountant can confirm a payment.
+     */
+    public function markConfirm(User $authUser, Payment $payment): bool
+    {
+        return $authUser->hasRole(Controller::_ROLES[0]) || $authUser->hasRole(Controller::_ROLES[1]);
+    }
+    
 }

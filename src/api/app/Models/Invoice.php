@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Invoice extends Model
 {
@@ -42,11 +45,21 @@ class Invoice extends Model
         return [
             'issue_date' => 'date',
             'due_date' => 'date',
-            'total_amount' => 'decimal:2',
-            'amount_paid' => 'decimal:2',
-            'penalty_amount' => 'decimal:2',
+            'total_amount' => 'float',
+            'amount_paid' => 'float',
+            'penalty_amount' => 'float',
             'metadata' => 'array',
         ];
+    }
+
+    /**
+     * Get the final amount due on the invoice, including penalties.
+     * 
+     * @return float
+     */
+    public function getFinalAmountDueAttribute(): float
+    {
+        return $this->total_amount + $this->penalty_amount - $this->amount_paid;
     }
 
     /**
@@ -90,14 +103,25 @@ class Invoice extends Model
     }
 
     /**
+     * Get penalty related to this invoice if the source type is fee.
+     * 
+     * @return HasMany
+     */
+    public function penalties(): HasMany
+    {
+        return $this->hasMany(InvoicePenalties::class);
+    }
+
+
+    /**
      * Check if the invoice is penalizable
      * 
      * @return bool
      */
-    public function isPenalizable(): bool
+    public function getIsPenalizableAttribute(): bool
     {
-        if ($this->source_type === 'fee' && $this->fee) {
-            return $this->fee->is_penalizable;
+        if ($this->source_type === "App\\Models\\Fee" && $this->source) {
+            return $this->source->is_penalizable;
         }
         return false;
     }
@@ -107,9 +131,9 @@ class Invoice extends Model
      * 
      * @return bool
      */
-    public function isOverdue(): bool
+    public function getIsOverdueAttribute(): bool
     {
-        return $this->status === 'overdue' && $this->due_date < now()->toDateString();
+        return $this->due_date < now()->toDateString();
     }
 
     /**
@@ -117,8 +141,89 @@ class Invoice extends Model
      * 
      * @return float
      */
-    public function outstandingAmount(): float
+    public function getOutStandingAmountAttribute(): float
     {
         return max(0, $this->total_amount + $this->penalty_amount - $this->amount_paid);
+    }
+
+    /**
+     * Apply penalty to the invoice.
+     * 
+     * @return void
+     */
+    public function applyPenalty(): void
+    {
+        if (!$this->is_penalizable || !$this->due_date) {
+            return;
+        }
+
+        $dueDate = Carbon::parse($this->due_date);
+        $now = Carbon::now()->startOfDay();
+
+        // If today is on or before due date, no penalty yet.
+        if ($now->lte($dueDate)) {
+            return;
+        }
+
+        DB::transaction(function () use ($dueDate, $now) {
+            $this->refresh();
+
+            // Fetch existing reasons to prevent duplicates
+            $existingReasons = $this->penalties()->pluck('reason')->toArray();
+
+            $penaltyAmount = Controller::_FEE_FIXED_PENALTY;
+            $periodCounter = 1;
+
+            // Start checking from the day AFTER due date
+            // Example: Due Jan 10 -> Start counting Jan 11
+            $currentStart = $dueDate->copy()->addDay();
+
+            // Loop as long as the start of the penalty period has been reached
+            while ($currentStart->lte($now)) {
+
+                // LOGIC CHANGE HERE:
+                // First period is 20 days, all others are 30 days
+                $daysInThisPeriod = ($periodCounter === 1) ? 20 : 30;
+
+                // Calculate the end of this specific period
+                // We subtract 1 day because the start day counts as day 1
+                // e.g., Jan 11 + 20 days would be Jan 31, but we want Jan 30 (inclusive)
+                $currentEnd = $currentStart->copy()->addDays($daysInThisPeriod - 1);
+
+                // Generate Unique Reason Key
+                $reasonKey = "Overdue Period #{$periodCounter}";
+                $fullReason = "{$reasonKey}: {$currentStart->toDateString()} to {$currentEnd->toDateString()}";
+
+                // Check if already applied
+                $alreadyApplied = false;
+                foreach ($existingReasons as $existing) {
+                    if (str_starts_with($existing, $reasonKey)) {
+                        $alreadyApplied = true;
+                        break;
+                    }
+                }
+
+                // Insert if valid and not duplicate
+                if (!$alreadyApplied) {
+                    $this->penalties()->create([
+                        'amount'       => $penaltyAmount,
+                        'applied_date' => $now->toDateString(),
+                        'reason'       => $fullReason,
+                    ]);
+                }
+
+                // PREPARE FOR NEXT LOOP:
+                // The next period starts the day after this one ends
+                $currentStart = $currentEnd->copy()->addDay();
+                $periodCounter++;
+            }
+
+            // Update total sum on invoice
+            $this->update([
+                'status' => Controller::_INVOICE_STATUSES[3],
+                'penalty_amount' => $this->penalties()->sum('amount'),
+            ]);
+            $this->save();
+        });
     }
 }

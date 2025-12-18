@@ -6,6 +6,7 @@ use App\Models\Building;
 use App\Models\DocumentTemplate;
 use App\Models\Fee;
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\UnitLease;
 use App\Models\Unit;
 use App\Models\UnitOwner;
@@ -15,6 +16,7 @@ use App\Policies\Api\V1\BuildingPolicy;
 use App\Policies\Api\V1\DocumentTemplatePolicy;
 use App\Policies\Api\V1\FeePolicy;
 use App\Policies\Api\V1\InvoicePolicy;
+use App\Policies\Api\V1\PaymentPolicy;
 use App\Policies\Api\V1\UnitLeasePolicy;
 use App\Policies\Api\V1\UnitPolicy;
 use App\Policies\Api\V1\UserPolicy;
@@ -46,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Fee::class, FeePolicy::class);
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(UnitOwner::class, UnitOwnerPolicy::class);
+        Gate::policy(Payment::class, PaymentPolicy::class);
 
         // Observers
         User::observe(AuditLogObserver::class);

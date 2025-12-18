@@ -52,7 +52,7 @@ export function UserSelect({ value, onChange, error, role, status, disabledIds }
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [query, open]);
+  }, [query, open, role, status]);
 
   // Update selected label when value or options change
   useEffect(() => {

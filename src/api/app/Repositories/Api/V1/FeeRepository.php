@@ -32,7 +32,7 @@ class FeeRepository
 
         $query->orderBy('created_at', 'desc');
 
-        return $perPage ? $query->paginate($perPage) : $query->get();;
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     /**

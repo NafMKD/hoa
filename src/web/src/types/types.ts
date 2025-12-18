@@ -34,6 +34,10 @@ export type UserSelectOption = {
   data: User[];
 }
 
+export type InvoiceSelectOption = {
+  data: Invoice[];
+}
+
 export type IdNamePair = {
   id: string | number;
   name: string;
@@ -211,6 +215,87 @@ export interface Fee {
 
 export interface FeePaginatedResponse {
   data: Fee[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export type InvoiceStatus = 'issued' | 'partial' |'paid' | 'overdue' | 'cancelled';
+
+
+export interface Payment {
+  id: number;
+  amount: number;
+  method: string;
+  reference: string;
+  status: string;
+  type: string;
+  processed_by?: string;
+  processed_at: string | null; 
+  payment_date: string | null; 
+  reconciliation_metadata?: Record<string, string> | null;
+  invoice: Invoice;
+  screenshot?: Document;
+  created_at: string; 
+  updated_at: string; 
+}
+
+export interface PaymentPaginatedResponse {
+  data: Payment[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export interface InvoiceSource {
+  id: number;
+  name?: string; 
+  description?: string;
+}
+
+export interface Invoice {
+  id: number | string;
+  invoice_number: string;
+  issue_date: string;
+  due_date: string | null;
+  total_amount: number | string;
+  amount_paid: number | string;
+  status: InvoiceStatus;
+  source_type: string;
+  source_id: number;
+  metadata?: {
+    notes?: string;
+    items?: Array<{ description: string; quantity: number; unit_price: number; total: number }>;
+  } | null;
+  penalty_amount: number | string;
+  final_amount_due: number | string;
+  user?: User;
+  unit?: Unit;
+  source?: InvoiceSource;
+  payments?: Payment[];
+  penalties?:InvoicePenalities[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvoicePenalities {
+  id: number | string;
+  invoice?: Invoice;
+  amount: number | string;
+  reason: string | null;
+  applied_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvoicePaginatedResponse {
+  data: Invoice[];
   meta: {
     current_page: number;
     per_page: number;

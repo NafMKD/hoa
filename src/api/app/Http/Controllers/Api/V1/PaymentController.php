@@ -10,7 +10,9 @@ use App\Repositories\Api\V1\PaymentRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class PaymentController extends Controller
@@ -24,16 +26,25 @@ class PaymentController extends Controller
 
     /**
      * Display a listing of payments.
+     *
+     * @param Request $request
+     * @return AnonymousResourceCollection|JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $this->authorize('viewAny', Payment::class);
 
             $perPage = (int) ($request->query('per_page', self::_DEFAULT_PAGINATION));
-            $payments = $this->payments->all($perPage);
+            $search = $request->query('search');
 
-            return response()->json(PaymentResource::collection($payments));
+            $filters = compact('search');
+
+            $payments = $this->payments->all($perPage, $filters);
+
+            $payments->load(['invoice', 'invoice.user', 'invoice.unit']);
+
+            return PaymentResource::collection($payments);
         } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
@@ -55,6 +66,9 @@ class PaymentController extends Controller
 
     /**
      * Store a newly created payment.
+     * 
+     * @param  Request  $request
+     * @return JsonResponse
      */
     public function store(Request $request): JsonResponse
     {
@@ -65,12 +79,8 @@ class PaymentController extends Controller
                 'invoice_id'              => ['required', 'integer', 'exists:invoices,id'],
                 'amount'                  => ['required', 'numeric', 'min:0'],
                 'method'                  => ['required', 'string', 'max:255'],
-                'reference'               => ['nullable', 'string', 'max:255'],
-                'status'                  => ['required', 'string', 'in:pending,completed,failed,reconciled'],
-                'processed_at'            => ['nullable', 'date'],
+                'reference'               => ['required', 'string', 'max:255'],
                 'payment_date'            => ['required', 'date'],
-                'reconciliation_metadata' => ['nullable', 'array'],
-                'payment_screen_shoot'    => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.self::_MAX_FILE_SIZE],
             ]);
 
             $payment = $this->payments->create($validated);
@@ -103,12 +113,16 @@ class PaymentController extends Controller
 
     /**
      * Display a specific payment.
+     * 
+     * @param  Payment $payment
+     * @return JsonResponse
      */
     public function show(Payment $payment): JsonResponse
     {
         try {
             $this->authorize('view', $payment);
-            $payment->load(['invoice', 'screenshot']);
+            $payment->load(['invoice', 'invoice.user',  'invoice.unit', 'screenshot']);
+
             return response()->json(new PaymentResource($payment));
         } catch (AuthorizationException) {
             return response()->json([
@@ -125,25 +139,18 @@ class PaymentController extends Controller
     }
 
     /**
-     * Update the specified payment.
+     * Mark payment as confirmed
+     * 
+     * @param  Payment $payment
+     * @return Payment|JsonResponse
      */
-    public function update(Request $request, Payment $payment): JsonResponse
+    public function confirmPayment(Payment $payment): Payment|JsonResponse
     {
         try {
-            $this->authorize('update', $payment);
+            $this->authorize('markConfirm', $payment);
+            $payment = $this->payments->confirm($payment);
 
-            $validated = $request->validate([
-                'amount'                  => ['sometimes', 'numeric', 'min:0'],
-                'method'                  => ['sometimes', 'string', 'max:255'],
-                'reference'               => ['nullable', 'string', 'max:255'],
-                'status'                  => ['sometimes', 'string', 'in:pending,completed,failed,reconciled'],
-                'processed_at'            => ['nullable', 'date'],
-                'payment_date'            => ['nullable', 'date'],
-                'reconciliation_metadata' => ['nullable', 'array'],
-                'payment_screen_shoot_id' => ['nullable', 'integer', 'exists:documents,id'],
-            ]);
-
-            $payment = $this->payments->update($payment, $validated);
+            $payment->load(['invoice', 'invoice.user',  'invoice.unit', 'screenshot']);
 
             return response()->json(new PaymentResource($payment));
         } catch (AuthorizationException) {
@@ -151,19 +158,13 @@ class PaymentController extends Controller
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'status' => self::_ERROR,
-                'message' => 'Validation failed',
-                'errors' => $e->errors(),
-            ], 422);
         } catch (RepositoryException $e) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => $e->getMessage(),
             ], 400);
         } catch (\Exception $e) {
-            Log::error('Error updating payment: ' . $e->getMessage());
+            Log::error('Error deleting payment: ' . $e->getMessage());
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNKNOWN_ERROR,
@@ -172,7 +173,79 @@ class PaymentController extends Controller
     }
 
     /**
+     * Mark payment as refunded
+     * 
+     * @param  Payment $payment
+     * @return Payment|JsonResponse
+     */
+    public function refundPayment(Payment $payment): Payment|JsonResponse
+    {
+        try {
+            $this->authorize('markRefund', $payment);
+            $payment = $this->payments->refund($payment);
+
+            $payment->load(['invoice', 'invoice.user',  'invoice.unit', 'screenshot']);
+
+            return response()->json(new PaymentResource($payment));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error deleting payment: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Mark payment as failed
+     * 
+     * @param  Payment $payment
+     * @return Payment|JsonResponse
+     */
+    public function failPayment(Payment $payment): Payment|JsonResponse
+    {
+        try {
+            $this->authorize('markFailed', $payment);
+            $payment = $this->payments->fail($payment);
+            
+            $payment->load(['invoice', 'invoice.user',  'invoice.unit', 'screenshot']);
+
+            return response()->json(new PaymentResource($payment));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error deleting payment: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+
+    /**
      * Delete a payment.
+     * 
+     * @param  Payment $payment
+     * @return JsonResponse
      */
     public function destroy(Payment $payment): JsonResponse
     {

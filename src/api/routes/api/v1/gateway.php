@@ -24,6 +24,11 @@ Route::prefix('fees')->middleware('auth:sanctum')->name('api.v1.fees.')->group(f
 Route::prefix('invoices')->middleware('auth:sanctum')->name('api.v1.invoices.')->group(function () { 
     require __DIR__.'/invoice.php';
 });
-Route::post('/import/users', [ImportController::class, 'importUsers'])->middleware('auth:sanctum')->name('api.v1.import.users');
-Route::post('/import/buildings', [ImportController::class, 'importBuildings'])->middleware('auth:sanctum')->name('api.v1.import.buildings');
-Route::post('/import/units', [ImportController::class, 'importUnits'])->middleware('auth:sanctum');
+Route::prefix('payments')->middleware('auth:sanctum')->name('api.v1.payments.')->group(function () { 
+    require __DIR__.'/payment.php';
+});
+Route::prefix('import')->middleware('auth:sanctum')->name('api.v1.import.')->group(function () { 
+    Route::post('/users', [ImportController::class, 'importUsers'])->name('users');
+    Route::post('/buildings', [ImportController::class, 'importBuildings'])->name('buildings');
+    Route::post('/units', [ImportController::class, 'importUnits'])->name('units');;
+});

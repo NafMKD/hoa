@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,11 +27,15 @@ class InvoiceResource extends JsonResource
             'source'               => $this->whenLoaded('source', function () {
                 return $this->resolveSourceResource($this->source);
             }),
-            // 'payments'          => $this->whenLoaded('payments', function () {
-            //     return PaymentResource::collection($this->payments);
-            // }),
-            'issue_date'        => $this->issue_date,
-            'due_date'          => $this->due_date,
+            'payments'          => $this->whenLoaded('payments', function () {
+                return PaymentResource::collection($this->payments);
+            }),
+            'penalties'        => $this->whenLoaded('penalties', function () {
+                return InvoicePenaltyResource::collection($this->penalties);
+            }),
+            'final_amount_due' => $this->final_amount_due,
+            'issue_date'        => Carbon::parse($this->issue_date)->toFormattedDateString(),
+            'due_date'          => Carbon::parse($this->due_date)->toFormattedDateString(),
             'total_amount'      => $this->total_amount,
             'amount_paid'       => $this->amount_paid,
             'penalty_amount'    => $this->penalty_amount,
@@ -38,8 +43,8 @@ class InvoiceResource extends JsonResource
             'source_type'       => $this->source_type,
             'source_id'         => $this->source_id,
             'metadata'          => $this->metadata,
-            'created_at'        => $this->created_at,
-            'updated_at'        => $this->updated_at,
+            'created_at'        => Carbon::parse($this->created_at)->toFormattedDateString(),
+            'updated_at'        => Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];
     }
 

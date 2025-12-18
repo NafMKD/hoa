@@ -38,10 +38,10 @@ class Payroll extends Model
         return [
             'payroll_period_start' => 'date',
             'payroll_period_end' => 'date',
-            'gross_salary' => 'decimal:2',
-            'taxes' => 'decimal:2',
-            'deductions' => 'decimal:2',
-            'net_salary' => 'decimal:2',
+            'gross_salary' => 'float',
+            'taxes' => 'float',
+            'deductions' => 'float',
+            'net_salary' => 'float',
             'pay_date' => 'date',
         ];
     }

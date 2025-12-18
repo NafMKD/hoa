@@ -45,6 +45,7 @@ class ProcessRecurringFeesTask
      */
     public function schedule(Schedule $schedule): void
     {
-        $schedule->call([$this, 'handle'])->everyMinute(); // run daily at midnight
+        // $schedule->call([$this, 'handle'])->dailyAt('00:00'); // run daily at midnight
+        $schedule->call([$this, 'handle'])->everyMinute();
     }
 }

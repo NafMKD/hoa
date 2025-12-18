@@ -16,16 +16,15 @@ class PaymentResource extends JsonResource
     {
         return [
             'id'                       => $this->id,
-            'payment_number'           => $this->payment_number,
-            'invoice_id'               => $this->invoice_id,
             'amount'                   => $this->amount,
             'method'                   => $this->method,
             'reference'                => $this->reference,
             'status'                   => $this->status,
+            'type'                     => $this->type,
+            'processed_by'             => $this->processed_by,
             'processed_at'             => $this->processed_at,
             'payment_date'             => $this->payment_date,
             'reconciliation_metadata'  => $this->reconciliation_metadata,
-            'payment_screen_shoot_id'  => $this->payment_screen_shoot_id,
             'invoice'                  => $this->whenLoaded('invoice', function () {
                 return new InvoiceResource($this->invoice);
             }),

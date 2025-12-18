@@ -17,12 +17,13 @@ class Payment extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'payment_number',
         'invoice_id',
         'amount',
         'method',
         'reference',
         'status',
+        'type',
+        'processed_by',
         'processed_at',
         'reconciliation_metadata',
         'payment_screen_shoot_id',
@@ -37,7 +38,7 @@ class Payment extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'decimal:2',
+            'amount' => 'float',
             'processed_at' => 'datetime',
             'payment_date' => 'datetime',
             'reconciliation_metadata' => 'array',

@@ -6,5 +6,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [InvoiceController::class,  'index'])->name(name: 'index');
 Route::post('/', [InvoiceController::class,  'store'])->name('store');
+Route::get('/search', [InvoiceController::class,  'search'])->name('search');
 Route::get('/{invoice}', [InvoiceController::class,  'show'])->name('show');
 Route::delete('/{invoice}', [InvoiceController::class,  'destroy'])->name('destroy');

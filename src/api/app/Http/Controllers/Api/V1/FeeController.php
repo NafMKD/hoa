@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class FeeController extends Controller
 {
@@ -27,17 +28,21 @@ class FeeController extends Controller
      * Display a listing of fees.
      * 
      * @param Request $request
-     * @return JsonResponse
+     * @return AnonymousResourceCollection|JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $this->authorize('viewAny', Fee::class);
 
             $perPage = (int) ($request->query('per_page', self::_DEFAULT_PAGINATION));
-            $fees = $this->fees->all($perPage);
+            $search = $request->query('search');
 
-            return response()->json(FeeResource::collection($fees));
+            $filters = compact('search');
+
+            $fees = $this->fees->all($perPage, $filters);
+
+            return FeeResource::collection($fees);
         } catch (AuthorizationException) {
             return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);
         } catch (RepositoryException $e) {

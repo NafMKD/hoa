@@ -14,12 +14,13 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->string('payment_number')->unique();
             $table->foreignId('invoice_id')->nullable()->constrained('invoices');
             $table->decimal('amount', 14, 2);
             $table->enum('method', Controller::_PAYMENT_METHODS);
-            $table->string('reference')->nullable();
+            $table->string('reference')->unique();
             $table->enum('status', Controller::_PAYMENT_STATUSES)->default('pending');
+            $table->enum('type', Controller::_PAYMENT_TYPE);
+            $table->enum('processed_by', Controller::_PAYMENT_PROCESSED_BY)->nullable();
             $table->dateTime('processed_at')->nullable();
             $table->json('reconciliation_metadata')->nullable();
             $table->foreignId('payment_screen_shoot_id')->nullable()->constrained('documents');

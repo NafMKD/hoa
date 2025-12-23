@@ -39,7 +39,10 @@ export function Users() {
     pageSize: 10,
   });
   const [pageCount, setPageCount] = useState(0);
+
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+
   const [data, setData] = useState<User[]>([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 600);
@@ -59,6 +62,8 @@ export function Users() {
     setData(res.data);
     setPageCount(res.meta.last_page);
     setIsLoading(false);
+
+    setIsInitialLoading(false);
   }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
 
   useEffect(() => {
@@ -99,6 +104,7 @@ export function Users() {
       onStatusChange: handleStatusChange,
       setEditUser,
       setIsEditOpen,
+      isLoading,
     },
   });
 
@@ -185,24 +191,28 @@ export function Users() {
         </div>
 
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          {isLoading ? (
+          {isInitialLoading ? (
             <DataTableSkeleton
               columnCount={8}
               filterCount={1}
               cellWidths={[
-                "6rem",
-                "10rem",
-                "30rem",
-                "10rem",
-                "10rem",
-                "6rem",
-                "6rem",
-                "6rem",
+                "2rem",
+                "2rem",
+                "16rem",
+                "12rem",
+                "5rem",
+                "4rem",
+                "5rem",
+                "4rem",
               ]}
               shrinkZero
             />
           ) : (
-            <DataTable table={table} onChange={setSearch} />
+            <DataTable
+              table={table}
+              onChange={setSearch}
+              searchValue={search}
+            />
           )}
         </div>
       </Main>

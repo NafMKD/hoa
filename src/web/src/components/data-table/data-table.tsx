@@ -1,7 +1,4 @@
-import {
-  type Table as TanstackTable,
-  flexRender,
-} from "@tanstack/react-table";
+import { type Table as TanstackTable, flexRender } from "@tanstack/react-table";
 
 import {
   Table,
@@ -14,29 +11,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableViewOptions } from "./data-table-view-options";
-import { useState } from "react";
 
 interface DataTableProps<TData> {
-  table: TanstackTable<TData>
-  onChange?: (value: string) => void
+  table: TanstackTable<TData>;
+  onChange?: (value: string) => void;
+  searchValue: string;
 }
 
 export function DataTable<TData>({
   table,
-  onChange
+  onChange,
+  searchValue
 }: DataTableProps<TData>) {
-  const [value, setValue] = useState("")
-
+  const { isLoading } = table.options.meta as { isLoading: boolean };
   return (
     <div className="flex w-full flex-col gap-2.5 overflow-auto">
       <div className="flex items-center py-4">
         <Input
           type="text"
           placeholder="Search here..."
-          value={value}
+          value={searchValue}
           onChange={(e) => {
-            setValue(e.target.value)
-            onChange?.(e.target.value)
+            onChange?.(e.target.value);
           }}
           className="max-w-sm"
         />
@@ -63,31 +59,49 @@ export function DataTable<TData>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
+            {isLoading ? (
               <TableRow>
                 <TableCell
                   colSpan={table.getAllColumns().length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  <div className="flex items-center justify-center p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
+                      Loading...
+                    </div>
+                  </div>
                 </TableCell>
               </TableRow>
+            ) : (
+              <>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={table.getAllColumns().length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
             )}
           </TableBody>
         </Table>

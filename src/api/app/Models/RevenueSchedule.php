@@ -34,7 +34,7 @@ class RevenueSchedule extends Model
         return [
             'period_start' => 'date',
             'period_end' => 'date',
-            'amount' => 'decimal:2',
+            'amount' => 'float',
             'recognized' => 'boolean',
             'recognized_at' => 'datetime',
         ];

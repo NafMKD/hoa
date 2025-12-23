@@ -31,7 +31,7 @@ class GenerateFeeInvoiceJob implements ShouldQueue
     public function handle(InvoiceRepository $repository): void
     {
         // Resolve repository at runtime
-        $repository = app(\App\Repositories\Api\V1\InvoiceRepository::class);
+        $repository = app(InvoiceRepository::class);
 
         try {
                         

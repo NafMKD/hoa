@@ -5,27 +5,44 @@ namespace App\Repositories\Api\V1;
 use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
+use App\Models\Invoice;
 use App\Models\Payment;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PaymentRepository
 {
+    protected $invoiceRepository;
+
+    public function __construct(InvoiceRepository $invoiceRepository)
+    {
+        $this->invoiceRepository = $invoiceRepository;
+    }
+
     /**
      * Retrieve all payments with pagination.
      *
      * @param int $perPage
-     * @return LengthAwarePaginator
-     * @throws RepositoryException
+     * @param array $filters
+     * @return Collection|LengthAwarePaginator
      */
-    public function all(?int $perPage = null): LengthAwarePaginator
+    public function all(?int $perPage = null, array $filters): Collection|LengthAwarePaginator
     {
-        try {
-            return Payment::paginate($perPage);
-        } catch (\Exception $e) {
-            throw new RepositoryException('Failed to retrieve payments: ' . $e->getMessage());
+        $query = Payment::query();
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('reference', 'like', "%{$search}%");
+            });
         }
+
+        $query->orderBy('created_at', 'desc');
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
     }
 
     /**
@@ -39,45 +56,90 @@ class PaymentRepository
     {
         DB::beginTransaction();
         try {
-            if (isset($data['payment_screen_shoot'])) { 
-                $path = $this->uploadIdFile($data['payment_screen_shoot']);
-                $document = Document::create([
-                    'file_path' => $path,
-                    'file_name' => $data['payment_screen_shoot']->getClientOriginalName(),
-                    'mime_type' => $data['payment_screen_shoot']->getClientMimeType(),
-                    'file_size' => $data['payment_screen_shoot']->getSize(),
-                    'category' => Controller::_DOCUMENT_TYPES[3] // 'payments'
-                ]);
-
-                $data['payment_screen_shoot_id'] = $document->id;
+            // Check if the invoice already has a payment that is pending.
+            if ($this->hasPendingPayment($data['invoice_id'])) {
+                throw new RepositoryException('A pending payment already exists for this invoice.');
             }
+
+            // Check if the payment amount exceeds the outstanding invoice amount.
+            if ($this->exceedsOutstandingAmount($data['invoice_id'], $data['amount'])) {
+                throw new RepositoryException('Payment amount exceeds the outstanding invoice amount.');
+            }
+
+            $data['type'] = Controller::_PAYMENT_TYPE[0];
+            $data['status'] = Controller::_PAYMENT_STATUSES[0];
+            $data['reference'] = strtoupper($data['reference']);
             $payment = Payment::create($data);
+
             DB::commit();
             return $payment;
+        } catch (RepositoryException $e) {
+            DB::rollBack();
+            Log::info('Failed to create payment: ' . $e->getMessage());
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new RepositoryException('Failed to create payment: ' . $e->getMessage());
+            Log::info('Failed to create payment: ' . $e->getMessage());
+            throw new RepositoryException('Failed to create payment: ');
         }
     }
 
     /**
-     * Update an existing payment.
-     *
+     * Complete a payment (mark as confirmed).
+     * 
      * @param Payment $payment
-     * @param array<string, mixed> $data
      * @return Payment
      * @throws RepositoryException
      */
-    public function update(Payment $payment, array $data): Payment
+    public function confirm(Payment $payment): Payment
     {
-        DB::beginTransaction();
         try {
-            $payment->update($data);
-            DB::commit();
-            return $payment;
+            $this->invoiceRepository->setAsPaid($payment->invoice, $payment);
+
+            return $payment->refresh();
+        } catch(RepositoryException $e) {
+            throw $e;
         } catch (\Exception $e) {
-            DB::rollBack();
-            throw new RepositoryException('Failed to update payment: ' . $e->getMessage());
+            throw new RepositoryException('Failed to confirm payment: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Complete a payment (mark as refunded). 
+     * 
+     * @param Payment $payment
+     * @return Payment
+     * @throws RepositoryException
+     */
+    public function refund(Payment $payment): Payment
+    {
+        try {
+            $this->invoiceRepository->setAsRefunded($payment->invoice, $payment);
+
+            return $payment->refresh();
+        } catch (\Exception $e) {
+            throw new RepositoryException('Failed to refund payment: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Complete a payment (mark as failed).
+     * 
+     * @param Payment $payment
+     * @return Payment
+     * @throws RepositoryException
+     */
+    public function fail(Payment $payment): Payment
+    {
+        try {
+            $payment->update([          
+                'status' => Controller::_PAYMENT_STATUSES[2], // failed
+                'processed_by' => Controller::_PAYMENT_PROCESSED_BY[1],
+                'processed_at' => now()
+            ]); 
+            return $payment->refresh();
+        } catch (\Exception $e) {   
+            throw new RepositoryException('Failed to mark payment as failed: ' . $e->getMessage());
         }
     }
 
@@ -101,14 +163,31 @@ class PaymentRepository
         }
     }
 
+
     /**
-     * Handle uploading ID file.
-     *
-     * @param UploadedFile|string $file
-     * @return string
+     * Check if a payment with pending status exists for a given invoice.
+     * 
+     * @param int $invoiceId
+     * @return bool
      */
-    private function uploadIdFile($file): string
+    public function hasPendingPayment(int $invoiceId): bool
     {
-        return $file->store(Controller::_DOCUMENT_TYPES[3], 'public');
+        return Payment::where('invoice_id', $invoiceId)
+                      ->where('status', 'pending')
+                      ->exists();
+    }
+
+    /**
+     * Check if the payment amount exceeds the outstanding invoice amount.
+     * 
+     * @param int $invoiceId
+     * @param float $amount
+     * @return bool
+     */
+    public function exceedsOutstandingAmount(int $invoiceId, float $amount): bool
+    {
+        $invoice = Invoice::find($invoiceId);
+        $outstandingAmount = $invoice->final_amount_due;
+        return $amount > $outstandingAmount;
     }
 }

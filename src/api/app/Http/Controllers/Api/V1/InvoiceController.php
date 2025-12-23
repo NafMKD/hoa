@@ -10,6 +10,7 @@ use App\Repositories\Api\V1\InvoiceRepository;
 use App\Http\Resources\Api\V1\InvoiceResource;
 use App\Models\Invoice;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -32,17 +33,23 @@ class InvoiceController extends Controller
      * Display a listing of invoices.
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return AnonymousResourceCollection|JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
     {
         try {
             $this->authorize('viewAny', Invoice::class);
 
             $perPage = (int) ($request->query('per_page', self::_DEFAULT_PAGINATION));
-            $invoices = $this->invoices->all($perPage);
+            $search = $request->query('search');
 
-            return response()->json(InvoiceResource::collection($invoices));
+            $filters = compact('search');
+
+            $invoices = $this->invoices->all($perPage, $filters);
+
+            $invoices->load(['user', 'unit']);
+
+            return InvoiceResource::collection($invoices);
         } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
@@ -55,6 +62,46 @@ class InvoiceController extends Controller
             ], 400);
         } catch (\Exception $e) {
             Log::error('Error fetching invoices: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Search invoice by Invoice number=.
+     * filtered by status if provided.
+     * 
+     * @param  Request  $request
+     * @return AnonymousResourceCollection|JsonResponse
+     */
+    public function search(Request $request): AnonymousResourceCollection|JsonResponse
+    {
+        try {
+            $this->authorize('viewAny', Invoice::class);
+            $term = $request->query('term');
+            $status = $request->query('status');
+
+            $filters = [
+                'term' => $term,
+                'status' => $status,
+            ];
+
+            $users = $this->invoices->search($term, $filters);
+
+            return InvoiceResource::collection($users);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNKNOWN_ERROR,
@@ -124,7 +171,7 @@ class InvoiceController extends Controller
         try {
             $this->authorize('view', $invoice);
 
-            $invoice->load(['user', 'unit', 'source', 'payments']);
+            $invoice->load(['user', 'unit', 'source', 'payments', 'penalties']);
             return response()->json(new InvoiceResource($invoice));
         } catch (AuthorizationException) {
             return response()->json([

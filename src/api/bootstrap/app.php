@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Tasks\MarkOverdueInvoicesTask;
 use App\Console\Tasks\ProcessRecurringFeesTask;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withSchedule(function (Schedule $schedule) {
         app(ProcessRecurringFeesTask::class)->schedule($schedule);
+        app(MarkOverdueInvoicesTask::class)->schedule($schedule);
     })
     ->withMiddleware(function (Middleware $middleware): void {
         //

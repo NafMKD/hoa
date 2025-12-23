@@ -46,7 +46,7 @@ class UnitLease extends Model
         return [
             'lease_start_date' => 'datetime',
             'lease_end_date' => 'datetime',
-            'agreement_amount' => 'decimal:2',
+            'agreement_amount' => 'float',
         ];
     }
 

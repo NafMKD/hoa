@@ -34,7 +34,7 @@ class Employee extends Model
     protected function casts(): array
     {
         return [
-            'base_salary' => 'decimal:2',
+            'base_salary' => 'float',
             'hired_at' => 'date',
             'terminated_at' => 'date',
         ];

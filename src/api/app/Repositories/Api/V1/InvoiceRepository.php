@@ -6,11 +6,13 @@ use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
 use App\Models\Fee;
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceRepository 
 {
@@ -18,15 +20,48 @@ class InvoiceRepository
      * Get all invoices with optional pagination.
      * 
      * @param  int|null  $perPage
+     * @param  array  $filters
      * @return Collection|LengthAwarePaginator
      */
-    public function all(?int $perPage = null): Collection|LengthAwarePaginator
-    {
-        if ($perPage) {
-            return Invoice::paginate($perPage);
+    public function all(?int $perPage = null, array $filters): Collection|LengthAwarePaginator
+    {        
+        $query = Invoice::query();
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhere('total_amount', 'like', "%{$search}%");
+            });
         }
 
-        return Invoice::all();
+        $query->orderBy('created_at', 'desc');
+
+        return $perPage ? $query->paginate($perPage) : $query->get();
+    }
+
+    /**
+     * Search users by invoice name or phone.
+     * Additional filters can be added.
+     * ['role', 'status']
+     * 
+     * @param  string  $term
+     * @param  array  $filers
+     * @return Collection
+     */
+    public function search(string $term, array $filers = []): Collection
+    {   
+        $query = Invoice::query()
+            ->where(function ($q) use ($term) {
+                $q->where('invoice_number', 'like', "%{$term}%")
+                  ->orWhere('total_amount', 'like', "%{$term}%");
+            });
+
+        if (!empty($filers['status'])) {
+            $query->whereIn('status', $filers['status']);
+        }
+
+        return $query->orderBy('created_at', 'desc')->get();
     }
 
     /**
@@ -58,63 +93,6 @@ class InvoiceRepository
     }
 
     /**
-     * Set an invoice as paid|partial.
-     * 
-     * @param  Invoice  $invoice
-     * @param  float  $amountPaid
-     * @return Invoice
-     * @throws RepositoryException
-     */
-    public function setAsPaid(Invoice $invoice, float $amountPaid): Invoice
-    {
-        if ($amountPaid <= 0) {
-            throw new RepositoryException('Payment amount must be greater than zero.');
-        }
-        return DB::transaction(function () use ($invoice, $amountPaid) {
-            
-            $newAmountPaid = $invoice->amount_paid + $amountPaid;
-
-            if ($newAmountPaid > $invoice->total_amount + $invoice->penalty_amount) {
-                throw new RepositoryException('Payment exceeds total amount due.');
-            }
-
-            // check if the invoice is already paid
-            if ($invoice->status === Controller::_INVOICE_STATUSES[2]) { // paid
-                throw new RepositoryException('Invoice is already fully paid.');
-            }
-
-            // check if the invoice is overdue
-            if ($invoice->isOverdue()) { 
-                // check if penalizable
-                if ($invoice->isPenalizable()) {
-                    $this->markInvoiceAsOverdue($invoice);
-                    if ($newAmountPaid >= $invoice->total_amount + $invoice->penalty_amount) {
-                        $invoice->status = Controller::_INVOICE_STATUSES[2]; // paid
-                    } 
-                } else {
-                    if ($newAmountPaid >= $invoice->total_amount) {
-                        $invoice->status = Controller::_INVOICE_STATUSES[2]; // paid
-                    } 
-                }
-                
-            } else {
-                if ($newAmountPaid >= $invoice->total_amount) {
-                    $invoice->status = Controller::_INVOICE_STATUSES[2]; // paid
-                } else {
-                    $invoice->status = Controller::_INVOICE_STATUSES[1]; // partial
-                }
-            }
-
-            $invoice->amount_paid = $newAmountPaid;
-            $invoice->save();
-
-            // TODO: Register payment in payment table
-
-            return $invoice;
-        });
-    }
-
-    /**
      * Soft delete a invoice.
      * 
      * @param  Invoice  $invoice
@@ -129,6 +107,14 @@ class InvoiceRepository
             return $invoice->delete();
         });
     }
+
+    /*
+    |--------------------------------------------------------------------------------------------
+    |
+    | --- Helper Methods ---
+    |
+    |---------------------------------------------------------------------------------------------
+    */
 
     /**
      * Generate next invoice number
@@ -160,6 +146,106 @@ class InvoiceRepository
             return sprintf('%s%06d', $prefix, $nextIncrement);
         });
     }
+
+    /**
+     * Set an invoice as paid|partial.
+     * 
+     * @param  Invoice  $invoice
+     * @param  Payment  $payment
+     * @return Invoice
+     * @throws RepositoryException
+     */
+    public function setAsPaid(Invoice $invoice, Payment  $payment): Invoice
+    {
+        if ($payment->amount <= 0) {
+            throw new RepositoryException('Payment amount must be greater than zero.');
+        }
+
+        // check if the invoice is overdue
+        if ($invoice->is_overdue) {
+            if ($invoice->status !== Controller::_INVOICE_STATUSES[3]) {
+                // mark as overdue if not already marked
+                $invoice = $this->markInvoiceAsOverdue($invoice);
+            }
+        }
+
+        if ($payment->amount > $invoice->out_standing_amount) {
+            throw new RepositoryException('Payment exceeds total amount due.');
+        }
+
+        // check if the invoice is already paid
+        if ($invoice->status === Controller::_INVOICE_STATUSES[2]) { // paid
+            throw new RepositoryException('Invoice is already fully paid.');
+        }
+
+        return DB::transaction(function () use ($invoice, $payment) { 
+
+            if ($payment->amount >= $invoice->out_standing_amount) {
+                $invoice->status = Controller::_INVOICE_STATUSES[2]; // paid
+            } else {
+                $invoice->status = Controller::_INVOICE_STATUSES[1]; // partial
+            }
+
+            $invoice->update([
+                'amount_paid' => $payment->amount + $invoice->amount_paid,
+            ]);
+
+            $payment->update([
+                'status' => Controller::_PAYMENT_STATUSES[1], // confirmed
+                'processed_by' => Controller::_PAYMENT_PROCESSED_BY[1],
+                'processed_at' => now()
+            ]);
+
+            return $invoice->refresh();
+        });
+    }
+
+    /**
+     * Set an invoice as refunded.
+     * 
+     * @param  Invoice  $invoice
+     * @param  Payment  $payment
+     * @return Invoice
+     */
+    public function setAsRefunded(Invoice $invoice, Payment  $payment): Invoice 
+    {
+        return DB::transaction(function () use ($invoice, $payment) {
+            // Adjust the amount paid on the invoice
+            $newAmountPaid = max(0, $invoice->amount_paid - $payment->amount);
+
+            // Determine new status
+            if ($newAmountPaid == 0) {
+                $newStatus = Controller::_INVOICE_STATUSES[0]; // issued
+            } elseif ($newAmountPaid < $invoice->total_amount + $invoice->penalty_amount) {
+                $newStatus = Controller::_INVOICE_STATUSES[1]; // partial
+            } else {
+                $newStatus = Controller::_INVOICE_STATUSES[2]; // paid
+            }
+
+            // Update invoice
+            $invoice->update([
+                'amount_paid' => $newAmountPaid,
+                'status' => $newStatus
+            ]);
+
+            // Update payment
+            $payment->update([
+                'status' => Controller::_PAYMENT_STATUSES[3], // refunded
+                'processed_by' => Controller::_PAYMENT_PROCESSED_BY[1],
+                'processed_at' => now()
+            ]);
+
+            return $invoice->refresh();
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------------------------------
+    |
+    | --- Automatic Invoice Generation for Recurring Fees ---
+    |
+    |---------------------------------------------------------------------------------------------
+    */
 
     /**
      * Generate an invoice for a given fee.
@@ -199,7 +285,7 @@ class InvoiceRepository
         }
     }
 
-    /**
+        /**
      * Create an invoice for a specific unit based on its status.
      * 
      * @param Unit $unit 
@@ -224,22 +310,19 @@ class InvoiceRepository
             'metadata' => ['generated_by' => 'system']
         ];
 
-        switch ($unit->status) {
-            case Controller::_UNIT_STATUSES[0]: // rented
-                if ($unit->tenant->id === null) {
-                    throw new RepositoryException('Rented unit has no active tenant.');
-                }
-                $data['user_id'] = $unit->tenant->id;
-                break;
-            case Controller::_UNIT_STATUSES[1]: // owner_ocupied
-                $data['user_id'] = $unit->owner_id;
-                break;
-            case Controller::_UNIT_STATUSES[2]: // vacant
+        // check the unit status
+        if ($unit->currentLease) {
+            if ($unit->currentLease->tenant->id === null) {
+                throw new RepositoryException('Rented unit has no active tenant.');
+            }
+            $data['user_id'] = $unit->currentLease->tenant->id;
+        } else {
+            if ($unit->currentOwner) {
+                $data['user_id'] = $unit->currentOwner->owner->id;
+            } else {
                 $data['user_id'] = null; 
                 $generable = false; // Skip invoice generation for vacant units
-                break;
-            default:
-                throw new RepositoryException('Invalid unit status for invoicing.');
+            }
         }
 
         if ($generable) {
@@ -248,6 +331,15 @@ class InvoiceRepository
 
         return null;
     }
+
+
+    /*
+    |--------------------------------------------------------------------------------------------
+    |
+    | --- Automatic marking of Overdue Invoices ---
+    |
+    |---------------------------------------------------------------------------------------------
+    */
 
     /**
      * Get invoices that are overdue.
@@ -259,31 +351,11 @@ class InvoiceRepository
     {
         try {
             return Invoice::where('due_date', '<', now())
-                ->whereIn('status', [Controller::_INVOICE_STATUSES[0], Controller::_INVOICE_STATUSES[1]]) // issued or partial
+                ->whereIn('status', [Controller::_INVOICE_STATUSES[0], Controller::_INVOICE_STATUSES[1], Controller::_INVOICE_STATUSES[3]]) // issued or partial or overdue
                 ->get();
         } catch (\Throwable $e) {
             throw new RepositoryException('Failed to retrieve overdue invoices: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Set overdue invoices' status to 'overdue'.
-     * 
-     * @return int Number of invoices updated
-     */
-    public function markOverdueInvoices(): int
-    {
-        return DB::transaction(function () {
-            $overdueInvoices = $this->getOverdueInvoices();
-            $count = 0;
-
-            foreach ($overdueInvoices as $invoice) {
-                $this->markInvoiceAsOverdue($invoice);
-                $count++;
-            }
-
-            return $count;
-        });
     }
 
     /**
@@ -303,32 +375,16 @@ class InvoiceRepository
             throw new RepositoryException('Invoice is not yet overdue.');
         }
 
-        return DB::transaction(function () use ($invoice) {
-            $invoice->status = Controller::_INVOICE_STATUSES[3]; // overdue
-            // set penalty if applicable
-            if ($invoice->isPenalizable()) {
-                $invoice->penalty_amount = Controller::_FEE_FIXED_PENALTY;
-            }
-            $invoice->save();
-            return $invoice;
-        });
+        // set penalty if applicable
+        if ($invoice->is_penalizable) {
+            $invoice->applyPenalty();
+        } else {
+            $invoice->update([
+                'status' => Controller::_INVOICE_STATUSES[3], // overdue
+            ]);
+        }
+
+        return $invoice;
     }
 
-    /**
-     * Calculate total outstanding amount across all invoices for a user.
-     * 
-     * @param User $user
-     * @return float
-     * @throws RepositoryException
-     */
-    public function getTotalOutstandingForUser(User $user): float
-    {
-        try {
-            return Invoice::where('user_id', $user->id)
-                ->whereIn('status', [Controller::_INVOICE_STATUSES[0], Controller::_INVOICE_STATUSES[1]]) // issued or partial
-                ->sum(DB::raw('total_amount - amount_paid'));
-        } catch (\Throwable $e) {
-            throw new RepositoryException('Failed to calculate total outstanding: ' . $e->getMessage());
-        }
-    }
 }

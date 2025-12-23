@@ -40,7 +40,7 @@ class Fee extends Model
             'is_penalizable' => 'boolean',
             'last_recurring_date' => 'datetime',
             'next_recurring_date' => 'datetime',
-            'amount' => 'decimal:2',
+            'amount' => 'float',
         ];
     }
 

@@ -19,40 +19,72 @@ export interface Payment {
 // Create a typed column helper
 const columnHelper = createColumnHelper<Payment>()
 
+export function RecentPaymentsCard({ data }: { data: Payment[] }) {
+  return (
+    <Card
+      className={cn(
+        "rounded-2xl border-0 overflow-hidden",
+        "ring-1 ring-black/5",
+        // colorful surface: sky → gold → violet
+        "bg-gradient-to-br from-[#E0F2FE] via-[#FFF7D6] to-[#E9D5FF]"
+      )}
+    >
+      <CardHeader className="pb-2">
+        <CardTitle className="text-[#0B1B34]">Recent Payments</CardTitle>
+        <p className="text-sm text-[#0B1B34]/60">Latest resident transactions</p>
+      </CardHeader>
+
+      <CardContent className="p-0">
+        <RecentPaymentsTable data={data} />
+      </CardContent>
+    </Card>
+  )
+}
+
 export function RecentPaymentsTable({ data }: { data: Payment[] }) {
   const columns = React.useMemo(
     () => [
-      columnHelper.accessor('name', {
-        header: 'Resident',
+      columnHelper.accessor("name", {
+        header: "Resident",
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor('amount', {
-        header: 'Amount',
-        cell: (info) => <span className='font-medium'>{info.getValue()}</span>,
+      columnHelper.accessor("amount", {
+        header: "Amount",
+        cell: (info) => <span className="font-semibold">{info.getValue()}</span>,
       }),
-      columnHelper.accessor('date', {
-        header: 'Date',
+      columnHelper.accessor("date", {
+        header: "Date",
         cell: (info) => (
-          <span className='text-muted-foreground'>{info.getValue()}</span>
+          <span className="text-[#0B1B34]/65">{info.getValue()}</span>
         ),
       }),
-      columnHelper.accessor('status', {
-        header: 'Status',
+      columnHelper.accessor("status", {
+        header: "Status",
         cell: (info) => {
           const status = info.getValue()
+
           const colorClass =
-            status === 'Paid'
-              ? 'bg-green-100 text-green-700'
-              : status === 'Pending'
-              ? 'bg-yellow-100 text-yellow-700'
-              : 'bg-red-100 text-red-700'
+            status === "Paid"
+              ? "bg-gradient-to-r from-emerald-200 to-teal-200 text-emerald-900 ring-1 ring-emerald-400/40"
+              : status === "Pending"
+              ? "bg-gradient-to-r from-amber-200 to-yellow-200 text-amber-900 ring-1 ring-amber-400/40"
+              : "bg-gradient-to-r from-rose-200 to-red-200 text-rose-900 ring-1 ring-rose-400/40"
+
+          const dotClass =
+            status === "Paid"
+              ? "bg-emerald-600"
+              : status === "Pending"
+              ? "bg-amber-600"
+              : "bg-rose-600"
+
           return (
             <span
               className={cn(
-                'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                "inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold shadow-sm",
                 colorClass
               )}
             >
+              <span className={cn("h-2 w-2 rounded-full", dotClass)} />
               {status}
             </span>
           )

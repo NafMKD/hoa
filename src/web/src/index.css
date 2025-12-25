@@ -44,91 +44,143 @@
 :root {
   --radius: 0.625rem;
 
-  /* Backgrounds */
-  --background: #FDFDFD;            /* Main content background */
-  --foreground: #111827;            /* Main text */
-  --card: #FFFFFF;                   /* Card background */
+  /* =========================
+     Core surfaces (bright, clean)
+     ========================= */
+  --background: #FFFCF6;            /* warm ivory (reduces "white fatigue") */
+  --foreground: #111827;            /* ink */
+  --card: #FFFFFF;
   --card-foreground: #111827;
-  --popover: #F9FAFB;
+  --popover: #FFF8E6;               /* soft warm popover */
   --popover-foreground: #111827;
 
-  /* Sidebar */
-  --sidebar: #E0F2FE;               /* Soft Sky Blue */
-  --sidebar-foreground: #111827;
-  --sidebar-primary: #3B82F6;       /* Active item */
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #60A5FA;        /* Highlight / hover */
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #D1D5DB;        /* Light gray border */
-  --sidebar-ring: #3B82F6;          /* Focus ring */
+  /* =========================
+     Brand (GOLD) — primary actions, active states, highlights
+     ========================= */
+  --primary: #D4AF37;               /* gold */
+  --primary-foreground: #1A1300;    /* deep warm ink for readability on gold */
+  --ring: #D4AF37;
 
-  /* Accents */
-  --primary: #3B82F6;               /* Buttons / main accents */
-  --primary-foreground: #FFFFFF;
-  --secondary: #60A5FA;             /* Hover / highlights */
-  --secondary-foreground: #111827;
-  --muted: #F3F4F6;                 /* Disabled / subtle elements */
+  /* =========================
+     Colorful secondary system
+     - secondary is used by shadcn for subtle variants
+     - accent is used for highlights, hovers, tags
+     ========================= */
+  --secondary: #1D4ED8;             /* royal blue (pairs well with gold) */
+  --secondary-foreground: #FFFFFF;
+
+  --accent: #14B8A6;                /* teal (fresh, modern with gold) */
+  --accent-foreground: #062B2A;
+
+  --muted: #F3F4F6;
   --muted-foreground: #6B7280;
-  --accent: #60A5FA;
-  --accent-foreground: #FFFFFF;
 
-  /* Status */
+  /* =========================
+     Status
+     ========================= */
   --destructive: #EF4444;
   --success: #10B981;
   --warning: #F59E0B;
 
-  /* Borders / Inputs */
-  --border: #E5E7EB;
-  --input: #F9FAFB;
-  --ring: #3B82F6;
+  /* =========================
+     Borders / Inputs
+     ========================= */
+  --border: #E7E2D6;                /* warm gray border */
+  --input: #FFFEFB;
 
-  /* Charts */
-  --chart-1: #10B981;
-  --chart-2: #F59E0B;
-  --chart-3: #EF4444;
-  --chart-4: #3B82F6;
-  --chart-5: #60A5FA;
+  /* =========================
+     Sidebar (distinct color)
+     ========================= */
+  --sidebar: #0B1B34;               /* deep navy */
+  --sidebar-foreground: #F9FAFB;
+
+  --sidebar-primary: #D4AF37;       /* active item uses gold */
+  --sidebar-primary-foreground: #1A1300;
+
+  --sidebar-accent: #1D4ED8;        /* hover uses royal blue */
+  --sidebar-accent-foreground: #FFFFFF;
+
+  --sidebar-border: #1F2A44;
+  --sidebar-ring: #D4AF37;
+
+  /* =========================
+     Charts (vivid, readable)
+     ========================= */
+  --chart-1: #D4AF37;               /* gold */
+  --chart-2: #1D4ED8;               /* royal blue */
+  --chart-3: #14B8A6;               /* teal */
+  --chart-4: #A855F7;               /* violet */
+  --chart-5: #F97316;               /* orange */
 }
 
 .dark {
-  --background: #111827;
-  --foreground: #F9FAFB;
-  --card: #1F2937;
-  --card-foreground: #F9FAFB;
-  --popover: #1F2937;
-  --popover-foreground: #F9FAFB;
+  /* =========================
+     Core surfaces (dark, rich)
+     ========================= */
+  --background: #07111F;            /* deep navy-black */
+  --foreground: #F8FAFC;
+  --card: #0B1B34;                  /* navy card */
+  --card-foreground: #F8FAFC;
+  --popover: #0A162B;
+  --popover-foreground: #F8FAFC;
 
-  --sidebar: #1E3A8A;              /* Darker blue for sidebar */
-  --sidebar-foreground: #F9FAFB;
-  --sidebar-primary: #3B82F6;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #60A5FA;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #374151;
-  --sidebar-ring: #3B82F6;
+  /* =========================
+     Brand (GOLD)
+     ========================= */
+  --primary: #E6C35C;               /* brighter gold for dark mode */
+  --primary-foreground: #1A1300;
+  --ring: #E6C35C;
 
-  --primary: #3B82F6;
-  --primary-foreground: #FFFFFF;
-  --secondary: #60A5FA;
-  --secondary-foreground: #111827;
-  --muted: #374151;
-  --muted-foreground: #D1D5DB;
-  --accent: #60A5FA;
-  --accent-foreground: #FFFFFF;
+  /* =========================
+     Secondary & accent
+     ========================= */
+  --secondary: #3B82F6;             /* bright blue */
+  --secondary-foreground: #07111F;
 
-  --destructive: #EF4444;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --border: #374151;
-  --input: #1F2937;
-  --ring: #3B82F6;
+  --accent: #2DD4BF;                /* bright teal */
+  --accent-foreground: #062B2A;
 
-  --chart-1: #10B981;
-  --chart-2: #F59E0B;
-  --chart-3: #EF4444;
-  --chart-4: #3B82F6;
-  --chart-5: #60A5FA;
+  --muted: #0E223F;
+  --muted-foreground: #C7D2E0;
+
+  /* =========================
+     Status
+     ========================= */
+  --destructive: #F87171;
+  --success: #34D399;
+  --warning: #FBBF24;
+
+  /* =========================
+     Borders / Inputs
+     ========================= */
+  --border: #13284A;
+  --input: #0A162B;
+
+  /* =========================
+     Sidebar (distinct color)
+     ========================= */
+  --sidebar: #0A162B;               /* slightly different from background */
+  --sidebar-foreground: #F8FAFC;
+
+  --sidebar-primary: #E6C35C;       /* gold active item */
+  --sidebar-primary-foreground: #1A1300;
+
+  --sidebar-accent: #3B82F6;        /* hover blue */
+  --sidebar-accent-foreground: #07111F;
+
+  --sidebar-border: #13284A;
+  --sidebar-ring: #E6C35C;
+
+  /* =========================
+     Charts
+     ========================= */
+  --chart-1: #E6C35C;
+  --chart-2: #60A5FA;
+  --chart-3: #2DD4BF;
+  --chart-4: #C084FC;
+  --chart-5: #FB923C;
 }
+
 
 
 @layer base {

@@ -5,7 +5,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function AppTitle() {
   const { open, setOpenMobile } = useSidebar();
@@ -19,7 +19,11 @@ export function AppTitle() {
           asChild
         >
           <div className="flex items-center">
-            <Avatar>
+            <Avatar className="h-15 w-15">
+              <AvatarImage
+                src="/images/logo.png"   
+                alt="Noah Garden HOA"
+              />
               <AvatarFallback>NG</AvatarFallback>
             </Avatar>
 

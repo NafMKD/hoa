@@ -1,8 +1,4 @@
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { useEffect, useState, useCallback } from "react";
 import { useDebounce } from "use-debounce";
 import {
@@ -45,7 +41,7 @@ export function DocumentTemplates() {
   });
 
   const [pageCount, setPageCount] = useState(0);
-  
+
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,7 +50,7 @@ export function DocumentTemplates() {
   const [debouncedSearch] = useDebounce(search, 600);
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  
+
   const [open, setOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
 
@@ -71,7 +67,7 @@ export function DocumentTemplates() {
     setData(res.data);
     setPageCount(res.meta.last_page);
     setIsLoading(false);
-    
+
     setIsInitialLoading(false);
   }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
 
@@ -129,179 +125,161 @@ export function DocumentTemplates() {
   }
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
+    <Main>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Document Templates
+          </h2>
+          <p className="text-muted-foreground">
+            Manage system document templates here.
+          </p>
         </div>
-      </Header>
 
-      <Main>
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              Document Templates
-            </h2>
-            <p className="text-muted-foreground">
-              Manage system document templates here.
-            </p>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setHelpOpen(true)}
+            className="gap-2"
+          >
+            <IconHelp className="h-4 w-4" />
+            Help
+          </Button>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setHelpOpen(true)}
-              className="gap-2"
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button onClick={() => setOpen(true)} className="gap-2">
+                <IconPlus className="h-4 w-4" />
+                Add Template
+              </Button>
+            </SheetTrigger>
+
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-lg overflow-auto"
             >
-              <IconHelp className="h-4 w-4" />
-              Help
-            </Button>
+              <SheetHeader>
+                <SheetTitle className="text-center">
+                  Add New Template
+                </SheetTitle>
+                <SheetDescription className="text-center">
+                  Fill in template information below.
+                </SheetDescription>
+              </SheetHeader>
 
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <Button onClick={() => setOpen(true)} className="gap-2">
-                  <IconPlus className="h-4 w-4" />
-                  Add Template
-                </Button>
-              </SheetTrigger>
+              <div className="mt-6 pb-10">
+                <AddDocumentTemplateForm
+                  onSuccess={() => {
+                    setOpen(false);
+                    refreshTemplates();
+                  }}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
 
-              <SheetContent
-                side="right"
-                className="w-full sm:max-w-lg overflow-auto"
-              >
-                <SheetHeader>
-                  <SheetTitle className="text-center">
-                    Add New Template
-                  </SheetTitle>
-                  <SheetDescription className="text-center">
-                    Fill in template information below.
-                  </SheetDescription>
-                </SheetHeader>
+      <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
+        {isInitialLoading ? (
+          <DataTableSkeleton
+            columnCount={6}
+            filterCount={1}
+            cellWidths={["2rem", "2rem", "12rem", "8rem", "2rem", "4rem"]}
+            shrinkZero
+          />
+        ) : (
+          <DataTable table={table} onChange={setSearch} searchValue={search} />
+        )}
+      </div>
 
-                <div className="mt-6 pb-10">
-                  <AddDocumentTemplateForm
-                    onSuccess={() => {
-                      setOpen(false);
-                      refreshTemplates();
-                    }}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
+      <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold">
+              Template Variable Guide
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground text-center mt-1">
+              Click any variable to copy it to your clipboard.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            <section>
+              <h3 className="font-semibold text-lg">Lease Document Creation</h3>
+              <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                <p>
+                  Category Name: <CopyTag text="lease_agreement" />
+                </p>
+                <p>
+                  Sub Category Name: <CopyTag text="lease_agreement" />
+                </p>
+              </div>
+            </section>
+
+            <HelpSection
+              title="Owner Information"
+              items={[
+                { label: "Owner Name", value: "{{unit.owner.full_name}}" },
+                { label: "City", value: "{{unit.owner.city}}" },
+                { label: "Sub City", value: "{{unit.owner.sub_city}}" },
+                { label: "Woreda", value: "{{unit.owner.woreda}}" },
+                {
+                  label: "House Number",
+                  value: "{{unit.owner.house_number}}",
+                },
+                { label: "Phone Number", value: "{{unit.owner.phone}}" },
+              ]}
+            />
+
+            <HelpSection
+              title="Representative Information"
+              items={[{ label: "Name", value: "{{representative.full_name}}" }]}
+            />
+
+            <HelpSection
+              title="Tenant Information"
+              items={[
+                { label: "Name", value: "{{tenant.full_name}}" },
+                { label: "City", value: "{{tenant.city}}" },
+                { label: "Sub City", value: "{{tenant.sub_city}}" },
+                { label: "Woreda", value: "{{tenant.woreda}}" },
+                { label: "House Number", value: "{{tenant.house_number}}" },
+                { label: "Phone Number", value: "{{tenant.phone}}" },
+              ]}
+            />
+            <HelpSection
+              title="House Details"
+              items={[
+                { label: "Block", value: "{{unit.building.name}}" },
+                { label: "Unit Number", value: "{{unit.name}}" },
+                { label: "Unit Type", value: "{{unit.unit_type}}" },
+              ]}
+            />
+
+            <HelpSection
+              title="Lease Details"
+              items={[
+                { label: "Lessor Name", value: "{{unit.lessor.name}}" },
+                { label: "Lease Amount", value: "{{agreement_amount}}" },
+                {
+                  label: "Lease Amount (Words)",
+                  value: "{{amount_in_words}}",
+                },
+                { label: "Lease Term", value: "{{lease_term_in_years}}" },
+                { label: "Today Date", value: "{{today_date}}" },
+              ]}
+            />
+            <HelpSection
+              title="Witnesses"
+              items={[
+                { label: "Witness 1", value: "{{witness_1_full_name}}" },
+                { label: "Witness 2", value: "{{witness_2_full_name}}" },
+              ]}
+            />
           </div>
-        </div>
-
-        <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          {isInitialLoading ? (
-            <DataTableSkeleton
-              columnCount={6}
-              filterCount={1}
-              cellWidths={["2rem", "2rem", "12rem", "8rem", "2rem", "4rem"]}
-              shrinkZero
-            />
-          ) : (
-            <DataTable
-              table={table}
-              onChange={setSearch}
-              searchValue={search}
-            />
-          )}
-        </div>
-
-        <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-center text-xl font-bold">
-                Template Variable Guide
-              </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground text-center mt-1">
-                Click any variable to copy it to your clipboard.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-6 py-4">
-              <section>
-                <h3 className="font-semibold text-lg">
-                  Lease Document Creation
-                </h3>
-                <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-                  <p>
-                    Category Name: <CopyTag text="lease_agreement" />
-                  </p>
-                  <p>
-                    Sub Category Name: <CopyTag text="lease_agreement" />
-                  </p>
-                </div>
-              </section>
-
-              <HelpSection
-                title="Owner Information"
-                items={[
-                  { label: "Owner Name", value: "{{unit.owner.full_name}}" },
-                  { label: "City", value: "{{unit.owner.city}}" },
-                  { label: "Sub City", value: "{{unit.owner.sub_city}}" },
-                  { label: "Woreda", value: "{{unit.owner.woreda}}" },
-                  {
-                    label: "House Number",
-                    value: "{{unit.owner.house_number}}",
-                  },
-                  { label: "Phone Number", value: "{{unit.owner.phone}}" },
-                ]}
-              />
-
-              <HelpSection
-                title="Representative Information"
-                items={[
-                  { label: "Name", value: "{{representative.full_name}}" },
-                ]}
-              />
-
-              <HelpSection
-                title="Tenant Information"
-                items={[
-                  { label: "Name", value: "{{tenant.full_name}}" },
-                  { label: "City", value: "{{tenant.city}}" },
-                  { label: "Sub City", value: "{{tenant.sub_city}}" },
-                  { label: "Woreda", value: "{{tenant.woreda}}" },
-                  { label: "House Number", value: "{{tenant.house_number}}" },
-                  { label: "Phone Number", value: "{{tenant.phone}}" },
-                ]}
-              />
-              <HelpSection
-                title="House Details"
-                items={[
-                  { label: "Block", value: "{{unit.building.name}}" },
-                  { label: "Unit Number", value: "{{unit.name}}" },
-                  { label: "Unit Type", value: "{{unit.unit_type}}" },
-                ]}
-              />
-
-              <HelpSection
-                title="Lease Details"
-                items={[
-                  { label: "Lessor Name", value: "{{unit.lessor.name}}" },
-                  { label: "Lease Amount", value: "{{agreement_amount}}" },
-                  {
-                    label: "Lease Amount (Words)",
-                    value: "{{amount_in_words}}",
-                  },
-                  { label: "Lease Term", value: "{{lease_term_in_years}}" },
-                  { label: "Today Date", value: "{{today_date}}" },
-                ]}
-              />
-              <HelpSection
-                title="Witnesses"
-                items={[
-                  { label: "Witness 1", value: "{{witness_1_full_name}}" },
-                  { label: "Witness 2", value: "{{witness_2_full_name}}" },
-                ]}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
-      </Main>
-    </>
+        </DialogContent>
+      </Dialog>
+    </Main>
   );
 }

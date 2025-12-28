@@ -10,9 +10,9 @@ import { sidebarData } from './data/admin/sidebar-data'
 import { NavGroup } from './admin/nav-group'
 
 export function AppSidebar() {
-  const { collapsible, variant } = useLayout()
+  const { collapsible } = useLayout()
   return (
-    <Sidebar collapsible={collapsible} variant={variant}>
+    <Sidebar collapsible={collapsible} variant={"inset"}>
       <SidebarHeader>
         <AppTitle />
       </SidebarHeader>

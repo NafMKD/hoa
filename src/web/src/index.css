@@ -89,18 +89,18 @@
   --input: #fffefb;
 
   /* =========================
-     Sidebar (distinct color)
+     Sidebar (light theme)
      ========================= */
-  --sidebar: #0b1b34; /* deep navy */
-  --sidebar-foreground: #f9fafb;
+  --sidebar: #f8f9fa; /* light gray for light mode */
+  --sidebar-foreground: #111827; /* dark text for light mode */
 
   --sidebar-primary: #d4af37; /* active item uses gold */
   --sidebar-primary-foreground: #1a1300;
 
-  --sidebar-accent: #1d4ed8; /* hover uses royal blue */
-  --sidebar-accent-foreground: #ffffff;
+  --sidebar-accent: #e5e7eb; /* subtle hover for light mode */
+  --sidebar-accent-foreground: #111827;
 
-  --sidebar-border: #1f2a44;
+  --sidebar-border: #e5e7eb;
   --sidebar-ring: #d4af37;
 
   /* =========================
@@ -157,16 +157,16 @@
   --input: #0a162b;
 
   /* =========================
-     Sidebar (distinct color)
+     Sidebar (dark theme)
      ========================= */
-  --sidebar: #0a162b; /* slightly different from background */
-  --sidebar-foreground: #f8fafc;
+  --sidebar: #0a162b; /* dark navy for dark mode */
+  --sidebar-foreground: #f8fafc; /* light text for dark mode */
 
   --sidebar-primary: #e6c35c; /* gold active item */
   --sidebar-primary-foreground: #1a1300;
 
-  --sidebar-accent: #3b82f6; /* hover blue */
-  --sidebar-accent-foreground: #07111f;
+  --sidebar-accent: #1e3a5f; /* subtle hover for dark mode */
+  --sidebar-accent-foreground: #f8fafc;
 
   --sidebar-border: #13284a;
   --sidebar-ring: #e6c35c;
@@ -184,6 +184,8 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
   body {
     @apply bg-background text-foreground;
@@ -196,4 +198,3 @@ textarea,
 select {
   @apply border border-border rounded-md bg-input text-foreground px-3 py-2 outline-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-colors duration-200;
 }
-*/

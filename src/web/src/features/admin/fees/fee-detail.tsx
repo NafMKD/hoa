@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,15 +13,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fetchFeeDetail } from "./lib/fees";
 import type { Fee } from "@/types/types";
 import { Link, useParams } from "@tanstack/react-router";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { IconArrowLeft, IconArrowLeftCircle, IconCalendar, IconAlertCircle } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 
 export function FeeDetail() {
   // ensure your router path matches this
-  const { feeId } = useParams({ from: "/_authenticated/admin/financials/fees/$feeId" }); 
+  const { feeId } = useParams({ from: "/_authenticated/admin/financials/fees/$feeId" });
   const [fee, setFee] = useState<Fee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -58,40 +54,31 @@ export function FeeDetail() {
 
   if (isLoading) {
     return (
-      <>
-        <Header fixed>
-          <div className="ml-auto flex items-center space-x-4">
-            <Search />
-            <ThemeSwitch />
-            <ProfileDropdown />
-          </div>
-        </Header>
-        <Main className="container mx-auto px-4 py-6 space-y-8">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-40" />
-            <Skeleton className="h-9 w-20" />
-          </div>
+      <Main className="container mx-auto px-4 py-6 space-y-8">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-9 w-20" />
+        </div>
 
-          <Card className="border-muted shadow-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-5 w-16 rounded-full" />
+        <Card className="border-muted shadow-sm">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-60 mt-2" />
+          </CardHeader>
+
+          <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-4 w-32" />
               </div>
-              <Skeleton className="h-4 w-60 mt-2" />
-            </CardHeader>
-
-            <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-3 w-24" />
-                  <Skeleton className="h-4 w-32" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </Main>
-      </>
+            ))}
+          </CardContent>
+        </Card>
+      </Main>
     );
   }
 
@@ -112,182 +99,172 @@ export function FeeDetail() {
   }
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
+    <Main className="container mx-auto px-4 py-6 space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">Fee Details</h1>
+        <Button variant="outline" asChild>
+          <Link to="/admin/financials/fees">
+            <IconArrowLeft size={16} className="mr-1" />
+            Back
+          </Link>
+        </Button>
+      </div>
 
-      <Main className="container mx-auto px-4 py-6 space-y-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">Fee Details</h1>
-          <Button variant="outline" asChild>
-            <Link to="/admin/financials/fees">
-              <IconArrowLeft size={16} className="mr-1" />
-              Back
-            </Link>
-          </Button>
-        </div>
-
-        <Card className="border-muted shadow-sm">
-          <CardHeader className="space-y-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div className="flex flex-1 flex-col gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <CardTitle className="text-xl font-semibold leading-tight">
-                    {fee.name}
-                  </CardTitle>
-                  <Badge variant="secondary" className="capitalize">
-                    {fee.category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                  </Badge>
-                </div>
-                <CardDescription className="text-sm text-muted-foreground">
-                  Overview of fee structure and rules.
-                </CardDescription>
-
-                <div className="mt-2 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Frequency
-                    </p>
-                    <p className="text-sm font-medium break-all">
-                      {fee.is_recurring 
-                        ? `Every ${fee.recurring_period_months} Month(s)` 
-                        : "One-time Charge"}
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Next Due
-                    </p>
-                    <p className="text-sm font-medium break-all">
-                      {fee.is_recurring ? formatDate(fee.next_recurring_date) : "—"}
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Penalizable
-                    </p>
-                    <p className="text-sm font-medium break-all">
-                      {fee.is_penalizable ? "Yes" : "No"}
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Created At
-                    </p>
-                    <p className="text-sm font-medium break-all">
-                      {formatDate(fee.created_at)}
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Last Updated
-                    </p>
-                    <p className="text-sm font-medium break-all">
-                      {formatDate(fee.updated_at)}
-                    </p>
-                  </div>
-                </div>
+      <Card className="border-muted shadow-sm">
+        <CardHeader className="space-y-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="flex flex-1 flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="text-xl font-semibold leading-tight">
+                  {fee.name}
+                </CardTitle>
+                <Badge variant="secondary" className="capitalize">
+                  {fee.category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                </Badge>
               </div>
+              <CardDescription className="text-sm text-muted-foreground">
+                Overview of fee structure and rules.
+              </CardDescription>
 
-              {/* Side Stat Box - Amount */}
-              <div className="grid w-full max-w-xs grid-cols-2 gap-3 rounded-lg border bg-muted/40 p-3 text-sm md:grid-cols-1">
+              <div className="mt-2 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                 <div className="space-y-1">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Fee Amount
+                    Frequency
                   </p>
-                  <p className="text-2xl font-bold text-primary">
-                    {formatCurrency(fee.amount)}
+                  <p className="text-sm font-medium break-all">
+                    {fee.is_recurring
+                      ? `Every ${fee.recurring_period_months} Month(s)`
+                      : "One-time Charge"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Next Due
+                  </p>
+                  <p className="text-sm font-medium break-all">
+                    {fee.is_recurring ? formatDate(fee.next_recurring_date) : "—"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Penalizable
+                  </p>
+                  <p className="text-sm font-medium break-all">
+                    {fee.is_penalizable ? "Yes" : "No"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Created At
+                  </p>
+                  <p className="text-sm font-medium break-all">
+                    {formatDate(fee.created_at)}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Last Updated
+                  </p>
+                  <p className="text-sm font-medium break-all">
+                    {formatDate(fee.updated_at)}
                   </p>
                 </div>
               </div>
             </div>
-          </CardHeader>
-        </Card>
 
-        <Tabs defaultValue="config" className="w-full">
-          <TabsList className="flex flex-wrap gap-2 w-full">
-            <TabsTrigger value="config">Configuration</TabsTrigger>
-            <TabsTrigger value="description">Description</TabsTrigger>
-          </TabsList>
+            {/* Side Stat Box - Amount */}
+            <div className="grid w-full max-w-xs grid-cols-2 gap-3 rounded-lg border bg-muted/40 p-3 text-sm md:grid-cols-1">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Fee Amount
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  {formatCurrency(fee.amount)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
-          <TabsContent value="config" className="mt-6 space-y-8">
-            <section className="grid gap-4 md:grid-cols-2">
-              {/* Recurring Logic Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <IconCalendar className="h-4 w-4 text-muted-foreground" />
-                    Recurring Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Is Recurring?</span>
-                    <span className="font-medium">{fee.is_recurring ? "Yes" : "No"}</span>
-                  </div>
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Interval</span>
-                    <span className="font-medium">
-                      { fee.is_recurring ? fee.recurring_period_months ? `${fee.recurring_period_months} Months` : "N/A" : "N/A" }
-                    </span>
-                  </div>
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Last Processed</span>
-                    <span className="font-medium">{fee.is_recurring ? formatDate(fee.last_recurring_date) : "—"}</span>
-                  </div>
-                  <div className="flex justify-between pt-1">
-                    <span className="text-muted-foreground">Next Scheduled</span>
-                    <span className="font-medium">{fee.is_recurring ? formatDate(fee.next_recurring_date) : "—"}</span>
-                  </div>
-                </CardContent>
-              </Card>
+      <Tabs defaultValue="config" className="w-full">
+        <TabsList className="flex flex-wrap gap-2 w-full">
+          <TabsTrigger value="config">Configuration</TabsTrigger>
+          <TabsTrigger value="description">Description</TabsTrigger>
+        </TabsList>
 
-              {/* Penalty Logic Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <IconAlertCircle className="h-4 w-4 text-muted-foreground" />
-                    Penalty Rules
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Can Incur Penalties?</span>
-                    <span className={`font-medium ${fee.is_penalizable ? "text-destructive" : ""}`}>
-                      {fee.is_penalizable ? "Yes" : "No"}
-                    </span>
-                  </div>
-                  <div className="pt-2">
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      {fee.is_penalizable 
-                        ? "If this fee is not paid by the due date, the system may generate penalty records based on global penalty settings."
-                        : "Late payments for this fee will not trigger automatic system penalties."
-                      }
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-          </TabsContent>
+        <TabsContent value="config" className="mt-6 space-y-8">
+          <section className="grid gap-4 md:grid-cols-2">
+            {/* Recurring Logic Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <IconCalendar className="h-4 w-4 text-muted-foreground" />
+                  Recurring Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Is Recurring?</span>
+                  <span className="font-medium">{fee.is_recurring ? "Yes" : "No"}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Interval</span>
+                  <span className="font-medium">
+                    {fee.is_recurring ? fee.recurring_period_months ? `${fee.recurring_period_months} Months` : "N/A" : "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Last Processed</span>
+                  <span className="font-medium">{fee.is_recurring ? formatDate(fee.last_recurring_date) : "—"}</span>
+                </div>
+                <div className="flex justify-between pt-1">
+                  <span className="text-muted-foreground">Next Scheduled</span>
+                  <span className="font-medium">{fee.is_recurring ? formatDate(fee.next_recurring_date) : "—"}</span>
+                </div>
+              </CardContent>
+            </Card>
 
-          <TabsContent value="description" className="mt-6">
-            {fee.description ? (
-              <Card className="border-muted shadow-sm">
-                <CardContent className="pt-6">
-                  <p className="whitespace-pre-wrap">{fee.description}</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <p className="text-sm text-muted-foreground">No description available.</p>
-            )}
-          </TabsContent>
-        </Tabs>
-      </Main>
-    </>
+            {/* Penalty Logic Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <IconAlertCircle className="h-4 w-4 text-muted-foreground" />
+                  Penalty Rules
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Can Incur Penalties?</span>
+                  <span className={`font-medium ${fee.is_penalizable ? "text-destructive" : ""}`}>
+                    {fee.is_penalizable ? "Yes" : "No"}
+                  </span>
+                </div>
+                <div className="pt-2">
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    {fee.is_penalizable
+                      ? "If this fee is not paid by the due date, the system may generate penalty records based on global penalty settings."
+                      : "Late payments for this fee will not trigger automatic system penalties."
+                    }
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        </TabsContent>
+
+        <TabsContent value="description" className="mt-6">
+          {fee.description ? (
+            <Card className="border-muted shadow-sm">
+              <CardContent className="pt-6">
+                <p className="whitespace-pre-wrap">{fee.description}</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <p className="text-sm text-muted-foreground">No description available.</p>
+          )}
+        </TabsContent>
+      </Tabs>
+    </Main>
   );
 }

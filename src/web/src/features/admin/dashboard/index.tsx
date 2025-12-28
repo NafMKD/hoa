@@ -7,12 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { TopNav } from '@/components/layout/admin/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { cn } from "@/lib/utils"
 
@@ -75,174 +70,160 @@ const styles: Record<
 
 export function Dashboard() {
   return (
-    <>
-      {/* ===== Top Heading ===== */}
-      <Header>
-        <TopNav links={topNav} />
-        <div className="ms-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
+    <Main>
+      <div className="mb-2 flex items-center justify-between space-y-2">
+        <h1 className="text-2xl font-bold tracking-tight">HOA Dashboard</h1>
+      </div>
 
-      {/* ===== Main ===== */}
-      <Main>
-        <div className="mb-2 flex items-center justify-between space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight">HOA Dashboard</h1>
+      <Tabs
+        orientation="vertical"
+        defaultValue="overview"
+        className="space-y-4"
+      >
+        <div className="w-full overflow-x-auto pb-2">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="residents">Residents</TabsTrigger>
+            <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+          </TabsList>
         </div>
 
-        <Tabs
-          orientation="vertical"
-          defaultValue="overview"
-          className="space-y-4"
-        >
-          <div className="w-full overflow-x-auto pb-2">
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="residents">Residents</TabsTrigger>
-              <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
-            </TabsList>
+        {/* ==== OVERVIEW ==== */}
+        <TabsContent value="overview" className="space-y-4">
+          {/* Summary Cards */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <SummaryCard
+              title="Total Dues Collected"
+              value="$85,430"
+              change="+12.3%"
+              variant="gold"
+            />
+            <SummaryCard
+              title="Pending Payments"
+              value="$4,850"
+              change="-3.8%"
+              variant="violet"
+            />
+            <SummaryCard
+              title="Active Residents"
+              value="142"
+              change="+8 new"
+              variant="teal"
+            />
+            <SummaryCard
+              title="Open Maintenance Requests"
+              value="9"
+              change="+2 new"
+              variant="blue"
+            />
           </div>
 
-          {/* ==== OVERVIEW ==== */}
-          <TabsContent value="overview" className="space-y-4">
-            {/* Summary Cards */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <SummaryCard
-                title="Total Dues Collected"
-                value="$85,430"
-                change="+12.3%"
-                variant="gold"
-              />
-              <SummaryCard
-                title="Pending Payments"
-                value="$4,850"
-                change="-3.8%"
-                variant="violet"
-              />
-              <SummaryCard
-                title="Active Residents"
-                value="142"
-                change="+8 new"
-                variant="teal"
-              />
-              <SummaryCard
-                title="Open Maintenance Requests"
-                value="9"
-                change="+2 new"
-                variant="blue"
-              />
-            </div>
-
-            {/* Charts and Tables */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-7">
-              {/* Chart */}
-              <Card
-                className={cn(
-                  "col-span-1 lg:col-span-4 rounded-2xl border-0 overflow-hidden",
-                  "ring-1 ring-black/5",
-                  "bg-gradient-to-br from-[#FFF7D6] via-[color:color-mix(in_oklab,#D4AF37_18%,white)] to-[#FFE9A3]"
-                )}
-              >
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-[#1A1300]">
-                    Income vs Expenses
-                  </CardTitle>
-                  <p className="text-sm text-[#1A1300]/60">
-                    Monthly comparison of cash flow
-                  </p>
-                </CardHeader>
-
-                <CardContent className="h-[280px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={incomeExpenseData}>
-                      <XAxis dataKey="month" stroke="rgba(26,19,0,0.55)" />
-                      <YAxis stroke="rgba(26,19,0,0.55)" />
-                      <Tooltip
-                        contentStyle={{
-                          background: "rgba(255,255,255,0.9)",
-                          border: "1px solid rgba(0,0,0,0.08)",
-                          borderRadius: 12,
-                        }}
-                        cursor={{ fill: "rgba(0,0,0,0.04)" }}
-                      />
-                      <Bar
-                        dataKey="income"
-                        name="Income"
-                        radius={[10, 10, 0, 0]}
-                        fill="#14B8A6" /* teal (matches your accent) */
-                      />
-                      <Bar
-                        dataKey="expenses"
-                        name="Expenses"
-                        radius={[10, 10, 0, 0]}
-                        fill="#EF4444" /* red (destructive) */
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              {/* Recent Payments */}
-              <RecentPaymentsTable data={recentPayments} />
-            </div>
-          </TabsContent>
-
-          {/* ==== RESIDENTS ==== */}
-          <TabsContent value="residents" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Residents List</CardTitle>
-                <CardDescription>
-                  Manage all registered homeowners
-                </CardDescription>
+          {/* Charts and Tables */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-7">
+            {/* Chart */}
+            <Card
+              className={cn(
+                "col-span-1 lg:col-span-4 rounded-2xl border-0 overflow-hidden",
+                "ring-1 ring-black/5",
+                "bg-gradient-to-br from-[#FFF7D6] via-[color:color-mix(in_oklab,#D4AF37_18%,white)] to-[#FFE9A3]"
+              )}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-[#1A1300]">
+                  Income vs Expenses
+                </CardTitle>
+                <p className="text-sm text-[#1A1300]/60">
+                  Monthly comparison of cash flow
+                </p>
               </CardHeader>
-              <CardContent>
-                {/* integrate your TanStack Table here */}
-                <div className="text-muted-foreground text-sm">
-                  Table placeholder for Residents
-                </div>
+
+              <CardContent className="h-[280px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={incomeExpenseData}>
+                    <XAxis dataKey="month" stroke="rgba(26,19,0,0.55)" />
+                    <YAxis stroke="rgba(26,19,0,0.55)" />
+                    <Tooltip
+                      contentStyle={{
+                        background: "rgba(255,255,255,0.9)",
+                        border: "1px solid rgba(0,0,0,0.08)",
+                        borderRadius: 12,
+                      }}
+                      cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                    />
+                    <Bar
+                      dataKey="income"
+                      name="Income"
+                      radius={[10, 10, 0, 0]}
+                      fill="#14B8A6" /* teal (matches your accent) */
+                    />
+                    <Bar
+                      dataKey="expenses"
+                      name="Expenses"
+                      radius={[10, 10, 0, 0]}
+                      fill="#EF4444" /* red (destructive) */
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
 
-          {/* ==== MAINTENANCE ==== */}
-          <TabsContent value="maintenance" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ongoing Maintenance</CardTitle>
-                <CardDescription>
-                  Track ongoing repair and cleaning tasks
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {maintenance.map((m, i) => (
-                  <div
-                    key={i}
-                    className="flex justify-between border-b py-2 text-sm"
-                  >
-                    <span>{m.task}</span>
-                    <span
-                      className={`${
-                        m.status === "In Progress"
-                          ? "text-yellow-600"
-                          : m.status === "Completed"
-                            ? "text-green-600"
-                            : "text-red-600"
+            {/* Recent Payments */}
+            <RecentPaymentsTable data={recentPayments} />
+          </div>
+        </TabsContent>
+
+        {/* ==== RESIDENTS ==== */}
+        <TabsContent value="residents" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Residents List</CardTitle>
+              <CardDescription>
+                Manage all registered homeowners
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* integrate your TanStack Table here */}
+              <div className="text-muted-foreground text-sm">
+                Table placeholder for Residents
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ==== MAINTENANCE ==== */}
+        <TabsContent value="maintenance" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ongoing Maintenance</CardTitle>
+              <CardDescription>
+                Track ongoing repair and cleaning tasks
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {maintenance.map((m, i) => (
+                <div
+                  key={i}
+                  className="flex justify-between border-b py-2 text-sm"
+                >
+                  <span>{m.task}</span>
+                  <span
+                    className={`${m.status === "In Progress"
+                      ? "text-yellow-600"
+                      : m.status === "Completed"
+                        ? "text-green-600"
+                        : "text-red-600"
                       }`}
-                    >
-                      {m.status}
-                    </span>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </Main>
-    </>
+                  >
+                    {m.status}
+                  </span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </Main>
   );
 }
 
@@ -299,8 +280,8 @@ const maintenance = [
   { task: 'Security camera upgrade', status: 'Pending' },
 ]
 
-const topNav = [
-  { title: 'Financials', href: '/admin/financials', isActive: true, disabled: false },
-  { title: 'Residents', href: '/admin/residents', isActive: false, disabled: false },
-  { title: 'Maintenance', href: '/admin/maintenance', isActive: false, disabled: false },
-]
+// const topNav = [
+//   { title: 'Financials', href: '/admin/financials', isActive: true, disabled: false },
+//   { title: 'Residents', href: '/admin/residents', isActive: false, disabled: false },
+//   { title: 'Maintenance', href: '/admin/maintenance', isActive: false, disabled: false },
+// ]

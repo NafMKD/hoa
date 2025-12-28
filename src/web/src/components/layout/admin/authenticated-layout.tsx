@@ -7,9 +7,13 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { SkipToMain } from '@/components/skip-to-main'
 import { useAuthStore } from '@/stores/auth-store'
+import { Header } from '../header'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
+import { ProfileDropdown } from '@/components/profile-dropdown'
 
 type AuthenticatedLayoutProps = {
-  allowedRoles?: string[] 
+  allowedRoles?: string[]
   children?: React.ReactNode
 }
 
@@ -47,7 +51,16 @@ export function AuthenticatedLayout({ children, allowedRoles }: AuthenticatedLay
               'peer-data-[variant=inset]:has-[[data-layout=fixed]]:h-[calc(100svh-(var(--spacing)*4))]'
             )}
           >
-            {children ?? <Outlet />}
+            <>
+              <Header>
+                <div className="ml-auto flex items-center space-x-4">
+                  <Search />
+                  <ThemeSwitch />
+                  <ProfileDropdown />
+                </div>
+              </Header>
+              {children ?? <Outlet />}
+            </>
           </SidebarInset>
         </SidebarProvider>
       </LayoutProvider>

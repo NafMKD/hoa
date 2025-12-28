@@ -1,7 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { useParams, Link } from "@tanstack/react-router";
-import { confirmPayment, failPayment, fetchPaymentDetail, getPaymentStatusColor, refundPayment } from "./lib/payments";
+import {
+  addReceiptNumber,
+  confirmPayment,
+  failPayment,
+  fetchPaymentDetail,
+  getPaymentStatusColor,
+  refundPayment,
+} from "./lib/payments";
 import type { Payment } from "@/types/types";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -22,14 +29,9 @@ import {
   IconLoader2,
   IconX,
   IconCheck,
-  IconArrowBackUp
+  IconArrowBackUp,
 } from "@tabler/icons-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { ProfileDropdown } from "@/components/profile-dropdown";
@@ -56,7 +58,11 @@ export function PaymentDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<"confirm" | "fail" | "refund" | null>(null);
+  const [pendingAction, setPendingAction] = useState<
+    "confirm" | "fail" | "refund" | null
+  >(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [receiptNumber, setReceiptNumber] = useState("");
 
   // Print Logic
   const printRef = useRef<HTMLDivElement>(null);
@@ -94,75 +100,75 @@ export function PaymentDetail() {
         })
       : "—";
 
-    const triggerConfirm = (action: "confirm" | "fail" | "refund") => {
-      setPendingAction(action);
-      setConfirmOpen(true);
-    };
+  const triggerConfirm = (action: "confirm" | "fail" | "refund") => {
+    setPendingAction(action);
+    setConfirmOpen(true);
+  };
 
-    const onConfirm = () => {
-      if (pendingAction) {
-        handleAction(pendingAction);
+  const onConfirm = () => {
+    if (pendingAction) {
+      handleAction(pendingAction);
+    }
+    setConfirmOpen(false);
+  };
+
+  const getDialogDetails = () => {
+    switch (pendingAction) {
+      case "confirm":
+        return {
+          title: "Confirm Payment?",
+          desc: "This will mark the payment as verified and deduct the amount from the invoice balance.",
+          btnClass: "bg-green-600 hover:bg-green-700",
+        };
+      case "fail":
+        return {
+          title: "Reject Payment?",
+          desc: "This will mark the payment as failed. The user will be notified.",
+          btnClass:
+            "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        };
+      case "refund":
+        return {
+          title: "Issue Refund?",
+          desc: "This will mark the payment as refunded. Ensure you have returned the funds to the user.",
+          btnClass: "bg-purple-600 hover:bg-purple-700",
+        };
+      default:
+        return {
+          title: "Are you sure?",
+          desc: "This action cannot be undone.",
+          btnClass: "",
+        };
+    }
+  };
+
+  const dialogContent = getDialogDetails();
+
+  const handleAction = async (action: "confirm" | "fail" | "refund") => {
+    if (!payment) return;
+    setIsProcessing(true);
+    try {
+      let updatedPayment;
+
+      if (action === "confirm") {
+        updatedPayment = await confirmPayment(payment.id);
+        toast.success("Payment confirmed successfully");
+      } else if (action === "fail") {
+        updatedPayment = await failPayment(payment.id);
+        toast.success("Payment marked as failed");
+      } else if (action === "refund") {
+        updatedPayment = await refundPayment(payment.id);
+        toast.info("Payment refunded");
       }
-      setConfirmOpen(false);
-    };
 
-    const getDialogDetails = () => {
-      switch (pendingAction) {
-        case "confirm":
-          return {
-            title: "Confirm Payment?",
-            desc: "This will mark the payment as verified and deduct the amount from the invoice balance.",
-            btnClass: "bg-green-600 hover:bg-green-700",
-          };
-        case "fail":
-          return {
-            title: "Reject Payment?",
-            desc: "This will mark the payment as failed. The user will be notified.",
-            btnClass:
-              "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-          };
-        case "refund":
-          return {
-            title: "Issue Refund?",
-            desc: "This will mark the payment as refunded. Ensure you have returned the funds to the user.",
-            btnClass: "bg-purple-600 hover:bg-purple-700",
-          };
-        default:
-          return {
-            title: "Are you sure?",
-            desc: "This action cannot be undone.",
-            btnClass: "",
-          };
-      }
-    };
-
-    const dialogContent = getDialogDetails();
-
-    const handleAction = async (action: "confirm" | "fail" | "refund") => {
-      if (!payment) return;
-      setIsProcessing(true);
-      try {
-        let updatedPayment;
-
-        if (action === "confirm") {
-          updatedPayment = await confirmPayment(payment.id);
-          toast.success("Payment confirmed successfully");
-        } else if (action === "fail") {
-          updatedPayment = await failPayment(payment.id);
-          toast.success("Payment marked as failed");
-        } else if (action === "refund") {
-          updatedPayment = await refundPayment(payment.id);
-          toast.info("Payment refunded");
-        }
-
-        if (updatedPayment) setPayment(updatedPayment);
-      } catch (error) {
-        const err = error as ApiError;
-        toast.error(err.data?.message || "Action failed. Please try again.");
-      } finally {
-        setIsProcessing(false);
-      }
-    };
+      if (updatedPayment) setPayment(updatedPayment);
+    } catch (error) {
+      const err = error as ApiError;
+      toast.error(err.data?.message || "Action failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   if (isLoading) return <PaymentDetailSkeleton />;
   if (!payment)
@@ -171,6 +177,29 @@ export function PaymentDetail() {
         Payment not found
       </div>
     );
+
+  const submitReceiptNumber = async () => {
+    if (!payment || !receiptNumber.trim()) return;
+
+    setIsProcessing(true);
+    try {
+      const updatedPayment = await addReceiptNumber(
+        payment.id,
+        receiptNumber.trim()
+      );
+
+      setPayment(updatedPayment);
+      setReceiptOpen(false);
+      setReceiptNumber("");
+
+      toast.success("Receipt number added");
+    } catch (error) {
+      const err = error as ApiError;
+      toast.error(err.data?.message || "Failed to add receipt number");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <>
@@ -233,7 +262,7 @@ export function PaymentDetail() {
             {payment.status === "confirmed" && (
               <Button
                 variant="secondary"
-                className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                className="border-purple-200 text-white"
                 disabled={isProcessing}
                 onClick={() => triggerConfirm("refund")}
               >
@@ -243,6 +272,16 @@ export function PaymentDetail() {
                   <IconArrowBackUp size={16} className="mr-1" />
                 )}
                 Refund
+              </Button>
+            )}
+            {payment.status === "confirmed" && !payment.receipt_number && (
+              <Button
+                variant="outline"
+                onClick={() => setReceiptOpen(true)}
+                disabled={isProcessing}
+              >
+                <IconFileInvoice size={16} className="mr-1" />
+                Add Receipt #
               </Button>
             )}
             <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
@@ -255,11 +294,49 @@ export function PaymentDetail() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={onConfirm} 
+                  <AlertDialogAction
+                    onClick={onConfirm}
                     className={dialogContent.btnClass}
                   >
                     Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog open={receiptOpen} onOpenChange={setReceiptOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Add Receipt Number</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Enter the official receipt number for this completed
+                    payment.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <input
+                  autoFocus
+                  value={receiptNumber}
+                  onChange={(e) => setReceiptNumber(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && receiptNumber.trim()) {
+                      submitReceiptNumber();
+                    }
+                  }}
+                  placeholder="Receipt number"
+                  className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                />
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={!receiptNumber.trim() || isProcessing}
+                    onClick={submitReceiptNumber}
+                  >
+                    {isProcessing ? (
+                      <IconLoader2 className="animate-spin h-4 w-4" />
+                    ) : (
+                      "Save"
+                    )}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -354,7 +431,8 @@ export function PaymentDetail() {
                       <br />
                       {payment.invoice?.penalty_amount && (
                         <>
-                          Penalty Amount: <b>{formatMoney(payment.invoice.penalty_amount)}</b>
+                          Penalty Amount:{" "}
+                          <b>{formatMoney(payment.invoice.penalty_amount)}</b>
                         </>
                       )}
                     </p>
@@ -366,7 +444,19 @@ export function PaymentDetail() {
             {/* 2. Transaction Details */}
             <Card>
               <CardHeader className="pb-3 border-b">
-                <CardTitle className="text-base">Transaction Details</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">
+                    Transaction Details
+                  </CardTitle>
+                  { payment.receipt_number && (
+                  <div className="text-sm text-muted-foreground">
+                    Receipt # —{" "}
+                    <span className="ml-1 font-mono font-bold text-foreground">
+                      {payment.receipt_number}
+                    </span>
+                  </div>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 <Table>
@@ -488,9 +578,8 @@ export function PaymentDetail() {
                     {payment.invoice ? (
                       <b>
                         {formatMoney(
-                          parseFloat(
-                            payment.invoice.total_amount as string
-                          ) + parseFloat(payment.invoice.penalty_amount as string)
+                          parseFloat(payment.invoice.total_amount as string) +
+                            parseFloat(payment.invoice.penalty_amount as string)
                         )}
                       </b>
                     ) : (
@@ -579,10 +668,10 @@ function PaymentDetailSkeleton() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                  <div className="p-6 space-y-4">
-                     <Skeleton className="h-8 w-full" />
-                     <Skeleton className="h-8 w-full" />
-                  </div>
+                <div className="p-6 space-y-4">
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                </div>
               </CardContent>
             </Card>
           </div>

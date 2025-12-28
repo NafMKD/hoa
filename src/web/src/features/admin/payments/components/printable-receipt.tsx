@@ -21,6 +21,7 @@ export const PrintableReceipt = forwardRef<HTMLDivElement, PrintableReceiptProps
             <div className="space-y-1">
                 <h1 className="text-3xl font-bold tracking-tight uppercase">Official Receipt</h1>
                 <p className="text-sm font-semibold text-gray-500">Ref: {payment.reference}</p>
+                { payment.receipt_number && (<p className="text-sm font-semibold text-gray-500">Receipt Number: {payment.receipt_number}</p>) }
                 <div className="pt-2">
                      <span className={`text-xs px-2 py-0.5 border rounded uppercase font-bold ${payment.status === 'confirmed' || payment.status === 'completed' ? 'border-black text-black' : 'border-gray-300 text-gray-400'}`}>
                         {payment.status}

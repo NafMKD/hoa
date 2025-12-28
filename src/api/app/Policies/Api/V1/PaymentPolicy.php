@@ -79,5 +79,12 @@ class PaymentPolicy
     {
         return $authUser->hasRole(Controller::_ROLES[0]) || $authUser->hasRole(Controller::_ROLES[1]);
     }
-    
+
+    /**
+     * Only admin and accountant can add a receipt number.
+     */
+    public function addReceiptNumber(User $authUser, Payment $payment): bool
+    {
+        return $authUser->hasRole(Controller::_ROLES[0]) || $authUser->hasRole(Controller::_ROLES[1]);
+    }
 }

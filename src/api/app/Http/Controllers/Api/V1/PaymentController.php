@@ -240,6 +240,43 @@ class PaymentController extends Controller
         }
     }
 
+    /**
+     * Add a payment receipt number
+     * 
+     * @param Request $request
+     * @param Payment $payment
+     * 
+     * @return Payment|JsonResponse
+     */
+    public function addReceiptNumber(Request $request, Payment $payment): Payment|JsonResponse
+    {
+        try {
+            $this->authorize('addReceiptNumber', $payment);
+            $paymentNumber = $request->get('receipt_number');
+            
+            $payment = $this->payments->addReceiptNumber($payment, $paymentNumber);
+
+            $payment->load(['invoice', 'invoice.user',  'invoice.unit', 'screenshot']);
+
+            return response()->json(new PaymentResource($payment));
+        }catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error deleting payment: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    } 
 
     /**
      * Delete a payment.

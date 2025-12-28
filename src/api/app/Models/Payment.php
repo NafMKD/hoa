@@ -25,6 +25,7 @@ class Payment extends Model
         'type',
         'processed_by',
         'processed_at',
+        'receipt_number',
         'reconciliation_metadata',
         'payment_screen_shoot_id',
         'payment_date',

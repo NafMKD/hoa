@@ -26,6 +26,9 @@ export const failPayment = (paymentId: number) =>
 export const refundPayment = (paymentId: number) =>
   handleApi<Payment>(api.post(`/v1/payments/${paymentId}/refund`));
 
+export const addReceiptNumber = (paymentId: number, receiptNumber: string) =>
+  handleApi<Payment>(api.post(`/v1/payments/${paymentId}/add_receipt_number`, { receipt_number: receiptNumber }));
+
 export const getPaymentStatusColor = (status: string) => {
   switch (status) {
     case "confirmed":

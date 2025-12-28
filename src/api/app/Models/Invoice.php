@@ -179,7 +179,8 @@ class Invoice extends Model
             $currentStart = $dueDate->copy()->addDay();
 
             // Loop as long as the start of the penalty period has been reached
-            while ($currentStart->lte($now)) {
+            // Penalty periods are limited to 3 months
+            while ($currentStart->lte($now) && $periodCounter <= 3) {
 
                 // LOGIC CHANGE HERE:
                 // First period is 20 days, all others are 30 days
@@ -192,7 +193,7 @@ class Invoice extends Model
 
                 // Generate Unique Reason Key
                 $reasonKey = "Overdue Period #{$periodCounter}";
-                $fullReason = "{$reasonKey}: {$currentStart->toDateString()} to {$currentEnd->toDateString()}";
+                // $fullReason = "{$reasonKey}: {$currentStart->toDateString()} to {$currentEnd->toDateString()}";
 
                 // Check if already applied
                 $alreadyApplied = false;
@@ -208,7 +209,7 @@ class Invoice extends Model
                     $this->penalties()->create([
                         'amount'       => $penaltyAmount,
                         'applied_date' => $now->toDateString(),
-                        'reason'       => $fullReason,
+                        'reason'       => $reasonKey,
                     ]);
                 }
 

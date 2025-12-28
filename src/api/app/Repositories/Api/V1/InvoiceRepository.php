@@ -257,9 +257,14 @@ class InvoiceRepository
      */
     public function generateInvoiceForFee(Collection $units, Fee $fee): bool
     {
-        // Check if the category is valid for `administrational' invoicing 
+        // Check if the category is valid for `monthly' invoicing 
         if ($fee->category !== Controller::_FEE_CATEGORIES[0]) {
-            throw new RepositoryException('Fee category not valid for invoicing.');
+            // throw new RepositoryException('Fee category not valid for automatic invoicing.');
+            return false;
+        }
+        if ($fee->status !== Controller::_FEE_STATUSES[0]) {
+            // throw new RepositoryException('Fee status not valid for automatic invoicing.');
+            return false;
         }
 
         DB::beginTransaction();

@@ -27,7 +27,7 @@ abstract class Controller
     const _DOCUMENT_TEMPLATE_CATEGORIES = ['lease_agreement', 'letter', 'reminder', 'other'];
     const _LEASE_STATUS = ['active','terminated','expired','draft'];
     const _LEASE_AGREEMENT_TYPES = ['owner','representative'];
-    const _FEE_CATEGORIES = ['administrational','special_assessment', 'other'];
+    const _FEE_CATEGORIES = ['monthly', 'administrational','special_assessment', 'fine', 'other'];
     const _DEFAULT_DUE_DAYS = 10;
     const _INVOICE_STATUSES = ['issued','partial','paid','overdue','cancelled'];
     const _FEE_FIXED_PENALTY = 100;

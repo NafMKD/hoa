@@ -37,9 +37,15 @@ class GenerateFeeInvoiceJob implements ShouldQueue
                         
             DB::transaction(function () use ($repository) {
                 foreach ($this->fees as $fee) {
-                    // Check if the category is valid for `administrational' invoicing 
+                    // Check if the category is valid for `monthly' invoicing 
                     if ($fee->category !== Controller::_FEE_CATEGORIES[0]) {
-                        throw new RepositoryException('Fee category not valid for invoicing.');
+                        // throw new RepositoryException('Fee category not valid for automatic invoicing.');
+                        continue;
+                    }
+                    // Check if the status is 'active'
+                    if ($fee->status !== Controller::_FEE_STATUSES[0]) {
+                        // throw new RepositoryException('Fee status not valid for automatic invoicing.');
+                        continue;
                     }
                     // Get All Units
                     $units = Unit::all();

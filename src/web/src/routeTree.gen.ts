@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
@@ -34,6 +35,11 @@ import { Route as AuthenticatedAdminFinancialsFeesFeeIdRouteImport } from './rou
 import { Route as AuthenticatedAdminUnitsUnitIdLeasesIndexRouteImport } from './routes/_authenticated/admin/units/$unitId/leases/index'
 import { Route as AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRouteImport } from './routes/_authenticated/admin/units/$unitId/leases/$leaseId/index'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const errors503Route = errors503RouteImport.update({
   id: '/(errors)/503',
   path: '/503',
@@ -172,6 +178,7 @@ const AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/sign-in': typeof authSignInRoute
   '/401': typeof errors401Route
@@ -198,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/admin/units/$unitId/leases/$leaseId': typeof AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/sign-in': typeof authSignInRoute
   '/401': typeof errors401Route
   '/403': typeof errors403Route
@@ -224,6 +232,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/(auth)/sign-in': typeof authSignInRoute
   '/(errors)/401': typeof errors401Route
@@ -252,6 +261,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/admin'
     | '/sign-in'
     | '/401'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/admin/units/$unitId/leases/$leaseId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/sign-in'
     | '/401'
     | '/403'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/admin/units/$unitId/leases/$leaseId'
   id:
     | '__root__'
+    | '/'
     | '/_authenticated/admin'
     | '/(auth)/sign-in'
     | '/(errors)/401'
@@ -330,6 +342,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   authSignInRoute: typeof authSignInRoute
   errors401Route: typeof errors401Route
@@ -341,6 +354,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(errors)/503': {
       id: '/(errors)/503'
       path: '/503'
@@ -572,6 +592,7 @@ const AuthenticatedAdminRouteRouteWithChildren =
   )
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   authSignInRoute: authSignInRoute,
   errors401Route: errors401Route,

@@ -18,7 +18,6 @@ import api from "@/lib/api";
 import { useAuthStore, type User } from "@/stores/auth-store";
 import { router } from "@/QueryClient";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import { Link } from "@tanstack/react-router";
 import { AlertCircleIcon } from "lucide-react";
 
 const formSchema = z.object({
@@ -123,18 +122,12 @@ export function UserAuthForm() {
           control={form.control}
           name="password"
           render={({ field }) => (
-            <FormItem className="relative">
+            <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
                 <PasswordInput placeholder="********" {...field} />
               </FormControl>
               <FormMessage />
-              <Link
-                to="/admin"
-                className="text-muted-foreground absolute -top-0.5 right-0 text-sm font-medium hover:opacity-75"
-              >
-                Forgot password?
-              </Link>
             </FormItem>
           )}
         />

@@ -1,8 +1,4 @@
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { fetchUsers } from "./lib/users";
 import { columns } from "./components/columns";
 import { DataTable } from "@/components/data-table/data-table";
@@ -109,113 +105,103 @@ export function Users() {
   });
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
+    <Main>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">User List</h2>
+          <p className="text-muted-foreground">Manage system users here.</p>
         </div>
-      </Header>
 
-      <Main>
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">User List</h2>
-            <p className="text-muted-foreground">Manage system users here.</p>
-          </div>
+        {/* Right-side actions */}
+        <div className="flex flex-wrap items-center gap-2">
+          <ImportUsersDialog
+            onSuccess={refreshUsers}
+            templateUrl="/templates/users-import-template.xlsx"
+          />
 
-          {/* Right-side actions */}
-          <div className="flex flex-wrap items-center gap-2">
-            <ImportUsersDialog
-              onSuccess={refreshUsers}
-              templateUrl="/templates/users-import-template.xlsx"
-            />
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button onClick={() => setOpen(true)} className="gap-2">
+                <IconPlus className="h-4 w-4" />
+                Add User
+              </Button>
+            </SheetTrigger>
 
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <Button onClick={() => setOpen(true)} className="gap-2">
-                  <IconPlus className="h-4 w-4" />
-                  Add User
-                </Button>
-              </SheetTrigger>
-
-              <SheetContent
-                side="right"
-                className="w-full sm:max-w-lg overflow-auto"
-              >
-                <SheetHeader>
-                  <SheetTitle className="text-center">Add New User</SheetTitle>
-                  <SheetDescription className="text-center">
-                    Fill in the user information below to create a new account.
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 pb-10">
-                  <AddUserForm
-                    onSuccess={() => {
-                      setOpen(false);
-                      refreshUsers();
-                    }}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          {/* Edit sheet */}
-          <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
             <SheetContent
               side="right"
               className="w-full sm:max-w-lg overflow-auto"
             >
               <SheetHeader>
-                <SheetTitle className="text-center">Edit User</SheetTitle>
+                <SheetTitle className="text-center">Add New User</SheetTitle>
                 <SheetDescription className="text-center">
-                  Update the user information below.
+                  Fill in the user information below to create a new account.
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-6 pb-10">
-                {editUser && (
-                  <EditUserForm
-                    user={editUser}
-                    onSuccess={() => {
-                      setIsEditOpen(false);
-                      setEditUser(null);
-                      refreshUsers();
-                    }}
-                  />
-                )}
+                <AddUserForm
+                  onSuccess={() => {
+                    setOpen(false);
+                    refreshUsers();
+                  }}
+                />
               </div>
             </SheetContent>
           </Sheet>
         </div>
 
-        <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          {isInitialLoading ? (
-            <DataTableSkeleton
-              columnCount={8}
-              filterCount={1}
-              cellWidths={[
-                "2rem",
-                "2rem",
-                "16rem",
-                "12rem",
-                "5rem",
-                "4rem",
-                "5rem",
-                "4rem",
-              ]}
-              shrinkZero
-            />
-          ) : (
-            <DataTable
-              table={table}
-              onChange={setSearch}
-              searchValue={search}
-            />
-          )}
-        </div>
-      </Main>
-    </>
+        {/* Edit sheet */}
+        <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <SheetContent
+            side="right"
+            className="w-full sm:max-w-lg overflow-auto"
+          >
+            <SheetHeader>
+              <SheetTitle className="text-center">Edit User</SheetTitle>
+              <SheetDescription className="text-center">
+                Update the user information below.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-6 pb-10">
+              {editUser && (
+                <EditUserForm
+                  user={editUser}
+                  onSuccess={() => {
+                    setIsEditOpen(false);
+                    setEditUser(null);
+                    refreshUsers();
+                  }}
+                />
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
+        {isInitialLoading ? (
+          <DataTableSkeleton
+            columnCount={8}
+            filterCount={1}
+            cellWidths={[
+              "2rem",
+              "2rem",
+              "16rem",
+              "12rem",
+              "5rem",
+              "4rem",
+              "5rem",
+              "4rem",
+            ]}
+            shrinkZero
+          />
+        ) : (
+          <DataTable
+            table={table}
+            onChange={setSearch}
+            searchValue={search}
+          />
+        )}
+      </div>
+    </Main>
   );
 }

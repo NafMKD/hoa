@@ -15,8 +15,8 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  useSidebar,
 } from '@/components/ui/sidebar'
+import { useSidebar } from '@/components/ui/sidebar-context'
 import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
@@ -174,7 +174,7 @@ function SidebarMenuCollapsedDropdown({
 }
 
 function checkIsActive(href: string, item: NavItem, mainNav = false) {
-  const baseUrl = item.url?.replace(/\/$/, ''); 
+  const baseUrl = item.url?.replace(/\/$/, '');
   const currentUrl = href.replace(/\/$/, '');
 
   const baseUrlParts = baseUrl?.split('/').filter(Boolean) || [];

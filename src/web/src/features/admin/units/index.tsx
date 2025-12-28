@@ -1,8 +1,4 @@
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { fetchUnits } from "./lib/units";
 import { columns } from "./components/columns";
 import { DataTable } from "@/components/data-table/data-table";
@@ -87,150 +83,140 @@ export function Units() {
   });
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
+    <Main>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Units</h2>
+          <p className="text-muted-foreground">
+            Manage residential and commercial units here.
+          </p>
         </div>
-      </Header>
 
-      <Main>
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Units</h2>
-            <p className="text-muted-foreground">
-              Manage residential and commercial units here.
-            </p>
-          </div>
+        {/* Right-side actions */}
+        <div className="flex flex-wrap items-center gap-2">
+          <ImportUnitsDialog
+            onSuccess={refreshUnits}
+            templateUrl="/templates/units-import-template.xlsx"
+          />
 
-          {/* Right-side actions */}
-          <div className="flex flex-wrap items-center gap-2">
-            <ImportUnitsDialog
-              onSuccess={refreshUnits}
-              templateUrl="/templates/units-import-template.xlsx"
-            />
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button onClick={() => setOpen(true)} className="gap-2">
+                {open ? (
+                  <>
+                    <Spinner className="h-4 w-4" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <IconPlus className="h-4 w-4" />
+                    Add Unit
+                  </>
+                )}
+              </Button>
+            </SheetTrigger>
 
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <Button onClick={() => setOpen(true)} className="gap-2">
-                  {open ? (
-                    <>
-                      <Spinner className="h-4 w-4" />
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      <IconPlus className="h-4 w-4" />
-                      Add Unit
-                    </>
-                  )}
-                </Button>
-              </SheetTrigger>
-
-              <SheetContent
-                side="right"
-                className="w-full sm:max-w-lg overflow-auto"
-              >
-                <SheetHeader>
-                  <SheetTitle className="text-center">Add New Unit</SheetTitle>
-                  <SheetDescription className="text-center">
-                    Fill in unit information below.
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 pb-10">
-                  <AddUnitForm
-                    onSuccess={() => {
-                      setOpen(false);
-                      refreshUnits();
-                    }}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          {/* Edit Unit */}
-          <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
             <SheetContent
               side="right"
               className="w-full sm:max-w-lg overflow-auto"
             >
               <SheetHeader>
-                <SheetTitle className="text-center">Edit Unit</SheetTitle>
+                <SheetTitle className="text-center">Add New Unit</SheetTitle>
                 <SheetDescription className="text-center">
-                  Update the unit information below.
+                  Fill in unit information below.
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-6 pb-10">
-                {editUnit && (
-                  <EditUnitForm
-                    unit={editUnit}
-                    onSuccess={() => {
-                      setIsEditOpen(false);
-                      setEditUnit(null);
-                      refreshUnits();
-                    }}
-                  />
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          {/* Add Ownership */}
-          <Sheet open={isOwnershipOpen} onOpenChange={setIsOwnershipOpen}>
-            <SheetContent
-              side="right"
-              className="w-full sm:max-w-lg overflow-auto"
-            >
-              <SheetHeader>
-                <SheetTitle className="text-center">Add Owner</SheetTitle>
-                <SheetDescription className="text-center">
-                  Assign the unit owner below.
-                </SheetDescription>
-              </SheetHeader>
-              <div className="mt-6 pb-10">
-                {addOwnership && (
-                  <OwnershipForm
-                    unitId={addOwnership.id as number}
-                    onSuccess={() => {
-                      setIsOwnershipOpen(false);
-                      setAddOwnership(null);
-                    }}
-                  />
-                )}
+                <AddUnitForm
+                  onSuccess={() => {
+                    setOpen(false);
+                    refreshUnits();
+                  }}
+                />
               </div>
             </SheetContent>
           </Sheet>
         </div>
 
-        <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          {isInitialLoading ? (
-            <DataTableSkeleton
-              columnCount={8}
-              filterCount={1}
-              cellWidths={[
-                "2rem",
-                "2rem",
-                "16rem",
-                "12rem",
-                "5rem",
-                "4rem",
-                "5rem",
-                "4rem",
-              ]}
-              shrinkZero
-            />
-          ) : (
-            <DataTable
-              table={table}
-              onChange={setSearch}
-              searchValue={search}
-            />
-          )}
-        </div>
-      </Main>
-    </>
+        {/* Edit Unit */}
+        <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <SheetContent
+            side="right"
+            className="w-full sm:max-w-lg overflow-auto"
+          >
+            <SheetHeader>
+              <SheetTitle className="text-center">Edit Unit</SheetTitle>
+              <SheetDescription className="text-center">
+                Update the unit information below.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-6 pb-10">
+              {editUnit && (
+                <EditUnitForm
+                  unit={editUnit}
+                  onSuccess={() => {
+                    setIsEditOpen(false);
+                    setEditUnit(null);
+                    refreshUnits();
+                  }}
+                />
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* Add Ownership */}
+        <Sheet open={isOwnershipOpen} onOpenChange={setIsOwnershipOpen}>
+          <SheetContent
+            side="right"
+            className="w-full sm:max-w-lg overflow-auto"
+          >
+            <SheetHeader>
+              <SheetTitle className="text-center">Add Owner</SheetTitle>
+              <SheetDescription className="text-center">
+                Assign the unit owner below.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-6 pb-10">
+              {addOwnership && (
+                <OwnershipForm
+                  unitId={addOwnership.id as number}
+                  onSuccess={() => {
+                    setIsOwnershipOpen(false);
+                    setAddOwnership(null);
+                  }}
+                />
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
+        {isInitialLoading ? (
+          <DataTableSkeleton
+            columnCount={8}
+            filterCount={1}
+            cellWidths={[
+              "2rem",
+              "2rem",
+              "16rem",
+              "12rem",
+              "5rem",
+              "4rem",
+              "5rem",
+              "4rem",
+            ]}
+            shrinkZero
+          />
+        ) : (
+          <DataTable
+            table={table}
+            onChange={setSearch}
+            searchValue={search}
+          />
+        )}
+      </div>
+    </Main>
   );
 }

@@ -192,6 +192,7 @@
   }
 }
 
+/* Commented out: styles moved to individual shadcn components (Input, Textarea, Select)
 input,
 textarea,
 select {

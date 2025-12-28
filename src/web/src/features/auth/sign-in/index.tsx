@@ -16,13 +16,13 @@ import { Route } from "@/routes/(auth)/sign-in";
 export default function SignIn() {
   const { user, initAuth } = useAuthStore();
   const { redirect } = Route.useSearch();
-  const [ loading, setLoading ] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       if (!user) {
         setLoading(true);
-        await initAuth(redirect as string); 
+        await initAuth(redirect as string);
         setLoading(false);
       } else {
         router.navigate({ to: (redirect as string) || `/${user.role}` });
@@ -32,7 +32,7 @@ export default function SignIn() {
     checkAuth();
   }, [user, initAuth, redirect]);
 
-  if(loading) {
+  if (loading) {
     return (
       <div className="fixed top-4 left-4 flex items-center space-x-2">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -43,31 +43,17 @@ export default function SignIn() {
 
   return (
     <AuthLayout>
-      <Card className="gap-4">
-        <CardHeader className="flex flex-col items-center text-center">
-          <CardTitle className="text-lg tracking-tight">Sign In</CardTitle>
-          <CardDescription>Sign In in to start your session.</CardDescription>
+      <Card className="w-full max-w-sm shadow-lg border-border">
+        <CardHeader className="items-center text-center">
+          <CardTitle className="text-2xl font-bold">Noah Garden HOA</CardTitle>
+          <CardDescription>Sign in to continue</CardDescription>
         </CardHeader>
         <CardContent>
           <UserAuthForm />
         </CardContent>
-        <CardFooter>
-          <p className="text-muted-foreground px-8 text-center text-sm">
-            By clicking Sign In, you agree to our{" "}
-            <a
-              href="/terms"
-              className="hover:text-primary underline underline-offset-4"
-            >
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a
-              href="/privacy"
-              className="hover:text-primary underline underline-offset-4"
-            >
-              Privacy Policy
-            </a>
-            .
+        <CardFooter className="flex justify-center border-t bg-muted/30 pt-4">
+          <p className="text-xs text-muted-foreground/60">
+            Restricted Access &bull; Noah Garden HOA
           </p>
         </CardFooter>
       </Card>

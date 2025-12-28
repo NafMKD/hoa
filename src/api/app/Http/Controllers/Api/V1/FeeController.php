@@ -105,7 +105,6 @@ class FeeController extends Controller
         try {
             $this->authorize('view', $fee);
 
-            $fee->load('invoices');
             return response()->json(new FeeResource($fee));
         } catch (AuthorizationException) {
             return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);
@@ -140,6 +139,35 @@ class FeeController extends Controller
             ]);
 
             $fee = $this->fees->update($fee, $validated);
+
+            return response()->json(new FeeResource($fee));
+        } catch (AuthorizationException) {
+            return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json(['status' => self::_ERROR, 'message' => $e->getMessage()], 400);
+        } catch (\Exception $e) {
+            Log::error('Error updating fee: ' . $e->getMessage());
+            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        }
+    }
+
+    /**
+     * Terminate a fee.
+     * 
+     * @param Fee $fee
+     * @return JsonResponse
+     */
+    public function terminate(Fee $fee): JsonResponse
+    {
+        try {
+            $this->authorize('terminate', $fee);
+            $fee = $this->fees->terminate($fee);
 
             return response()->json(new FeeResource($fee));
         } catch (AuthorizationException) {

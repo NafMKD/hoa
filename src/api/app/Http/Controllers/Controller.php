@@ -37,4 +37,5 @@ abstract class Controller
     const _PAYMENT_PROCESSED_BY = ['system', 'manual'];
     const _USER_STATUSES = ['active','inactive','suspended'];
     const _DEFAULT_PASSWORD = '12345678';
+    const _FEE_STATUSES = ['active','terminated'];
 }

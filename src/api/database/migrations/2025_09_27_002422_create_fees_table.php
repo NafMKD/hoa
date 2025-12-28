@@ -23,6 +23,7 @@ return new class extends Migration
             $table->enum('category', Controller::_FEE_CATEGORIES);
             $table->decimal('amount', 12, 2);
             $table->boolean('is_penalizable')->default(false);
+            $table->enum('status', Controller::_FEE_STATUSES);
             $table->timestamps();
             $table->softDeletes();
 

@@ -26,6 +26,7 @@ class Fee extends Model
         'category',
         'amount',
         'is_penalizable',
+        'status',
     ];
 
     /**

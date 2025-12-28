@@ -209,6 +209,7 @@ export interface Fee {
   last_recurring_date: string | null;
   next_recurring_date: string | null;
   is_penalizable: boolean;
+  status: string;
   created_at: string;
   updated_at: string;
 }

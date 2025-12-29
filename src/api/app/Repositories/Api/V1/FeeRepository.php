@@ -3,6 +3,7 @@
 namespace App\Repositories\Api\V1;
 
 use App\Exceptions\RepositoryException;
+use App\Http\Controllers\Controller;
 use App\Models\Fee;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -52,7 +53,7 @@ class FeeRepository
                 $data['last_recurring_date'] = now();
                 $data['next_recurring_date'] = now()->addMonths((int) $data['recurring_period_months']);
             }
-
+            $data['status'] = Controller::_FEE_STATUSES[0];
             $fee = Fee::create($data);
 
             DB::commit();
@@ -90,6 +91,29 @@ class FeeRepository
         } catch (\Throwable $e) {
             DB::rollBack();
             throw new RepositoryException('Failed to update fee: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Terminate a fee.
+     * 
+     * @param Fee $fee
+     * @return Fee
+     * @throws RepositoryException
+     */
+    public function terminate(Fee $fee): Fee
+    {
+        DB::beginTransaction();
+        try {
+            $fee->update([
+                'status' => Controller::_FEE_STATUSES[1], // terminated
+            ]);
+            DB::commit();
+            
+            return $fee->refresh();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw new RepositoryException('Failed to terminate fee: ' . $e->getMessage());
         }
     }
 

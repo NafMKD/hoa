@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\Rule;
 
 class FeeController extends Controller
 {
@@ -67,7 +68,7 @@ class FeeController extends Controller
             $validated = $request->validate([
                 'name'                  => ['required', 'string', 'max:255'],
                 'description'           => ['nullable', 'string'],
-                'category'              => ['required', 'string', 'max:255'],
+                'category'              => ['required', 'string', 'max:255', Rule::in(self::_FEE_CATEGORIES)],
                 'amount'                => ['required', 'numeric', 'min:0'],
                 'is_recurring'          => ['required', 'boolean'],
                 'recurring_period_months'=> ['nullable', 'integer', 'min:1'],
@@ -105,7 +106,6 @@ class FeeController extends Controller
         try {
             $this->authorize('view', $fee);
 
-            $fee->load('invoices');
             return response()->json(new FeeResource($fee));
         } catch (AuthorizationException) {
             return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);
@@ -132,7 +132,7 @@ class FeeController extends Controller
             $validated = $request->validate([
                 'name'                  => ['sometimes', 'string', 'max:255'],
                 'description'           => ['nullable', 'string'],
-                'category'              => ['sometimes', 'string', 'max:255'],
+                'category'              => ['sometimes', 'string', 'max:255', Rule::in(self::_FEE_CATEGORIES)],
                 'amount'                => ['sometimes', 'numeric', 'min:0'],
                 'is_recurring'          => ['sometimes', 'boolean'],
                 'recurring_period_months'=> ['nullable', 'integer', 'min:1'],
@@ -140,6 +140,35 @@ class FeeController extends Controller
             ]);
 
             $fee = $this->fees->update($fee, $validated);
+
+            return response()->json(new FeeResource($fee));
+        } catch (AuthorizationException) {
+            return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json(['status' => self::_ERROR, 'message' => $e->getMessage()], 400);
+        } catch (\Exception $e) {
+            Log::error('Error updating fee: ' . $e->getMessage());
+            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        }
+    }
+
+    /**
+     * Terminate a fee.
+     * 
+     * @param Fee $fee
+     * @return JsonResponse
+     */
+    public function terminate(Fee $fee): JsonResponse
+    {
+        try {
+            $this->authorize('terminate', $fee);
+            $fee = $this->fees->terminate($fee);
 
             return response()->json(new FeeResource($fee));
         } catch (AuthorizationException) {

@@ -23,6 +23,7 @@ class PaymentResource extends JsonResource
             'type'                     => $this->type,
             'processed_by'             => $this->processed_by,
             'processed_at'             => $this->processed_at,
+            'receipt_number'           => $this->receipt_number,
             'payment_date'             => $this->payment_date,
             'reconciliation_metadata'  => $this->reconciliation_metadata,
             'invoice'                  => $this->whenLoaded('invoice', function () {

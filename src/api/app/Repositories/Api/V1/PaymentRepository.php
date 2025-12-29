@@ -144,6 +144,27 @@ class PaymentRepository
     }
 
     /**
+     * Add payment receipt number
+     * 
+     * @param Payment $payment
+     * @param string $paymentNumber
+     * 
+     * @return Payment
+     */
+    public function addReceiptNumber(Payment $payment, string $paymentNumber): Payment
+    {
+        try {
+            $payment->receipt_number = strtoupper($paymentNumber);
+            $payment->save();
+
+            return $payment->refresh();
+        } catch (\Exception $e) {
+            throw new RepositoryException('Failed to add receipt number: ' . $e->getMessage());
+        }
+    }
+
+
+    /**
      * Delete a payment (soft delete).
      *
      * @param Payment $payment

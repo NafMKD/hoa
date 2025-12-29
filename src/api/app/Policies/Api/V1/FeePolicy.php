@@ -55,4 +55,12 @@ class FeePolicy
     {
         return $authUser->hasRole(Controller::_ROLES[0]);
     }
+
+    /**
+     * Only admin can terminate a fee.
+     */
+    public function terminate(User $authUser, Fee $fee): bool
+    {
+        return $authUser->hasRole(Controller::_ROLES[0]);
+    }
 }

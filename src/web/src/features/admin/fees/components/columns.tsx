@@ -13,6 +13,8 @@ import { MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@tanstack/react-router";
+import { Badge } from "@/components/ui/badge";
+import { getFeeStatusColor } from "../lib/fees";
 
 export const columns: ColumnDef<Fee>[] = [
   {
@@ -106,6 +108,18 @@ export const columns: ColumnDef<Fee>[] = [
         <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-600 text-white hover:bg-green-700">
           No
         </span>
+      );
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      return (
+        <Badge variant="outline" className={`capitalize border ${getFeeStatusColor(status)}`}>
+          {status}
+        </Badge>
       );
     },
   },

@@ -209,6 +209,7 @@ export interface Fee {
   last_recurring_date: string | null;
   next_recurring_date: string | null;
   is_penalizable: boolean;
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -235,6 +236,7 @@ export interface Payment {
   type: string;
   processed_by?: string;
   processed_at: string | null; 
+  receipt_number?: string | null;
   payment_date: string | null; 
   reconciliation_metadata?: Record<string, string> | null;
   invoice: Invoice;

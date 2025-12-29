@@ -22,6 +22,7 @@ return new class extends Migration
             $table->enum('type', Controller::_PAYMENT_TYPE);
             $table->enum('processed_by', Controller::_PAYMENT_PROCESSED_BY)->nullable();
             $table->dateTime('processed_at')->nullable();
+            $table->string('receipt_number')->nullable();
             $table->json('reconciliation_metadata')->nullable();
             $table->foreignId('payment_screen_shoot_id')->nullable()->constrained('documents');
             $table->dateTime('payment_date')->useCurrent();

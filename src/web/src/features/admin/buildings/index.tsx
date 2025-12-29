@@ -1,8 +1,4 @@
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { fetchBuildings } from "./lib/buildings";
 import { columns } from "./components/columns";
 import { DataTable } from "@/components/data-table/data-table";
@@ -83,108 +79,98 @@ export function Buildings() {
   });
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
+    <Main>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Buildings</h2>
+          <p className="text-muted-foreground">
+            Manage community buildings here.
+          </p>
         </div>
-      </Header>
 
-      <Main>
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Buildings</h2>
-            <p className="text-muted-foreground">
-              Manage community buildings here.
-            </p>
-          </div>
+        {/* Right-side actions */}
+        <div className="flex flex-wrap items-center gap-2">
+          <ImportBuildingsDialog
+            onSuccess={refreshBuildings}
+            templateUrl="/templates/buildings-import-template.xlsx"
+          />
 
-          {/* Right-side actions */}
-          <div className="flex flex-wrap items-center gap-2">
-            <ImportBuildingsDialog
-              onSuccess={refreshBuildings}
-              templateUrl="/templates/buildings-import-template.xlsx"
-            />
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button onClick={() => setOpen(true)} className="gap-2">
+                <IconPlus className="h-4 w-4" />
+                Add Building
+              </Button>
+            </SheetTrigger>
 
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <Button onClick={() => setOpen(true)} className="gap-2">
-                  <IconPlus className="h-4 w-4" />
-                  Add Building
-                </Button>
-              </SheetTrigger>
-
-              <SheetContent
-                side="right"
-                className="w-full sm:max-w-lg overflow-auto"
-              >
-                <SheetHeader>
-                  <SheetTitle className="text-center">
-                    Add New Building
-                  </SheetTitle>
-                  <SheetDescription className="text-center">
-                    Fill in building information below.
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 pb-10">
-                  <AddBuildingForm
-                    onSuccess={() => {
-                      setOpen(false);
-                      refreshBuildings();
-                    }}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          {/* Edit sheet */}
-          <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
             <SheetContent
               side="right"
               className="w-full sm:max-w-lg overflow-auto"
             >
               <SheetHeader>
-                <SheetTitle className="text-center">Edit Building</SheetTitle>
+                <SheetTitle className="text-center">
+                  Add New Building
+                </SheetTitle>
                 <SheetDescription className="text-center">
-                  Update the building information below.
+                  Fill in building information below.
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-6 pb-10">
-                {editBuilding && (
-                  <EditBuildingForm
-                    building={editBuilding}
-                    onSuccess={() => {
-                      setIsEditOpen(false);
-                      setEditBuilding(null);
-                      refreshBuildings();
-                    }}
-                  />
-                )}
+                <AddBuildingForm
+                  onSuccess={() => {
+                    setOpen(false);
+                    refreshBuildings();
+                  }}
+                />
               </div>
             </SheetContent>
           </Sheet>
         </div>
 
-        <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-          {isInitialLoading ? (
-            <DataTableSkeleton
-              columnCount={6}
-              filterCount={1}
-              cellWidths={["4rem", "4rem", "12rem", "8rem", "8rem", "10rem", "4rem"]}
-              shrinkZero
-            />
-          ) : (
-            <DataTable
-              table={table}
-              onChange={setSearch}
-              searchValue={search}
-            />
-          )}
-        </div>
-      </Main>
-    </>
+        {/* Edit sheet */}
+        <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <SheetContent
+            side="right"
+            className="w-full sm:max-w-lg overflow-auto"
+          >
+            <SheetHeader>
+              <SheetTitle className="text-center">Edit Building</SheetTitle>
+              <SheetDescription className="text-center">
+                Update the building information below.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-6 pb-10">
+              {editBuilding && (
+                <EditBuildingForm
+                  building={editBuilding}
+                  onSuccess={() => {
+                    setIsEditOpen(false);
+                    setEditBuilding(null);
+                    refreshBuildings();
+                  }}
+                />
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
+        {isInitialLoading ? (
+          <DataTableSkeleton
+            columnCount={6}
+            filterCount={1}
+            cellWidths={["4rem", "4rem", "12rem", "8rem", "8rem", "10rem", "4rem"]}
+            shrinkZero
+          />
+        ) : (
+          <DataTable
+            table={table}
+            onChange={setSearch}
+            searchValue={search}
+          />
+        )}
+      </div>
+    </Main>
   );
 }

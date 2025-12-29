@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +13,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fetchFeeDetail, terminate, getFeeStatusColor } from "./lib/fees";
 import type { Fee } from "@/types/types";
 import { Link, useParams } from "@tanstack/react-router";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { IconArrowLeft, IconArrowLeftCircle, IconCalendar, IconAlertCircle, IconLoader2, IconX } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,7 +30,7 @@ import type { ApiError } from "@/types/api-error";
 
 export function FeeDetail() {
   // ensure your router path matches this
-  const { feeId } = useParams({ from: "/_authenticated/admin/financials/fees/$feeId" }); 
+  const { feeId } = useParams({ from: "/_authenticated/admin/financials/fees/$feeId" });
   const [fee, setFee] = useState<Fee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -94,40 +90,31 @@ export function FeeDetail() {
 
   if (isLoading) {
     return (
-      <>
-        <Header fixed>
-          <div className="ml-auto flex items-center space-x-4">
-            <Search />
-            <ThemeSwitch />
-            <ProfileDropdown />
-          </div>
-        </Header>
-        <Main className="container mx-auto px-4 py-6 space-y-8">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-40" />
-            <Skeleton className="h-9 w-20" />
-          </div>
+      <Main className="container mx-auto px-4 py-6 space-y-8">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-9 w-20" />
+        </div>
 
-          <Card className="border-muted shadow-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-5 w-16 rounded-full" />
+        <Card className="border-muted shadow-sm">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-60 mt-2" />
+          </CardHeader>
+
+          <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-4 w-32" />
               </div>
-              <Skeleton className="h-4 w-60 mt-2" />
-            </CardHeader>
-
-            <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-3 w-24" />
-                  <Skeleton className="h-4 w-32" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </Main>
-      </>
+            ))}
+          </CardContent>
+        </Card>
+      </Main>
     );
   }
 
@@ -148,14 +135,16 @@ export function FeeDetail() {
   }
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
+    <Main className="container mx-auto px-4 py-6 space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">Fee Details</h1>
+        <Button variant="outline" asChild>
+          <Link to="/admin/financials/fees">
+            <IconArrowLeft size={16} className="mr-1" />
+            Back
+          </Link>
+        </Button>
+      </div>
 
       <Main className="container mx-auto px-4 py-6 space-y-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -273,28 +262,37 @@ export function FeeDetail() {
                     </p>
                   </div>
                 </div>
-              </div>
-
-              {/* Side Stat Box - Amount */}
-              <div className="grid w-full max-w-xs grid-cols-2 gap-3 rounded-lg border bg-muted/40 p-3 text-sm md:grid-cols-1">
                 <div className="space-y-1">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Fee Amount
+                    Last Updated
                   </p>
-                  <p className="text-2xl font-bold text-primary">
-                    {formatCurrency(fee.amount)}
+                  <p className="text-sm font-medium break-all">
+                    {formatDate(fee.updated_at)}
                   </p>
                 </div>
               </div>
             </div>
-          </CardHeader>
-        </Card>
 
-        <Tabs defaultValue="config" className="w-full">
-          <TabsList className="flex flex-wrap gap-2 w-full">
-            <TabsTrigger value="config">Configuration</TabsTrigger>
-            <TabsTrigger value="description">Description</TabsTrigger>
-          </TabsList>
+            {/* Side Stat Box - Amount */}
+            <div className="grid w-full max-w-xs grid-cols-2 gap-3 rounded-lg border bg-muted/40 p-3 text-sm md:grid-cols-1">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Fee Amount
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  {formatCurrency(fee.amount)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      <Tabs defaultValue="config" className="w-full">
+        <TabsList className="flex flex-wrap gap-2 w-full">
+          <TabsTrigger value="config">Configuration</TabsTrigger>
+          <TabsTrigger value="description">Description</TabsTrigger>
+        </TabsList>
 
           <TabsContent value="config" className="mt-6 space-y-8">
             <section className="grid gap-4 md:grid-cols-2">

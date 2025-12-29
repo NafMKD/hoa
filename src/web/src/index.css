@@ -47,151 +47,152 @@
   /* =========================
      Core surfaces (bright, clean)
      ========================= */
-  --background: #FFFCF6;            /* warm ivory (reduces "white fatigue") */
-  --foreground: #111827;            /* ink */
-  --card: #FFFFFF;
+  --background: #fffcf6; /* warm ivory (reduces "white fatigue") */
+  --foreground: #111827; /* ink */
+  --card: #ffffff;
   --card-foreground: #111827;
-  --popover: #FFF8E6;               /* soft warm popover */
+  --popover: #fff8e6; /* soft warm popover */
   --popover-foreground: #111827;
 
   /* =========================
      Brand (GOLD) — primary actions, active states, highlights
      ========================= */
-  --primary: #D4AF37;               /* gold */
-  --primary-foreground: #1A1300;    /* deep warm ink for readability on gold */
-  --ring: #D4AF37;
+  --primary: #d4af37; /* gold */
+  --primary-foreground: #1a1300; /* deep warm ink for readability on gold */
+  --ring: #d4af37;
 
   /* =========================
      Colorful secondary system
      - secondary is used by shadcn for subtle variants
      - accent is used for highlights, hovers, tags
      ========================= */
-  --secondary: #1D4ED8;             /* royal blue (pairs well with gold) */
-  --secondary-foreground: #FFFFFF;
+  --secondary: #1d4ed8; /* royal blue (pairs well with gold) */
+  --secondary-foreground: #ffffff;
 
-  --accent: #14B8A6;                /* teal (fresh, modern with gold) */
-  --accent-foreground: #062B2A;
+  --accent: #14b8a6; /* teal (fresh, modern with gold) */
+  --accent-foreground: #062b2a;
 
-  --muted: #F3F4F6;
-  --muted-foreground: #6B7280;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
 
   /* =========================
      Status
      ========================= */
-  --destructive: #EF4444;
-  --success: #10B981;
-  --warning: #F59E0B;
+  --destructive: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
 
   /* =========================
      Borders / Inputs
      ========================= */
-  --border: #E7E2D6;                /* warm gray border */
-  --input: #FFFEFB;
+  --border: #e7e2d6; /* warm gray border */
+  --input: #fffefb;
 
   /* =========================
-     Sidebar (distinct color)
+     Sidebar (light theme)
      ========================= */
-  --sidebar: #0B1B34;               /* deep navy */
-  --sidebar-foreground: #F9FAFB;
+  --sidebar: #f8f9fa; /* light gray for light mode */
+  --sidebar-foreground: #111827; /* dark text for light mode */
 
-  --sidebar-primary: #D4AF37;       /* active item uses gold */
-  --sidebar-primary-foreground: #1A1300;
+  --sidebar-primary: #d4af37; /* active item uses gold */
+  --sidebar-primary-foreground: #1a1300;
 
-  --sidebar-accent: #1D4ED8;        /* hover uses royal blue */
-  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-accent: #e5e7eb; /* subtle hover for light mode */
+  --sidebar-accent-foreground: #111827;
 
-  --sidebar-border: #1F2A44;
-  --sidebar-ring: #D4AF37;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #d4af37;
 
   /* =========================
      Charts (vivid, readable)
      ========================= */
-  --chart-1: #D4AF37;               /* gold */
-  --chart-2: #1D4ED8;               /* royal blue */
-  --chart-3: #14B8A6;               /* teal */
-  --chart-4: #A855F7;               /* violet */
-  --chart-5: #F97316;               /* orange */
+  --chart-1: #d4af37; /* gold */
+  --chart-2: #1d4ed8; /* royal blue */
+  --chart-3: #14b8a6; /* teal */
+  --chart-4: #a855f7; /* violet */
+  --chart-5: #f97316; /* orange */
 }
 
 .dark {
   /* =========================
      Core surfaces (dark, rich)
      ========================= */
-  --background: #07111F;            /* deep navy-black */
-  --foreground: #F8FAFC;
-  --card: #0B1B34;                  /* navy card */
-  --card-foreground: #F8FAFC;
-  --popover: #0A162B;
-  --popover-foreground: #F8FAFC;
+  --background: #07111f; /* deep navy-black */
+  --foreground: #f8fafc;
+  --card: #0b1b34; /* navy card */
+  --card-foreground: #f8fafc;
+  --popover: #0a162b;
+  --popover-foreground: #f8fafc;
 
   /* =========================
      Brand (GOLD)
      ========================= */
-  --primary: #E6C35C;               /* brighter gold for dark mode */
-  --primary-foreground: #1A1300;
-  --ring: #E6C35C;
+  --primary: #e6c35c; /* brighter gold for dark mode */
+  --primary-foreground: #1a1300;
+  --ring: #e6c35c;
 
   /* =========================
      Secondary & accent
      ========================= */
-  --secondary: #3B82F6;             /* bright blue */
-  --secondary-foreground: #07111F;
+  --secondary: #3b82f6; /* bright blue */
+  --secondary-foreground: #07111f;
 
-  --accent: #2DD4BF;                /* bright teal */
-  --accent-foreground: #062B2A;
+  --accent: #2dd4bf; /* bright teal */
+  --accent-foreground: #062b2a;
 
-  --muted: #0E223F;
-  --muted-foreground: #C7D2E0;
+  --muted: #0e223f;
+  --muted-foreground: #c7d2e0;
 
   /* =========================
      Status
      ========================= */
-  --destructive: #F87171;
-  --success: #34D399;
-  --warning: #FBBF24;
+  --destructive: #f87171;
+  --success: #34d399;
+  --warning: #fbbf24;
 
   /* =========================
      Borders / Inputs
      ========================= */
-  --border: #13284A;
-  --input: #0A162B;
+  --border: #13284a;
+  --input: #0a162b;
 
   /* =========================
-     Sidebar (distinct color)
+     Sidebar (dark theme)
      ========================= */
-  --sidebar: #0A162B;               /* slightly different from background */
-  --sidebar-foreground: #F8FAFC;
+  --sidebar: #0a162b; /* dark navy for dark mode */
+  --sidebar-foreground: #f8fafc; /* light text for dark mode */
 
-  --sidebar-primary: #E6C35C;       /* gold active item */
-  --sidebar-primary-foreground: #1A1300;
+  --sidebar-primary: #e6c35c; /* gold active item */
+  --sidebar-primary-foreground: #1a1300;
 
-  --sidebar-accent: #3B82F6;        /* hover blue */
-  --sidebar-accent-foreground: #07111F;
+  --sidebar-accent: #1e3a5f; /* subtle hover for dark mode */
+  --sidebar-accent-foreground: #f8fafc;
 
-  --sidebar-border: #13284A;
-  --sidebar-ring: #E6C35C;
+  --sidebar-border: #13284a;
+  --sidebar-ring: #e6c35c;
 
   /* =========================
      Charts
      ========================= */
-  --chart-1: #E6C35C;
-  --chart-2: #60A5FA;
-  --chart-3: #2DD4BF;
-  --chart-4: #C084FC;
-  --chart-5: #FB923C;
+  --chart-1: #e6c35c;
+  --chart-2: #60a5fa;
+  --chart-3: #2dd4bf;
+  --chart-4: #c084fc;
+  --chart-5: #fb923c;
 }
-
-
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
   body {
     @apply bg-background text-foreground;
   }
 }
 
+/* Commented out: styles moved to individual shadcn components (Input, Textarea, Select)
 input,
 textarea,
 select {

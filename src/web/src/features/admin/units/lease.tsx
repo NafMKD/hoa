@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,9 +32,6 @@ import { StepType } from "./components/leases/steps/step-type";
 import { StepTenant } from "./components/leases/steps/step-tenant";
 import { StepRepresentative } from "./components/leases/steps/step-representative";
 import { StepLease } from "./components/leases/steps/step-lease";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ProfileDropdown } from "@/components/profile-dropdown";
 import { ReviewStep } from "./components/leases/steps/step-review";
 import { Link, useParams } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -158,7 +154,7 @@ export function Leases() {
       fd.append("renter_type", typeValues.renterType);
       if (typeValues.leasingBy === "representative" && typeValues.representativeType) {
         fd.append("representative_type", typeValues.representativeType);
-      } 
+      }
 
       // tenant
       if (typeValues.renterType === "existing") {
@@ -210,7 +206,7 @@ export function Leases() {
             );
           }
         }
-      }   
+      }
 
       // Lease fields
       fd.append("agreement_amount", String(leaseValues.agreement_amount));
@@ -234,12 +230,12 @@ export function Leases() {
         fd.append("witness_2_full_name", leaseValues.witness_2_full_name);
 
       if (leaseValues.notes) fd.append("notes", leaseValues.notes);
-      
+
       // Submit to API
-      const lease = await submitLeaseAgreement(unitId,fd);
+      const lease = await submitLeaseAgreement(unitId, fd);
 
       toast.success("Lease submitted successfully!");
-      
+
       // navigate to lease
       await navigate({
         to: "/admin/units/$unitId/leases/$leaseId",
@@ -253,7 +249,7 @@ export function Leases() {
       if (err?.status === 422 && err?.response?.data?.message) {
         toast.error(`Failed to submit lease: ${err.response.data.message}`);
       }
-      
+
       toast.error("Failed to submit lease. Please try again.");
       setSubmissionError(err?.message || "Unable to submit lease");
     } finally {
@@ -338,83 +334,73 @@ export function Leases() {
   };
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
+    <Main className="container mx-auto px-4 py-6">
+      <div className="flex items-center justify-between mb-10">
+        <h1 className="text-2xl font-bold tracking-tight">Add New Lease</h1>
+        <Button variant="outline" asChild>
+          <Link to="/admin/units">
+            <IconArrowLeft size={16} className="mr-1" />
+            Back
+          </Link>
+        </Button>
+      </div>
 
-      <Main className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-10">
-          <h1 className="text-2xl font-bold tracking-tight">Add New Lease</h1>
-          <Button variant="outline" asChild>
-            <Link to="/admin/units">
-              <IconArrowLeft size={16} className="mr-1" />
-              Back
-            </Link>
-          </Button>
-        </div>
+      <Card className="shadow-sm border-muted">
+        <CardHeader>
+          <CardTitle>Lease Creation</CardTitle>
+          <CardDescription>
+            Follow the steps to create a new lease
+          </CardDescription>
 
-        <Card className="shadow-sm border-muted">
-          <CardHeader>
-            <CardTitle>Lease Creation</CardTitle>
-            <CardDescription>
-              Follow the steps to create a new lease
-            </CardDescription>
+          <div className="mt-4">
+            <Tabs
+              value={activeStep}
+              onValueChange={(v) => tryChangeStep(v as StepKey)}
+            >
+              <TabsList className={`grid ${representativeRequired ? "grid-cols-5" : "grid-cols-4"} w-full mb-6`}>
+                {STEP_ORDER.map((step) => {
+                  // Hide Representative tab if not required
+                  if (step === "representative" && !representativeRequired)
+                    return null;
 
-            <div className="mt-4">
-              <Tabs
-                value={activeStep}
-                onValueChange={(v) => tryChangeStep(v as StepKey)}
-              >
-                <TabsList className={`grid ${representativeRequired ? "grid-cols-5" : "grid-cols-4"} w-full mb-6`}>
-                  {STEP_ORDER.map((step) => {
-                    // Hide Representative tab if not required
-                    if (step === "representative" && !representativeRequired)
-                      return null;
+                  return (
+                    <TabsTrigger
+                      key={step}
+                      value={step}
+                      disabled={
+                        !completed[step] && STEP_ORDER.indexOf(step) > 0
+                      }
+                    >
+                      {step.charAt(0).toUpperCase() + step.slice(1)}
+                      {completed[step] && (
+                        <IconCircleCheck
+                          className="ml-2 inline-block"
+                          size={14}
+                        />
+                      )}
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            </Tabs>
+          </div>
+        </CardHeader>
 
-                    return (
-                      <TabsTrigger
-                        key={step}
-                        value={step}
-                        disabled={
-                          !completed[step] && STEP_ORDER.indexOf(step) > 0
-                        }
-                      >
-                        {step.charAt(0).toUpperCase() + step.slice(1)}
-                        {completed[step] && (
-                          <IconCircleCheck
-                            className="ml-2 inline-block"
-                            size={14}
-                          />
-                        )}
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
-              </Tabs>
-            </div>
-          </CardHeader>
+        <CardContent className="mt-4">
+          {renderStep()}
 
-          <CardContent className="mt-4">
-            {renderStep()}
-
-            {submissionError && (
-              <p className="text-red-600 mt-3">{submissionError}</p>
-            )}
-          </CardContent>
-          <CardFooter>
-            <p className="text-sm text-muted-foreground">
-              Fields marked with <span className="text-red-500">*</span> are
-              required.
-            </p>
-          </CardFooter>
-        </Card>
-      </Main>
-    </>
+          {submissionError && (
+            <p className="text-red-600 mt-3">{submissionError}</p>
+          )}
+        </CardContent>
+        <CardFooter>
+          <p className="text-sm text-muted-foreground">
+            Fields marked with <span className="text-red-500">*</span> are
+            required.
+          </p>
+        </CardFooter>
+      </Card>
+    </Main>
   );
 }
 

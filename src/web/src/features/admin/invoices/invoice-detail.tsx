@@ -3,7 +3,6 @@ import { useReactToPrint } from "react-to-print";
 import { useParams, Link } from "@tanstack/react-router";
 import { fetchInvoiceDetail, getStatusColor } from "./lib/invoices";
 import type { Invoice } from "@/types/types";
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,9 +26,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ProfileDropdown } from "@/components/profile-dropdown";
 import { getPaymentStatusColor } from "../payments/lib/payments";
 
 export function InvoiceDetail() {
@@ -67,10 +63,10 @@ export function InvoiceDetail() {
   const formatDate = (date: string | null) =>
     date
       ? new Date(date).toLocaleDateString("en-GB", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
       : "—";
 
   if (isLoading) return <InvoiceDetailSkeleton />;
@@ -82,470 +78,452 @@ export function InvoiceDetail() {
     );
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
-      <Main className="container mx-auto px-4 py-6 space-y-8">
-        {/* Top Navigation & Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight flex items-center gap-3">
-                {invoice.invoice_number}
-                <Badge
-                  variant="outline"
-                  className={`text-sm px-2 py-0.5 rounded-full ${getStatusColor(invoice.status)}`}
-                >
-                  {invoice.status}
-                </Badge>
-              </h1>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" asChild>
-              <Link to="/admin/financials/invoices">
-                <IconArrowLeft size={16} className="mr-1" />
-                Invoices
-              </Link>
-            </Button>
-            <Button
-              onClick={handlePrint}
-              variant="default"
-              className="gap-2 shadow-sm"
-            >
-              <IconPrinter size={16} /> Print Invoice
-            </Button>
+    <Main className="container mx-auto px-4 py-6 space-y-8">
+      {/* Top Navigation & Actions */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-3">
+              {invoice.invoice_number}
+              <Badge
+                variant="outline"
+                className={`text-sm px-2 py-0.5 rounded-full ${getStatusColor(invoice.status)}`}
+              >
+                {invoice.status}
+              </Badge>
+            </h1>
           </div>
         </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/admin/financials/invoices">
+              <IconArrowLeft size={16} className="mr-1" />
+              Invoices
+            </Link>
+          </Button>
+          <Button
+            onClick={handlePrint}
+            variant="default"
+            className="gap-2 shadow-sm"
+          >
+            <IconPrinter size={16} /> Print Invoice
+          </Button>
+        </div>
+      </div>
 
-        <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {/* LEFT COLUMN: Main Invoice Content */}
-          <div className="md:col-span-2 lg:col-span-3 space-y-6">
-            {/* 1. Header Information Card */}
-            <Card className="border-none shadow-sm bg-muted/30">
-              <CardContent className="p-6">
-                <div className="grid sm:grid-cols-2 gap-8">
-                  {/* Bill To */}
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                      <IconUser size={16} />
-                      <span className="text-xs font-semibold uppercase tracking-wider">
-                        Bill To
-                      </span>
-                    </div>
-                    <p className="font-semibold text-lg">
-                      {invoice.user ? (
-                        <Link
-                          to={`/admin/users/$userId`}
-                          params={{ userId: invoice.user.id.toString() }}
-                          target="_blank"
-                          className="hover:underline"
-                        >
-                          {invoice.user.full_name}
-                        </Link>
-                      ) : (
-                        "Unknown User"
-                      )}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {invoice.user?.email}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {invoice.user?.phone}
-                    </p>
+      <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
+        {/* LEFT COLUMN: Main Invoice Content */}
+        <div className="md:col-span-2 lg:col-span-3 space-y-6">
+          {/* 1. Header Information Card */}
+          <Card className="border-none shadow-sm bg-muted/30">
+            <CardContent className="p-6">
+              <div className="grid sm:grid-cols-2 gap-8">
+                {/* Bill To */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <IconUser size={16} />
+                    <span className="text-xs font-semibold uppercase tracking-wider">
+                      Bill To
+                    </span>
                   </div>
-                  {/* Property Details */}
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                      <IconBuildingSkyscraper size={16} />
-                      <span className="text-xs font-semibold uppercase tracking-wider">
-                        Property Unit
-                      </span>
-                    </div>
-                    <p className="font-semibold text-lg">
-                      {invoice.unit ? (
-                        <Link
-                          to={`/admin/units/$unitId`}
-                          params={{ unitId: invoice.unit.id.toString() }}
-                          target="_blank"
-                          className="hover:underline"
-                        >
-                          {invoice.unit.name}
-                        </Link>
-                      ) : (
-                        "General Invoice"
-                      )}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {invoice.unit?.building?.name}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 2. Line Items Breakdown */}
-            <Card>
-              <CardHeader className="pb-3 border-b">
-                <CardTitle className="text-base">Invoice Items</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="w-[60%] pl-6">
-                        Description
-                      </TableHead>
-                      <TableHead className="text-right">Qty</TableHead>
-                      <TableHead className="text-right pr-6">Amount</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {/* Logic: Use Metadata Items OR Fallback to Source Name */}
-                    {invoice.metadata?.items ? (
-                      invoice.metadata.items.map((item, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell className="pl-6 font-medium">
-                            {item.description}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {item.quantity}
-                          </TableCell>
-                          <TableCell className="text-right pr-6">
-                            {formatMoney(item.total)}
-                          </TableCell>
-                        </TableRow>
-                      ))
+                  <p className="font-semibold text-lg">
+                    {invoice.user ? (
+                      <Link
+                        to={`/admin/users/$userId`}
+                        params={{ userId: invoice.user.id.toString() }}
+                        target="_blank"
+                        className="hover:underline"
+                      >
+                        {invoice.user.full_name}
+                      </Link>
                     ) : (
-                      <TableRow>
+                      "Unknown User"
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {invoice.user?.email}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {invoice.user?.phone}
+                  </p>
+                </div>
+                {/* Property Details */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <IconBuildingSkyscraper size={16} />
+                    <span className="text-xs font-semibold uppercase tracking-wider">
+                      Property Unit
+                    </span>
+                  </div>
+                  <p className="font-semibold text-lg">
+                    {invoice.unit ? (
+                      <Link
+                        to={`/admin/units/$unitId`}
+                        params={{ unitId: invoice.unit.id.toString() }}
+                        target="_blank"
+                        className="hover:underline"
+                      >
+                        {invoice.unit.name}
+                      </Link>
+                    ) : (
+                      "General Invoice"
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {invoice.unit?.building?.name}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 2. Line Items Breakdown */}
+          <Card>
+            <CardHeader className="pb-3 border-b">
+              <CardTitle className="text-base">Invoice Items</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-[60%] pl-6">
+                      Description
+                    </TableHead>
+                    <TableHead className="text-right">Qty</TableHead>
+                    <TableHead className="text-right pr-6">Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {/* Logic: Use Metadata Items OR Fallback to Source Name */}
+                  {invoice.metadata?.items ? (
+                    invoice.metadata.items.map((item, idx) => (
+                      <TableRow key={idx}>
                         <TableCell className="pl-6 font-medium">
-                          {invoice.source?.name ||
-                            invoice.source_type.split("\\").pop()}
-                          {invoice.source?.description && (
-                            <span className="block text-xs text-muted-foreground mt-0.5">
-                              {invoice.source.description}
-                            </span>
-                          )}
+                          {item.description}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {item.quantity}
+                        </TableCell>
+                        <TableCell className="text-right pr-6">
+                          {formatMoney(item.total)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell className="pl-6 font-medium">
+                        {invoice.source?.name ||
+                          invoice.source_type.split("\\").pop()}
+                        {invoice.source?.description && (
+                          <span className="block text-xs text-muted-foreground mt-0.5">
+                            {invoice.source.description}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">1</TableCell>
+                      <TableCell className="text-right pr-6">
+                        {formatMoney(invoice.total_amount)}
+                      </TableCell>
+                    </TableRow>
+                  )}
+
+                  {invoice.penalties &&
+                    invoice.penalties.length > 0 &&
+                    invoice.penalties.map((penalty) => (
+                      <TableRow key={penalty.id}>
+                        <TableCell className="pl-6 font-medium">
+                          Penalty
+                          <span className="block text-xs text-muted-foreground mt-0.5">
+                            {penalty.reason || "No reason provided"}
+                          </span>
                         </TableCell>
                         <TableCell className="text-right">1</TableCell>
                         <TableCell className="text-right pr-6">
-                          {formatMoney(invoice.total_amount)}
+                          {formatMoney(penalty.amount)}
                         </TableCell>
                       </TableRow>
-                    )}
-
-                    {invoice.penalties &&
-                      invoice.penalties.length > 0 &&
-                      invoice.penalties.map((penalty) => (
-                        <TableRow key={penalty.id}>
-                          <TableCell className="pl-6 font-medium">
-                            Penalty
-                            <span className="block text-xs text-muted-foreground mt-0.5">
-                              {penalty.reason || "No reason provided"}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right">1</TableCell>
-                          <TableCell className="text-right pr-6">
-                            {formatMoney(penalty.amount)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            {/* 3. Payment History (Only if payments exist) */}
-            {invoice.payments && invoice.payments.length > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <IconCreditCard
-                      size={18}
-                      className="text-muted-foreground"
-                    />
-                    Payment History
-                  </CardTitle>
-                </CardHeader>
-
-                <CardContent>
-                  <div className="space-y-4">
-                    {invoice.payments.map((payment) => (
-                      <div
-                        key={payment.id}
-                        className="flex justify-between items-center border-b last:border-0 pb-3 last:pb-0"
-                      >
-                        <div className="space-y-1">
-                          <p className="font-medium text-sm">
-                            Payment Received
-                          </p>
-
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(payment.payment_date)} • via {payment.method.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                          </p>
-
-                          {/* status + type */}
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`px-2 py-0.5 rounded-full border text-[10px] font-medium capitalize ${getPaymentStatusColor(payment.status)}`}
-                            >
-                              {payment.status}
-                            </span>
-
-                            <span className="px-2 py-0.5 rounded-full border text-[10px] font-medium capitalize bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700">
-                              {payment.type}
-                            </span>
-                          </div>
-                        </div>
-
-                        <span className="font-semibold text-green-600">
-                          -{formatMoney(payment.amount)}
-                        </span>
-                      </div>
                     ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
 
-          {/* RIGHT COLUMN: Summary & Dates */}
-          <div className="md:col-span-1 space-y-6">
-            {/* Dates Card */}
+          {/* 3. Payment History (Only if payments exist) */}
+          {invoice.payments && invoice.payments.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                  Timeline
+                <CardTitle className="text-base flex items-center gap-2">
+                  <IconCreditCard
+                    size={18}
+                    className="text-muted-foreground"
+                  />
+                  Payment History
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <IconCalendarEvent
-                      size={16}
-                      className="text-muted-foreground"
-                    />
-                    <span className="text-sm">Issued Date</span>
-                  </div>
-                  <span className="font-medium text-sm">
-                    {formatDate(invoice.issue_date)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <IconCalendarEvent size={16} className="text-red-400" />
-                    <span className="text-sm">Due Date</span>
-                  </div>
-                  <span className="font-medium text-sm">
-                    {formatDate(invoice.due_date)}
-                  </span>
+
+              <CardContent>
+                <div className="space-y-4">
+                  {invoice.payments.map((payment) => (
+                    <div
+                      key={payment.id}
+                      className="flex justify-between items-center border-b last:border-0 pb-3 last:pb-0"
+                    >
+                      <div className="space-y-1">
+                        <p className="font-medium text-sm">
+                          Payment Received
+                        </p>
+
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(payment.payment_date)} • via {payment.method.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                        </p>
+
+                        {/* status + type */}
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`px-2 py-0.5 rounded-full border text-[10px] font-medium capitalize ${getPaymentStatusColor(payment.status)}`}
+                          >
+                            {payment.status}
+                          </span>
+
+                          <span className="px-2 py-0.5 rounded-full border text-[10px] font-medium capitalize bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700">
+                            {payment.type}
+                          </span>
+                        </div>
+                      </div>
+
+                      <span className="font-semibold text-green-600">
+                        -{formatMoney(payment.amount)}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
+          )}
+        </div>
 
-            {/* Financial Summary Card */}
-            <Card className="bg-muted/20 border-primary/20 shadow-sm overflow-hidden">
-              <CardHeader className="bg-muted/40 pb-4 border-b">
-                <CardTitle className="text-base">Summary</CardTitle>
+        {/* RIGHT COLUMN: Summary & Dates */}
+        <div className="md:col-span-1 space-y-6">
+          {/* Dates Card */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                Timeline
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <IconCalendarEvent
+                    size={16}
+                    className="text-muted-foreground"
+                  />
+                  <span className="text-sm">Issued Date</span>
+                </div>
+                <span className="font-medium text-sm">
+                  {formatDate(invoice.issue_date)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <IconCalendarEvent size={16} className="text-red-400" />
+                  <span className="text-sm">Due Date</span>
+                </div>
+                <span className="font-medium text-sm">
+                  {formatDate(invoice.due_date)}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Financial Summary Card */}
+          <Card className="bg-muted/20 border-primary/20 shadow-sm overflow-hidden">
+            <CardHeader className="bg-muted/40 pb-4 border-b">
+              <CardTitle className="text-base">Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>{formatMoney(invoice.total_amount)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Penalty</span>
+                <span className="text-red-600">
+                  +{formatMoney(invoice.penalty_amount)}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Paid</span>
+                <span className="text-green-600">
+                  -{formatMoney(invoice.amount_paid)}
+                </span>
+              </div>
+
+              <Separator className="my-2" />
+
+              <div className="flex flex-col gap-1 pt-1">
+                <span className="text-xs font-semibold uppercase text-muted-foreground">
+                  Balance Due
+                </span>
+                <span
+                  className={`text-2xl font-bold ${(invoice.final_amount_due as number) > 0 ? "text-primary" : "text-green-600"}`}
+                >
+                  {formatMoney(invoice.final_amount_due)}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Metadata / Notes (if any) */}
+          {invoice.metadata?.notes && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm text-muted-foreground uppercase">
+                  Notes
+                </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>{formatMoney(invoice.total_amount)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Penalty</span>
-                  <span className="text-red-600">
-                    +{formatMoney(invoice.penalty_amount)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Paid</span>
-                  <span className="text-green-600">
-                    -{formatMoney(invoice.amount_paid)}
-                  </span>
-                </div>
-
-                <Separator className="my-2" />
-
-                <div className="flex flex-col gap-1 pt-1">
-                  <span className="text-xs font-semibold uppercase text-muted-foreground">
-                    Balance Due
-                  </span>
-                  <span
-                    className={`text-2xl font-bold ${(invoice.final_amount_due as number) > 0 ? "text-primary" : "text-green-600"}`}
-                  >
-                    {formatMoney(invoice.final_amount_due)}
-                  </span>
-                </div>
+              <CardContent>
+                <p className="text-sm text-muted-foreground italic">
+                  "{invoice.metadata.notes}"
+                </p>
               </CardContent>
             </Card>
-
-            {/* Metadata / Notes (if any) */}
-            {invoice.metadata?.notes && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm text-muted-foreground uppercase">
-                    Notes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground italic">
-                    "{invoice.metadata.notes}"
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          )}
         </div>
+      </div>
 
-        {/* Hidden Print Component */}
-        <div style={{ display: "none" }}>
-          <div ref={printRef}>
-            <PrintableInvoice invoice={invoice} />
-          </div>
+      {/* Hidden Print Component */}
+      <div style={{ display: "none" }}>
+        <div ref={printRef}>
+          <PrintableInvoice invoice={invoice} />
         </div>
-      </Main>
-    </>
+      </div>
+    </Main>
   );
 }
 
 function InvoiceDetailSkeleton() {
   return (
-    <>
-        <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
-      <Main className="container mx-auto px-4 py-6 space-y-8">
-        {/* Top Navigation & Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+    <Main className="container mx-auto px-4 py-6 space-y-8">
+      {/* Top Navigation & Actions */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-8 w-44" />
-              <Skeleton className="h-6 w-20 rounded-full" />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Skeleton className="h-10 w-28" />
-            <Skeleton className="h-10 w-36" />
+            <Skeleton className="h-8 w-44" />
+            <Skeleton className="h-6 w-20 rounded-full" />
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {/* LEFT COLUMN */}
-          <div className="md:col-span-2 lg:col-span-3 space-y-6">
-            {/* Header Information Card */}
-            <Card className="border-none shadow-sm bg-muted/30">
-              <CardContent className="p-6">
-                <div className="grid sm:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-6 w-44" />
-                    <Skeleton className="h-4 w-56" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-28" />
-                    <Skeleton className="h-6 w-40" />
-                    <Skeleton className="h-4 w-52" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-10 w-28" />
+          <Skeleton className="h-10 w-36" />
+        </div>
+      </div>
 
-            {/* Line Items Breakdown */}
-            <Card>
-              <CardHeader className="pb-3 border-b">
-                <CardTitle className="text-base">
-                  <Skeleton className="h-5 w-28" />
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent className="p-0">
-                <div className="p-6">
-                  {/* Table header row */}
-                  <div className="grid grid-cols-12 gap-3 items-center">
-                    <Skeleton className="h-4 col-span-7" />
-                    <Skeleton className="h-4 col-span-2 justify-self-end" />
-                    <Skeleton className="h-4 col-span-3 justify-self-end" />
-                  </div>
-
-                  {/* Table body rows */}
-                  <div className="mt-5 space-y-4">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="grid grid-cols-12 gap-3 items-center">
-                        <Skeleton className="h-4 col-span-7" />
-                        <Skeleton className="h-4 col-span-2 justify-self-end" />
-                        <Skeleton className="h-4 col-span-3 justify-self-end" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* RIGHT COLUMN */}
-          <div className="md:col-span-1 space-y-6">
-            {/* Timeline */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+      <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
+        {/* LEFT COLUMN */}
+        <div className="md:col-span-2 lg:col-span-3 space-y-6">
+          {/* Header Information Card */}
+          <Card className="border-none shadow-sm bg-muted/30">
+            <CardContent className="p-6">
+              <div className="grid sm:grid-cols-2 gap-8">
+                <div className="space-y-2">
                   <Skeleton className="h-4 w-24" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-4 rounded" />
-                      <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-6 w-44" />
+                  <Skeleton className="h-4 w-56" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-6 w-40" />
+                  <Skeleton className="h-4 w-52" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Line Items Breakdown */}
+          <Card>
+            <CardHeader className="pb-3 border-b">
+              <CardTitle className="text-base">
+                <Skeleton className="h-5 w-28" />
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="p-0">
+              <div className="p-6">
+                {/* Table header row */}
+                <div className="grid grid-cols-12 gap-3 items-center">
+                  <Skeleton className="h-4 col-span-7" />
+                  <Skeleton className="h-4 col-span-2 justify-self-end" />
+                  <Skeleton className="h-4 col-span-3 justify-self-end" />
+                </div>
+
+                {/* Table body rows */}
+                <div className="mt-5 space-y-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="grid grid-cols-12 gap-3 items-center">
+                      <Skeleton className="h-4 col-span-7" />
+                      <Skeleton className="h-4 col-span-2 justify-self-end" />
+                      <Skeleton className="h-4 col-span-3 justify-self-end" />
                     </div>
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Summary */}
-            <Card className="bg-muted/20 border-primary/20 shadow-sm overflow-hidden">
-              <CardHeader className="bg-muted/40 pb-4 border-b">
-                <CardTitle className="text-base">
-                  <Skeleton className="h-5 w-24" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-4 w-24" />
+                  ))}
                 </div>
-                <div className="flex justify-between text-sm">
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-
-                <Separator className="my-2" />
-
-                <div className="flex flex-col gap-2 pt-1">
-                  <Skeleton className="h-3 w-24" />
-                  <Skeleton className="h-8 w-40" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </Main>
-    </>
+
+        {/* RIGHT COLUMN */}
+        <div className="md:col-span-1 space-y-6">
+          {/* Timeline */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                <Skeleton className="h-4 w-24" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4 rounded" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Summary */}
+          <Card className="bg-muted/20 border-primary/20 shadow-sm overflow-hidden">
+            <CardHeader className="bg-muted/40 pb-4 border-b">
+              <CardTitle className="text-base">
+                <Skeleton className="h-5 w-24" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex justify-between text-sm">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <div className="flex justify-between text-sm">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+
+              <Separator className="my-2" />
+
+              <div className="flex flex-col gap-2 pt-1">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-8 w-40" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </Main>
   );
 }
 

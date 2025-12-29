@@ -1,8 +1,4 @@
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { fetchPayments } from "./lib/payments";
 import { columns } from "./components/columns";
 import { AddPaymentModal } from "./components/add-payment-modal";
@@ -39,37 +35,30 @@ export function Payments() {
   useEffect(() => { refreshData(); }, [refreshData]);
 
   const table = useReactTable({
-    data, columns, pageCount, state: { pagination }, 
-    manualPagination: true, 
+    data, columns, pageCount, state: { pagination },
+    manualPagination: true,
     onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(), 
+    getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     meta: { isLoading }
   });
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search /><ThemeSwitch /><ProfileDropdown />
+    <Main>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Payments</h2>
+          <p className="text-muted-foreground">Manage received payments and transaction history.</p>
         </div>
-      </Header>
-      <Main>
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Payments</h2>
-            <p className="text-muted-foreground">Manage received payments and transaction history.</p>
-          </div>
-          <AddPaymentModal onSuccess={refreshData} />
-        </div>
-        <div className="-mx-4 flex-1 overflow-auto px-4 py-1">
-          {isInitialLoading ? (
-            <DataTableSkeleton columnCount={6} shrinkZero />
-          ) : (
-            <DataTable table={table} onChange={setSearch} searchValue={search} />
-          )}
-        </div>
-      </Main>
-    </>
+        <AddPaymentModal onSuccess={refreshData} />
+      </div>
+      <div className="-mx-4 flex-1 overflow-auto px-4 py-1">
+        {isInitialLoading ? (
+          <DataTableSkeleton columnCount={6} shrinkZero />
+        ) : (
+          <DataTable table={table} onChange={setSearch} searchValue={search} />
+        )}
+      </div>
+    </Main>
   );
 }

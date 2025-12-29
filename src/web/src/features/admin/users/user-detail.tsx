@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,9 +15,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fetchUserDetail } from "./lib/users";
 import type { User } from "@/types/types";
 import { Link, useParams } from "@tanstack/react-router";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { IconArrowLeft, IconArrowLeftCircle } from "@tabler/icons-react";
 import {
   Table,
@@ -48,66 +44,57 @@ export function UserDetail() {
 
   if (isLoading) {
     return (
-      <>
-        <Header fixed>
-          <div className="ml-auto flex items-center space-x-4">
-            <Search />
-            <ThemeSwitch />
-            <ProfileDropdown />
-          </div>
-        </Header>
-        <Main className="container mx-auto px-4 py-6 space-y-8">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-40" />
-            <Skeleton className="h-9 w-20" />
-          </div>
+      <Main className="container mx-auto px-4 py-6 space-y-8">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-9 w-20" />
+        </div>
 
-          <Card className="border-muted shadow-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-5 w-16 rounded-full" />
+        <Card className="border-muted shadow-sm">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-60 mt-2" />
+          </CardHeader>
+
+          <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-4 w-32" />
               </div>
-              <Skeleton className="h-4 w-60 mt-2" />
-            </CardHeader>
+            ))}
+          </CardContent>
+        </Card>
 
-            <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-3 w-24" />
-                  <Skeleton className="h-4 w-32" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+        <div className="space-y-6">
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-9 w-24 rounded-md" />
+            ))}
+          </div>
 
           <div className="space-y-6">
-            <div className="flex flex-wrap gap-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-9 w-24 rounded-md" />
+            <Skeleton className="h-5 w-32" />
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="border-muted">
+                  <CardHeader>
+                    <Skeleton className="h-5 w-40" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4 mt-2" />
+                  </CardContent>
+                </Card>
               ))}
             </div>
-
-            <div className="space-y-6">
-              <Skeleton className="h-5 w-32" />
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="border-muted">
-                    <CardHeader>
-                      <Skeleton className="h-5 w-40" />
-                    </CardHeader>
-                    <CardContent>
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4 mt-2" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
           </div>
-        </Main>
-      </>
+        </div>
+      </Main>
     );
   }
 
@@ -147,149 +134,140 @@ export function UserDetail() {
   const leasesCount = user.leases?.length ?? 0;
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
+    <Main className="container mx-auto px-4 py-6 space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">User Details</h1>
+        <Button variant="outline" asChild>
+          <Link to="/admin/users">
+            <IconArrowLeft size={16} className="mr-1" />
+            Back
+          </Link>
+        </Button>
+      </div>
 
-      <Main className="container mx-auto px-4 py-6 space-y-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">User Details</h1>
-          <Button variant="outline" asChild>
-            <Link to="/admin/users">
-              <IconArrowLeft size={16} className="mr-1" />
-              Back
-            </Link>
-          </Button>
-        </div>
-
-        <Card className="border-muted shadow-sm">
-          <CardHeader className="space-y-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div className="flex flex-1 flex-col gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <CardTitle className="text-xl font-semibold leading-tight">
-                    {user.first_name} {user.last_name}
-                  </CardTitle>
-                  <Badge variant={variant} className={className}>
-                    {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+      <Card className="border-muted shadow-sm">
+        <CardHeader className="space-y-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="flex flex-1 flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="text-xl font-semibold leading-tight">
+                  {user.first_name} {user.last_name}
+                </CardTitle>
+                <Badge variant={variant} className={className}>
+                  {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                </Badge>
+                {user.role && (
+                  <Badge variant="outline" className="text-xs">
+                    {user.role}
                   </Badge>
-                  {user.role && (
-                    <Badge variant="outline" className="text-xs">
-                      {user.role}
-                    </Badge>
-                  )}
-                </div>
-                <CardDescription className="text-sm text-muted-foreground">
-                  Basic account information and system activity overview.
-                </CardDescription>
-
-                <div className="mt-2 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Email
-                    </p>
-                    <p className="text-sm font-medium break-all">{user.email || "—"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Phone
-                    </p>
-                    <p className="text-sm font-medium">{user.phone || "—"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      City
-                    </p>
-                    <p className="text-sm font-medium">{user.city || "—"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Sub-city
-                    </p>
-                    <p className="text-sm font-medium">{user.sub_city || "—"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Woreda
-                    </p>
-                    <p className="text-sm font-medium">{user.woreda || "—"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      House Number
-                    </p>
-                    <p className="text-sm font-medium">{user.house_number || "—"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Last login
-                    </p>
-                    <p className="text-sm font-medium">{user.last_login_at || "—"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Created
-                    </p>
-                    <p className="text-sm font-medium">{user.created_at || "—"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Updated
-                    </p>
-                    <p className="text-sm font-medium">{user.updated_at || "—"}</p>
-                  </div>
-                </div>
+                )}
               </div>
+              <CardDescription className="text-sm text-muted-foreground">
+                Basic account information and system activity overview.
+              </CardDescription>
 
-              {/* Quick stats */}
-              <div className="grid w-full max-w-xs grid-cols-2 gap-3 rounded-lg border bg-muted/40 p-3 text-sm md:grid-cols-1">
+              <div className="mt-2 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                 <div className="space-y-1">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Total units
+                    Email
                   </p>
-                  <p className="text-lg font-semibold">{totalUnits}</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {ownedCount} owned · {rentedCount} rented
-                  </p>
+                  <p className="text-sm font-medium break-all">{user.email || "—"}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Leases
+                    Phone
                   </p>
-                  <p className="text-lg font-semibold">{leasesCount}</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Active & historical leases.
+                  <p className="text-sm font-medium">{user.phone || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    City
                   </p>
+                  <p className="text-sm font-medium">{user.city || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Sub-city
+                  </p>
+                  <p className="text-sm font-medium">{user.sub_city || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Woreda
+                  </p>
+                  <p className="text-sm font-medium">{user.woreda || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    House Number
+                  </p>
+                  <p className="text-sm font-medium">{user.house_number || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Last login
+                  </p>
+                  <p className="text-sm font-medium">{user.last_login_at || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Created
+                  </p>
+                  <p className="text-sm font-medium">{user.created_at || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Updated
+                  </p>
+                  <p className="text-sm font-medium">{user.updated_at || "—"}</p>
                 </div>
               </div>
             </div>
-          </CardHeader>
-        </Card>
-          
-        <Tabs defaultValue="units" className="w-full">
-          <TabsList className="flex flex-wrap gap-2 w-full">
-            <TabsTrigger value="units">Units</TabsTrigger>
-            <TabsTrigger value="leases">Leases</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="payments" disabled>
-              Payments (Coming Soon)
-            </TabsTrigger>
-            <TabsTrigger value="invoices" disabled>
-              Invoices (Coming Soon)
-            </TabsTrigger>
-            <TabsTrigger value="expenses" disabled>
-              Expenses (Coming Soon)
-            </TabsTrigger>
-          </TabsList>
 
-          <TabsContent value="units" className="mt-6 space-y-8">
-            {/* split the two grid */}
-            <div className="grid gap-8 md:grid-cols-2">
+            {/* Quick stats */}
+            <div className="grid w-full max-w-xs grid-cols-2 gap-3 rounded-lg border bg-muted/40 p-3 text-sm md:grid-cols-1">
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Total units
+                </p>
+                <p className="text-lg font-semibold">{totalUnits}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {ownedCount} owned · {rentedCount} rented
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Leases
+                </p>
+                <p className="text-lg font-semibold">{leasesCount}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Active & historical leases.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      <Tabs defaultValue="units" className="w-full">
+        <TabsList className="flex flex-wrap gap-2 w-full">
+          <TabsTrigger value="units">Units</TabsTrigger>
+          <TabsTrigger value="leases">Leases</TabsTrigger>
+          <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="payments" disabled>
+            Payments (Coming Soon)
+          </TabsTrigger>
+          <TabsTrigger value="invoices" disabled>
+            Invoices (Coming Soon)
+          </TabsTrigger>
+          <TabsTrigger value="expenses" disabled>
+            Expenses (Coming Soon)
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="units" className="mt-6 space-y-8">
+          {/* split the two grid */}
+          <div className="grid gap-8 md:grid-cols-2">
             {/* Owned Units */}
             <section>
               <h2 className="text-lg font-semibold mb-3">Owned Units</h2>
@@ -375,88 +353,87 @@ export function UserDetail() {
                 </p>
               )}
             </section>
-            </div>
-          </TabsContent>
+          </div>
+        </TabsContent>
 
-          <TabsContent value="leases" className="mt-6 space-y-4">
-            {user.leases?.length ? (
-              user.leases.map((lease) => (
-                <Card key={lease.id} className="hover:shadow transition">
-                  <CardHeader>
-                    <CardTitle>{ `Lease #${lease.id}`}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      {lease.notes || "No details available"}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">No leases found.</p>
-            )}
-          </TabsContent>
+        <TabsContent value="leases" className="mt-6 space-y-4">
+          {user.leases?.length ? (
+            user.leases.map((lease) => (
+              <Card key={lease.id} className="hover:shadow transition">
+                <CardHeader>
+                  <CardTitle>{`Lease #${lease.id}`}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    {lease.notes || "No details available"}
+                  </p>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">No leases found.</p>
+          )}
+        </TabsContent>
 
-          <TabsContent value="templates" className="mt-6 space-y-8">
-            {user.created_templates?.length ||
+        <TabsContent value="templates" className="mt-6 space-y-8">
+          {user.created_templates?.length ||
             user.updated_templates?.length ? (
-              <>
-                <section>
-                  <h2 className="text-lg font-semibold mb-3">
-                    Created Templates
-                  </h2>
-                  {user.created_templates?.length ? (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {user.created_templates.map((tpl) => (
-                        <Card key={tpl.id} className="hover:shadow transition">
-                          <CardHeader>
-                            <CardTitle>{tpl.name}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-muted-foreground">
-                              {tpl.description || "No description"}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">None</p>
-                  )}
-                </section>
+            <>
+              <section>
+                <h2 className="text-lg font-semibold mb-3">
+                  Created Templates
+                </h2>
+                {user.created_templates?.length ? (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {user.created_templates.map((tpl) => (
+                      <Card key={tpl.id} className="hover:shadow transition">
+                        <CardHeader>
+                          <CardTitle>{tpl.name}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-muted-foreground">
+                            {tpl.description || "No description"}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">None</p>
+                )}
+              </section>
 
-                <Separator />
+              <Separator />
 
-                <section>
-                  <h2 className="text-lg font-semibold mb-3">
-                    Updated Templates
-                  </h2>
-                  {user.updated_templates?.length ? (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {user.updated_templates.map((tpl) => (
-                        <Card key={tpl.id} className="hover:shadow transition">
-                          <CardHeader>
-                            <CardTitle>{tpl.name}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-muted-foreground">
-                              {tpl.description || "No description"}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">None</p>
-                  )}
-                </section>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">No templates yet.</p>
-            )}
-          </TabsContent>
-        </Tabs>
-      </Main>
-    </>
+              <section>
+                <h2 className="text-lg font-semibold mb-3">
+                  Updated Templates
+                </h2>
+                {user.updated_templates?.length ? (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {user.updated_templates.map((tpl) => (
+                      <Card key={tpl.id} className="hover:shadow transition">
+                        <CardHeader>
+                          <CardTitle>{tpl.name}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-muted-foreground">
+                            {tpl.description || "No description"}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">None</p>
+                )}
+              </section>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">No templates yet.</p>
+          )}
+        </TabsContent>
+      </Tabs>
+    </Main>
   );
 }

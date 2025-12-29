@@ -3,8 +3,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function AppTitle() {
@@ -19,9 +19,9 @@ export function AppTitle() {
           asChild
         >
           <div className="flex items-center">
-            <Avatar className="h-15 w-15">
+            <Avatar className={`${open ? 'h-10 w-10' : 'h-8 w-8'}`}>
               <AvatarImage
-                src="/images/logo.png"   
+                src="/images/logo.png"
                 alt="Noah Garden HOA"
               />
               <AvatarFallback>NG</AvatarFallback>
@@ -31,7 +31,7 @@ export function AppTitle() {
               <Link
                 to="/admin"
                 onClick={() => setOpenMobile(false)}
-                className="grid flex-1 text-start text-sm leading-tight ml-2"
+                className="grid flex-1 text-start text-sm leading-tight"
               >
                 <span className="truncate font-bold">Noah Garden HOA</span>
                 <span className="truncate text-xs">Admin Dashboard</span>

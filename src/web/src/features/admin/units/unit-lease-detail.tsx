@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react"
-import { Header } from "@/components/layout/header"
 import { Main } from "@/components/layout/main"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,9 +27,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Link, useParams } from "@tanstack/react-router"
-import { ProfileDropdown } from "@/components/profile-dropdown"
-import { Search } from "@/components/search"
-import { ThemeSwitch } from "@/components/theme-switch"
 import {
   IconArrowLeft,
   IconArrowLeftCircle,
@@ -166,7 +162,7 @@ export function UnitLeaseDetail() {
 
   const handleActivate = async (leaseId: number) => {
     if (!lease) return;
-  
+
     try {
       setIsSaving(true);
       await activateUnitLease(unitId as string, leaseId.toString());
@@ -185,7 +181,7 @@ export function UnitLeaseDetail() {
 
   const handleTerminate = async (leaseId: number) => {
     if (!lease) return;
-  
+
     try {
       setIsSaving(true);
       await terminateUnitLease(unitId as string, leaseId.toString());
@@ -205,52 +201,42 @@ export function UnitLeaseDetail() {
   // ----------------- LOADING STATE -----------------
   if (isLoading) {
     return (
-      <>
-        <Header fixed>
-          <div className="ml-auto flex items-center space-x-4">
-            <Search />
-            <ThemeSwitch />
-            <ProfileDropdown />
-          </div>
-        </Header>
+      <Main className="container mx-auto px-4 py-6 space-y-8">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-9 w-28" />
+        </div>
 
-        <Main className="container mx-auto px-4 py-6 space-y-8">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-56" />
-            <Skeleton className="h-9 w-28" />
-          </div>
-
-          <Card className="border-muted shadow-sm">
-            <CardHeader>
-              <Skeleton className="h-6 w-56 mb-2" />
-              <Skeleton className="h-4 w-72" />
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-3 w-24" />
-                  <Skeleton className="h-4 w-40" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card className="border-muted shadow-sm">
-            <CardHeader>
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-4 w-64" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-9 w-full" />
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-20 w-full" />
-                ))}
+        <Card className="border-muted shadow-sm">
+          <CardHeader>
+            <Skeleton className="h-6 w-56 mb-2" />
+            <Skeleton className="h-4 w-72" />
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-4 w-40" />
               </div>
-            </CardContent>
-          </Card>
-        </Main>
-      </>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="border-muted shadow-sm">
+          <CardHeader>
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-9 w-full" />
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </Main>
     )
   }
 
@@ -282,14 +268,6 @@ export function UnitLeaseDetail() {
   // ----------------- MAIN UI -----------------
   return (
     <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
-
       <Main className="container mx-auto px-4 py-6 space-y-8">
         {/* Top bar */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -362,7 +340,7 @@ export function UnitLeaseDetail() {
                     onClick={() => handleTerminate(lease.id as number)}
                     disabled={isSaving}
                   >
-                    { isSaving ? "Terminating..." : "Terminate Lease" }
+                    {isSaving ? "Terminating..." : "Terminate Lease"}
                   </Button>
                 ) : lease.status === "draft" ? (
                   <Button
@@ -372,7 +350,7 @@ export function UnitLeaseDetail() {
                     onClick={() => handleActivate(lease.id as number)}
                     disabled={isSaving}
                   >
-                    { isSaving ? "Activating..." : "Activate Lease" }
+                    {isSaving ? "Activating..." : "Activate Lease"}
                   </Button>
                 ) : null}
               </div>
@@ -1006,7 +984,7 @@ export function UnitLeaseDetail() {
             </div>
           )}
         </DialogContent>
-      </Dialog>      
+      </Dialog>
     </>
   );
 }

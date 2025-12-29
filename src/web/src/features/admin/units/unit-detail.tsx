@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +13,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fetchUnitDetail, changeUnitStatus } from "./lib/units";
 import type { Unit } from "@/types/types";
 import { Link, useParams } from "@tanstack/react-router";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
 import {
   IconArrowLeft,
   IconArrowLeftCircle,
@@ -111,7 +107,8 @@ export function UnitDetail() {
       setUnit((prev) => (prev ? { ...prev, status: unitStatus } : prev));
       setStatusModal(false);
       toast.success("Unit status updated successfully.");
-    } catch (error: any) {;
+    } catch (error: any) {
+      ;
       if (error.status === 400 && error.data) {
         toast.error(`${error.data?.message}`);
         return
@@ -124,36 +121,27 @@ export function UnitDetail() {
 
   if (isLoading) {
     return (
-      <>
-        <Header fixed>
-          <div className="ml-auto flex items-center space-x-4">
-            <Search />
-            <ThemeSwitch />
-            <ProfileDropdown />
-          </div>
-        </Header>
-        <Main className="container mx-auto px-4 py-6 space-y-8">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-40" />
-            <Skeleton className="h-9 w-20" />
-          </div>
+      <Main className="container mx-auto px-4 py-6 space-y-8">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-9 w-20" />
+        </div>
 
-          <Card className="border-muted shadow-sm">
-            <CardHeader>
-              <Skeleton className="h-6 w-48 mb-2" />
-              <Skeleton className="h-4 w-60" />
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-3 w-24" />
-                  <Skeleton className="h-4 w-32" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </Main>
-      </>
+        <Card className="border-muted shadow-sm">
+          <CardHeader>
+            <Skeleton className="h-6 w-48 mb-2" />
+            <Skeleton className="h-4 w-60" />
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </Main>
     );
   }
 
@@ -175,14 +163,6 @@ export function UnitDetail() {
 
   return (
     <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
-
       <Main className="container mx-auto px-4 py-6 space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">Unit Details</h1>
@@ -205,7 +185,7 @@ export function UnitDetail() {
                     variant="outline"
                     className="text-xs font-medium rounded-full px-2 py-0.5"
                   >
-                    { unit.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) }
+                    {unit.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                   </Badge>
                 )}
               </CardTitle>
@@ -491,9 +471,9 @@ export function UnitDetail() {
                                     className="inline-flex items-center gap-1 text-xs"
                                     asChild
                                   >
-                                    <Link to={`/admin/units/$unitId/leases/$leaseId`} params={{unitId: unit.id.toString(), leaseId: lease.id.toString()}}>
-                                    <IconEye size={14} />
-                                    <span>View</span>
+                                    <Link to={`/admin/units/$unitId/leases/$leaseId`} params={{ unitId: unit.id.toString(), leaseId: lease.id.toString() }}>
+                                      <IconEye size={14} />
+                                      <span>View</span>
                                     </Link>
                                   </Button>
                                 </TableCell>

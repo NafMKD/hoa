@@ -10,7 +10,6 @@ import {
   refundPayment,
 } from "./lib/payments";
 import type { Payment } from "@/types/types";
-import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,9 +31,6 @@ import {
   IconArrowBackUp,
 } from "@tabler/icons-react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ProfileDropdown } from "@/components/profile-dropdown";
 import { toast } from "sonner";
 import type { ApiError } from "@/types/api-error";
 import { PrintableReceipt } from "./components/printable-receipt";
@@ -202,14 +198,6 @@ export function PaymentDetail() {
   };
 
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
       <Main className="container mx-auto px-4 py-6 space-y-8">
         {/* Top Navigation & Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -608,20 +596,11 @@ export function PaymentDetail() {
           </div>
         </div>
       </Main>
-    </>
   );
 }
 
 function PaymentDetailSkeleton() {
   return (
-    <>
-      <Header fixed>
-        <div className="ml-auto flex items-center space-x-4">
-          <Search />
-          <ThemeSwitch />
-          <ProfileDropdown />
-        </div>
-      </Header>
       <Main className="container mx-auto px-4 py-6 space-y-8">
         {/* Top Navigation & Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -720,6 +699,5 @@ function PaymentDetailSkeleton() {
           </div>
         </div>
       </Main>
-    </>
   );
 }

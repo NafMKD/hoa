@@ -14,7 +14,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Link } from "@tanstack/react-router"
+import { Link, useLocation } from "@tanstack/react-router"
 import { Fragment } from "react/jsx-runtime"
 
 // Custom labels for specific paths
@@ -97,7 +97,8 @@ const LOCALES = ['en', 'nl']
 const LAYOUT_SEGMENTS = ['admin']
 
 export function DynamicBreadcrumb() {
-    const pathname = window.location.pathname
+    const location = useLocation()
+    const pathname = location.pathname
 
     // Filter out empty strings, locales, and layout segments
     const allPaths = pathname.split('/').filter((path) => path !== "" && !LOCALES.includes(path))

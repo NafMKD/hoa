@@ -161,6 +161,53 @@ class InvoiceController extends Controller
     }
 
     /**
+     * Apply a penalty to an invoice (multiple).
+     * 
+     * @param Request $request
+     * @param Invoice $invoice
+     * @return JsonResponse
+     */
+    public function applyPenalties(Request $request, Invoice $invoice): JsonResponse
+    {
+        try {
+            $this->authorize('update', $invoice);
+
+            $validated = $request->validate([
+                'penalties'  => ['required', 'array', 'min:1'],
+                'penalties.*.amount' => ['required', 'numeric', 'min:0.01'],
+                'penalties.*.reason' => ['required', 'string'],
+                'penalties.*.applied_date' => ['required', 'date'],
+            ]);
+
+            $this->invoices->applyPenalties($invoice, $validated['penalties']);
+
+            return response()->json(new InvoiceResource($invoice->fresh()));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error applying penalties: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
      * Display the specified invoice.
      *
      * @param Invoice $invoice

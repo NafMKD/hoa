@@ -5,6 +5,27 @@ export type UserRole =
   | "tenant"
   | "homeowner"
   | "representative";
+
+export interface MetadataObject {
+  [key: string]: MetadataValue;
+}
+
+export type PenaltyPayload = {
+  invoice_id: number;
+  penalties: {
+    amount: number;
+    reason: string;
+    applied_date: string;
+  }[];
+};
+
+export type MetadataValue =
+  | string
+  | boolean
+  | number
+  | null
+  | MetadataObject
+  | MetadataValue[];
   
 export type User = {
   id: string | number;
@@ -163,6 +184,7 @@ export type Unit = {
   isRentable: boolean;
   currentLease?: UnitLeaseResource;
   leases?: UnitLeaseResource[];
+  invoices?: Invoice[];
   created_at: string;
   updated_at: string;
 };
@@ -265,16 +287,14 @@ export interface Invoice {
   id: number | string;
   invoice_number: string;
   issue_date: string;
+  invoice_type: string;
   due_date: string | null;
   total_amount: number | string;
   amount_paid: number | string;
   status: InvoiceStatus;
   source_type: string;
   source_id: number;
-  metadata?: {
-    notes?: string;
-    items?: Array<{ description: string; quantity: number; unit_price: number; total: number }>;
-  } | null;
+  metadata?: MetadataObject | null;
   penalty_amount: number | string;
   final_amount_due: number | string;
   user?: User;

@@ -25,7 +25,11 @@ export default function SignIn() {
         await initAuth(redirect as string);
         setLoading(false);
       } else {
-        router.navigate({ to: (redirect as string) || `/${user.role}` });
+        if (redirect) {
+          router.history.push(redirect as string); 
+        } else {
+          router.navigate({ to: `/${user.role}` });
+        }
       }
     };
 

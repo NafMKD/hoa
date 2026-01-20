@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -46,13 +46,16 @@ const formSchema = z.object({
 
 interface AddPaymentModalProps {
   onSuccess: () => void;
+  invoiceId?: number | null;
 }
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function AddPaymentModal({ onSuccess }: AddPaymentModalProps) {
+export function AddPaymentModal({ onSuccess, invoiceId }: AddPaymentModalProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const hasInvoiceId = typeof invoiceId === "number" && invoiceId > 0;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -61,16 +64,43 @@ export function AddPaymentModal({ onSuccess }: AddPaymentModalProps) {
       method: "bank_transfer",
       reference: "",
       payment_date: new Date().toISOString().split("T")[0],
+      ...(hasInvoiceId ? { invoice_id: invoiceId } : {}),
     },
   });
+
+  // If invoiceId changes while component is mounted, keep form in sync
+  useEffect(() => {
+    if (hasInvoiceId) {
+      form.setValue("invoice_id", invoiceId!, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      form.clearErrors("invoice_id");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasInvoiceId, invoiceId]);
+
+  // When closing, reset but keep invoiceId if provided
+  const resetForm = () => {
+    form.reset({
+      amount: 0,
+      method: "bank_transfer",
+      reference: "",
+      payment_date: new Date().toISOString().split("T")[0],
+      ...(hasInvoiceId ? { invoice_id: invoiceId! } : {}),
+    });
+  };
 
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true);
     try {
-      await createPayment(values);
+      const payload: FormValues = hasInvoiceId
+        ? { ...values, invoice_id: invoiceId! }
+        : values;
+      await createPayment(payload);
       toast.success("Payment recorded successfully");
       setOpen(false);
-      form.reset();
+      resetForm();
       onSuccess();
     } catch (error) {
       const err = error as ApiError;
@@ -85,7 +115,10 @@ export function AddPaymentModal({ onSuccess }: AddPaymentModalProps) {
           });
         });
       } else {
-        toast.error(err.data?.message || "Failed to record payment. Please check your inputs.");
+        toast.error(
+          err.data?.message ||
+            "Failed to record payment. Please check your inputs."
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -93,7 +126,13 @@ export function AddPaymentModal({ onSuccess }: AddPaymentModalProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) resetForm();
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" /> Add Payment
@@ -103,28 +142,51 @@ export function AddPaymentModal({ onSuccess }: AddPaymentModalProps) {
         <DialogHeader>
           <DialogTitle>Record Payment</DialogTitle>
           <DialogDescription>
-            Fields marked with <span className="text-red-500">*</span> are required.
+            Fields marked with <span className="text-red-500">*</span> are
+            required.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="invoice_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Invoice Ref <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <InvoiceSelect
-                    value={field.value ?? null}
-                    onChange={field.onChange}
-                    status={["issued", 'partial', 'overdue']}  
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!hasInvoiceId ? (
+              <FormField
+                control={form.control}
+                name="invoice_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Invoice Ref <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <InvoiceSelect
+                      value={field.value ?? null}
+                      onChange={field.onChange}
+                      status={["issued", "partial", "overdue"]}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <FormField
+                control={form.control}
+                name="invoice_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Invoice Ref <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        value={field.value ?? invoiceId ?? ""}
+                        disabled
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
@@ -136,9 +198,9 @@ export function AddPaymentModal({ onSuccess }: AddPaymentModalProps) {
                       Amount <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
+                      <Input
+                        type="number"
+                        {...field}
                         onChange={(e) =>
                           field.onChange(parseFloat(e.target.value) || 0)
                         }

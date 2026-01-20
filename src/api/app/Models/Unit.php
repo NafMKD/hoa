@@ -138,4 +138,14 @@ class Unit extends Model
     {
         return $this->hasOne(UnitOwner::class, 'unit_id')->where('status', 'active');
     }
+
+    /**
+     * Get the invoices of the unit.
+     * 
+     * @return HasMany
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'unit_id')->latest();
+    }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchUnitDetail, changeUnitStatus } from "./lib/units";
-import type { Unit } from "@/types/types";
+import type { Unit, UnitLeaseResource, UnitOwnership } from "@/types/types";
 import { Link, useParams } from "@tanstack/react-router";
 import {
   IconArrowLeft,
@@ -36,8 +36,9 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import type { ApiError } from "@/types/api-error";
+import { InvoiceList } from "./components/invoices/invoice-list";
 
-// Simple helper to guess file type by extension
 function getFileType(url?: string | null): "image" | "pdf" | "unknown" {
   if (!url) return "unknown";
   const lower = url.toLowerCase();
@@ -84,12 +85,15 @@ export function UnitDetail() {
     loadUnit();
   }, [unitId]);
 
-  const owners = useMemo(() => (unit as any)?.owners ?? [], [unit]);
+  const owners = (unit as Unit)?.owners ?? [];
 
-  const leases = useMemo(() => unit?.leases ?? [], [unit]);
+  const leases = unit?.leases ?? [];
+
+  const invoices = unit?.invoices ?? [];
 
   const ownersCount = owners?.length ?? 0;
   const leasesCount = leases?.length ?? 0;
+  const invoicesCount = invoices?.length ?? 0;
 
   const handleOpenPreview = (file: PreviewFile | null) => {
     setPreviewFile(file);
@@ -107,8 +111,8 @@ export function UnitDetail() {
       setUnit((prev) => (prev ? { ...prev, status: unitStatus } : prev));
       setStatusModal(false);
       toast.success("Unit status updated successfully.");
-    } catch (error: any) {
-      ;
+    } catch (err) {
+      const error = err as ApiError;
       if (error.status === 400 && error.data) {
         toast.error(`${error.data?.message}`);
         return
@@ -185,7 +189,9 @@ export function UnitDetail() {
                     variant="outline"
                     className="text-xs font-medium rounded-full px-2 py-0.5"
                   >
-                    {unit.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                    {unit.status
+                      .replace(/_/g, " ")
+                      .replace(/\b\w/g, (c) => c.toUpperCase())}
                   </Badge>
                 )}
               </CardTitle>
@@ -285,9 +291,18 @@ export function UnitDetail() {
           </CardHeader>
 
           <CardContent className="pt-0">
-            <Tabs defaultValue="owners" className="w-full">
+            <Tabs defaultValue="invoices" className="w-full">
               <div className="flex flex-col gap-3 border-b pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:inline-flex bg-muted/50">
+                  <TabsTrigger
+                    value="invoices"
+                    className="flex items-center gap-2"
+                  >
+                    <span>Invoices</span>
+                    <span className="inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-background text-xs font-semibold border">
+                      {invoicesCount}
+                    </span>
+                  </TabsTrigger>
                   <TabsTrigger
                     value="owners"
                     className="flex items-center gap-2"
@@ -312,6 +327,17 @@ export function UnitDetail() {
                   Click on a file to preview ownership or lease documents.
                 </div>
               </div>
+
+              {/* INVOICES TAB */}
+              <TabsContent value="invoices" className="mt-4">
+                {invoicesCount === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No invoices are recorded for this unit yet.
+                  </p>
+                ) : (
+                  <InvoiceList invoices={invoices} invoicesCount={invoicesCount} />
+                )}
+              </TabsContent>
 
               {/* OWNERS TAB */}
               <TabsContent value="owners" className="mt-4">
@@ -344,7 +370,7 @@ export function UnitDetail() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {owners.map((unit_ownership: any) => {
+                          {owners.map((unit_ownership: UnitOwnership) => {
                             const docUrl =
                               unit_ownership.ownership_document?.url || null;
                             const docName =
@@ -357,7 +383,7 @@ export function UnitDetail() {
                                 className="hover:bg-muted/40"
                               >
                                 <TableCell className="font-medium">
-                                  {unit_ownership.owner.full_name || "—"}
+                                  {unit_ownership.owner?.full_name || "—"}
                                   {unit_ownership.status === "Active" && (
                                     <span className="ml-5">
                                       <Badge
@@ -440,10 +466,9 @@ export function UnitDetail() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {leases.map((lease: any) => {
+                          {leases.map((lease: UnitLeaseResource) => {
                             const displayName =
-                              lease.tenant?.full_name ||
-                              `Lease #${lease.id}`;
+                              lease.tenant?.full_name || `Lease #${lease.id}`;
 
                             return (
                               <TableRow
@@ -471,7 +496,13 @@ export function UnitDetail() {
                                     className="inline-flex items-center gap-1 text-xs"
                                     asChild
                                   >
-                                    <Link to={`/admin/units/$unitId/leases/$leaseId`} params={{ unitId: unit.id.toString(), leaseId: lease.id.toString() }}>
+                                    <Link
+                                      to={`/admin/units/$unitId/leases/$leaseId`}
+                                      params={{
+                                        unitId: unit.id.toString(),
+                                        leaseId: lease.id.toString(),
+                                      }}
+                                    >
                                       <IconEye size={14} />
                                       <span>View</span>
                                     </Link>

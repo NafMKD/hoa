@@ -35,7 +35,7 @@ export const PrintableInvoice = forwardRef<HTMLDivElement, PrintableInvoiceProps
         <div className="flex justify-between mb-10">
             <div className="w-1/3">
                 <h3 className="text-xs font-bold uppercase text-gray-400 mb-2">Bill To</h3>
-                <p className="font-bold text-lg">{invoice.user?.full_name}</p>
+                <p className="font-bold text-lg">{invoice.user?.full_name || "Unknown User"}</p>
                 <p className="text-sm text-gray-600">{invoice.user?.email}</p>
                 <p className="text-sm text-gray-600">{invoice.user?.phone}</p>
             </div>
@@ -70,28 +70,6 @@ export const PrintableInvoice = forwardRef<HTMLDivElement, PrintableInvoiceProps
                     </tr>
                 </thead>
                 <tbody className="text-sm">
-                     {/* Logic: Check Metadata items, fallback to Source */}
-                     {invoice.metadata?.items ? (
-                        invoice.metadata.items.map((item, idx) => (
-                            <tr key={idx} className="border-b border-gray-200">
-                                <td className="py-3 text-gray-700">{item.description}</td>
-                                <td className="py-3 text-right text-gray-700">{item.quantity}</td>
-                                <td className="py-3 text-right text-gray-700">{Number(item.unit_price).toLocaleString()}</td>
-                                <td className="py-3 text-right font-medium">{Number(item.total).toLocaleString()}</td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr className="border-b border-gray-200">
-                            <td className="py-3 text-gray-700">
-                                {invoice.source?.name || "Services Rendered"}
-                                {invoice.source?.description && <div className="text-xs text-gray-500">{invoice.source.description}</div>}
-                            </td>
-                            <td className="py-3 text-right text-gray-700">1</td>
-                            <td className="py-3 text-right text-gray-700">{Number(invoice.total_amount).toLocaleString()}</td>
-                            <td className="py-3 text-right font-medium">{Number(invoice.total_amount).toLocaleString()}</td>
-                        </tr>
-                    )}
-
                     { invoice.penalties && invoice.penalties.length > 0 && invoice.penalties.map((penalty) => (
                         <tr key={penalty.id} className="border-b border-gray-200">
                             <td className="py-3 text-gray-700">

@@ -18,6 +18,7 @@ class InvoiceResource extends JsonResource
         return [
             'id'                => $this->id,
             'invoice_number'    => $this->invoice_number,
+            'invoice_type'      => $this->invoice_type,
             'user'              => $this->whenLoaded('user', function () {
                 return new UserResource($this->user);
             }),

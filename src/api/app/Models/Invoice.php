@@ -227,4 +227,29 @@ class Invoice extends Model
             $this->save();
         });
     }
+
+    /**
+     * Get type of the invoice.
+     * 
+     * @return string
+     */
+    public function getInvoiceTypeAttribute(): string
+    {
+        if ($this->source_type === "App\\Models\\Fee" && $this->source) {
+           switch($this->source->category){
+               case Controller::_FEE_CATEGORIES[0]:
+                   return "Monthly Fee";
+               case Controller::_FEE_CATEGORIES[1]:
+                   return "Administrative Fee";
+               case Controller::_FEE_CATEGORIES[2]:
+                   return "Special Assessment";
+               case Controller::_FEE_CATEGORIES[3]:
+                   return "Penalty Fee";
+               default:
+                   return "Other Fee";
+           }
+        }
+        
+        return "Unknown";
+    }
 }

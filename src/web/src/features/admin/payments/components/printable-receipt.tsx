@@ -118,7 +118,7 @@ export const PrintableReceipt = forwardRef<HTMLDivElement, PrintableReceiptProps
                             <span className="text-xs font-medium text-gray-500">Original Invoice Total</span>
                             <span className="text-xs font-medium text-gray-500">{invoiceTotal.toLocaleString()} ETB</span>
                         </div>
-                        {payment.invoice?.penalty_amount && (
+                        {payment.invoice?.penalty_amount !== 0 && (
                             <div className="flex justify-between py-1">
                                 <span className="text-xs font-medium text-gray-500">Penalty Amount</span>
                                 <span className="text-xs font-medium text-gray-500">{invoicePenalties.toLocaleString()} ETB</span>

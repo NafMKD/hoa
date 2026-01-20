@@ -37,6 +37,24 @@ class FeeRepository
     }
 
     /**
+     * Get all fee (by status if provided).
+     * 
+     * @param array<string, mixed> $filters
+     * @return Collection
+     */
+    public function getAll(array $filters = []): Collection
+    {
+        $query = Fee::query();
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        if (!empty($filters['category'])) {
+            $query->where('category', $filters['category']);
+        }
+        return $query->orderByDesc('created_at')->get();
+    }
+
+    /**
      * Create a new fee record.
      * 
      * @param array<string, mixed> $data

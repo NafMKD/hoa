@@ -55,6 +55,35 @@ class FeeController extends Controller
     }
 
     /**
+     * Get all fee (by status if provided).
+     * 
+     * @param Request $request
+     * @return AnonymousResourceCollection|JsonResponse
+     */
+    public function getAll(Request $request): AnonymousResourceCollection|JsonResponse
+    {
+        try {
+            $this->authorize('viewAny', Fee::class);
+
+            $status = $request->query('status');
+            $category = $request->query('category');
+
+            $filters = compact('status', 'category');
+
+            $fees = $this->fees->getAll($filters);
+
+            return FeeResource::collection($fees);
+        } catch (AuthorizationException) {
+            return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);
+        } catch (RepositoryException $e) {
+            return response()->json(['status' => self::_ERROR, 'message' => $e->getMessage()], 400);
+        } catch (\Exception $e) {
+            Log::error('Error fetching all fees: ' . $e->getMessage());
+            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        }
+    }
+
+    /**
      * Store a newly created fee.
      * 
      * @param Request $request

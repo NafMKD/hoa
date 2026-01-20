@@ -41,6 +41,9 @@ class UnitResource extends JsonResource
             'leases'           => $this->whenLoaded('leases', function () {
                 return UnitLeaseResource::collection($this->leases);
             }),
+            'invoices'         => $this->whenLoaded('invoices', function () {
+                return InvoiceResource::collection($this->invoices);
+            }),
             'created_at'       => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),
             'updated_at'       => \Carbon\Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];

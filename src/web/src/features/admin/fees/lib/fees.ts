@@ -34,6 +34,19 @@ export const fetchFees = async (
   }
 };
 
+export const fetchAllFees = async (
+  category = "",
+  status = ""
+): Promise<Fee[]> => {
+  try {
+    const res = await handleApi<FeePaginatedResponse>(api.get(`/v1/fees/all?category=${category}&status=${status}`));    
+    return res.data;
+  } catch (err) {
+    console.error("Failed to fetch all fees", err);
+    return [];
+  }
+}
+
 export const fetchFeeDetail = (feeId: string) =>
   handleApi<Fee>(api.get(`/v1/fees/${feeId}`));
 

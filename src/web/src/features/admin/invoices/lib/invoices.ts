@@ -1,5 +1,5 @@
 import api, { handleApi } from "@/lib/api";
-import type { Invoice, InvoicePaginatedResponse, InvoiceSelectOption } from "@/types/types";
+import type { Invoice, InvoicePaginatedResponse, InvoiceSelectOption, PenaltyPayload } from "@/types/types";
 
 export const fetchInvoices = async (
   page: string,
@@ -19,6 +19,11 @@ export const searchInvoices = async (query: string, status?: string[] ): Promise
     params: { term: query, status: status },
   }));
 
+export const createInvoicePenalties = (formData: PenaltyPayload) =>
+  handleApi<Invoice>(api.post(`/v1/invoices/${formData.invoice_id}/penalties`, {
+    penalties: formData.penalties
+  }));
+  
 // Helper to get status colors
 export const getStatusColor = (status: string) => {
   switch (status) {

@@ -26,7 +26,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ChevronDown } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { getPaymentStatusColor } from "../payments/lib/payments";
+import { AddPaymentModal } from "../payments/components/add-payment-modal";
+import { AddPenaltyModal } from "./components/add-penalty-modal";
+import { isLegacyMetadata, getString, getObject, getNumber, getStringArray, formatFeeCategory } from "./lib/utils";
 
 export function InvoiceDetail() {
   const { invoiceId } = useParams({
@@ -42,16 +51,19 @@ export function InvoiceDetail() {
     documentTitle: `Invoice-${invoice?.invoice_number}`,
   });
 
+  const refreshData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchInvoiceDetail(invoiceId);
+      setInvoice(data);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await fetchInvoiceDetail(invoiceId);
-        setInvoice(data);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadData();
+    refreshData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [invoiceId]);
 
   const formatMoney = (val: number | string) =>
@@ -94,7 +106,20 @@ export function InvoiceDetail() {
             </h1>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          {invoice.status === "issued" || invoice.status === "partial" ? (
+            <>
+              <AddPenaltyModal
+                onSuccess={refreshData}
+                invoiceId={Number(invoiceId)}
+              />
+              <AddPaymentModal
+                onSuccess={refreshData}
+                invoiceId={Number(invoiceId)}
+              />
+              <div className="h-6 w-px bg-border mx-1 hidden sm:block"></div>
+            </>
+          ) : null}
           <Button variant="outline" asChild>
             <Link to="/admin/financials/invoices">
               <IconArrowLeft size={16} className="mr-1" />
@@ -186,46 +211,27 @@ export function InvoiceDetail() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[60%] pl-6">
-                      Description
-                    </TableHead>
+                    <TableHead className="w-[60%] pl-6">Description</TableHead>
                     <TableHead className="text-right">Qty</TableHead>
                     <TableHead className="text-right pr-6">Amount</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* Logic: Use Metadata Items OR Fallback to Source Name */}
-                  {invoice.metadata?.items ? (
-                    invoice.metadata.items.map((item, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell className="pl-6 font-medium">
-                          {item.description}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {item.quantity}
-                        </TableCell>
-                        <TableCell className="text-right pr-6">
-                          {formatMoney(item.total)}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell className="pl-6 font-medium">
-                        {invoice.source?.name ||
-                          invoice.source_type.split("\\").pop()}
-                        {invoice.source?.description && (
-                          <span className="block text-xs text-muted-foreground mt-0.5">
-                            {invoice.source.description}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">1</TableCell>
-                      <TableCell className="text-right pr-6">
-                        {formatMoney(invoice.total_amount)}
-                      </TableCell>
-                    </TableRow>
-                  )}
+                  <TableRow>
+                    <TableCell className="pl-6 font-medium">
+                      {invoice.source?.name ||
+                        invoice.source_type.split("\\").pop()}
+                      {invoice.source?.description && (
+                        <span className="block text-xs text-muted-foreground mt-0.5">
+                          {invoice.source.description}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">1</TableCell>
+                    <TableCell className="text-right pr-6">
+                      {formatMoney(invoice.total_amount)}
+                    </TableCell>
+                  </TableRow>
 
                   {invoice.penalties &&
                     invoice.penalties.length > 0 &&
@@ -253,10 +259,7 @@ export function InvoiceDetail() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <IconCreditCard
-                    size={18}
-                    className="text-muted-foreground"
-                  />
+                  <IconCreditCard size={18} className="text-muted-foreground" />
                   Payment History
                 </CardTitle>
               </CardHeader>
@@ -269,12 +272,19 @@ export function InvoiceDetail() {
                       className="flex justify-between items-center border-b last:border-0 pb-3 last:pb-0"
                     >
                       <div className="space-y-1">
-                        <p className="font-medium text-sm">
+                        <Link
+                          to="/admin/financials/payments/$paymentId"
+                          params={{ paymentId: payment.id.toString() }}
+                          target="_blank"
+                        >
                           Payment Received
-                        </p>
+                        </Link>
 
                         <p className="text-xs text-muted-foreground">
-                          {formatDate(payment.payment_date)} • via {payment.method.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                          {formatDate(payment.payment_date)} • via{" "}
+                          {payment.method
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (c) => c.toUpperCase())}
                         </p>
 
                         {/* status + type */}
@@ -336,6 +346,130 @@ export function InvoiceDetail() {
             </CardContent>
           </Card>
 
+          {isLegacyMetadata(invoice.metadata) && (
+            <Collapsible defaultOpen={false}>
+              <Card className="border-primary/20 shadow-sm overflow-hidden">
+                {/* HEADER (clickable) */}
+                <CardHeader className="bg-muted/40 pb-4 border-b">
+                  <CollapsibleTrigger asChild>
+                    <button className="flex w-full items-center justify-between gap-3 text-left">
+                      <div className="flex items-center gap-3">
+                        <CardTitle className="text-base">
+                          Legacy Details
+                        </CardTitle>
+                        <Badge variant="outline" className="text-[10px]">
+                          Legacy
+                        </Badge>
+                      </div>
+
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
+                    </button>
+                  </CollapsibleTrigger>
+                </CardHeader>
+
+                {/* CONTENT (collapsed by default) */}
+                <CollapsibleContent>
+                  <CardContent className="space-y-4">
+                    {/* Invoice Snapshot */}
+                    {(() => {
+                      const invoiceSnap = getObject(
+                        invoice.metadata,
+                        "invoice_snapshot",
+                      );
+                      if (!invoiceSnap) return null;
+
+                      const months = getStringArray(
+                        invoiceSnap,
+                        "invoice_months",
+                      );
+                      if (!months) return null;
+
+                      return (
+                        <Card className="bg-muted/20 border-border shadow-none">
+                          <CardContent className="p-4 space-y-2">
+                            <div className="text-xs font-semibold uppercase text-muted-foreground">
+                              Invoice Snapshot
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                              <span className="text-sm text-muted-foreground">
+                                Months
+                              </span>
+                              <span className="text-sm font-medium">
+                                <ul className="space-y-1 text-sm font-medium">
+                                  {months.map((m) => (
+                                    <li
+                                      key={m}
+                                      className="rounded-sm px-2 py-1 hover:bg-muted transition-colors"
+                                    >
+                                      {m}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })()}
+
+                    {/* Fee Snapshot */}
+                    {(() => {
+                      const feeSnap = getObject(
+                        invoice.metadata,
+                        "fee_snapshot",
+                      );
+                      if (!feeSnap) return null;
+
+                      const feeName = getString(feeSnap, "name");
+                      const feeCategory = getString(feeSnap, "category");
+                      const feeAmount = getNumber(feeSnap, "amount");
+
+                      return (
+                        <Card className="bg-muted/20 border-border shadow-none">
+                          <CardContent className="p-4 space-y-2">
+                            <div className="text-xs font-semibold uppercase text-muted-foreground">
+                              Fee Snapshot
+                            </div>
+
+                            <div className="flex justify-between text-sm gap-3">
+                              <span className="text-muted-foreground">
+                                Name
+                              </span>
+                              <span className="font-medium text-right">
+                                {feeName ?? "—"}
+                              </span>
+                            </div>
+
+                            <div className="flex justify-between text-sm gap-3">
+                              <span className="text-muted-foreground">
+                                Category
+                              </span>
+                              <span className="font-medium text-right">
+                                {formatFeeCategory(feeCategory)}
+                              </span>
+                            </div>
+
+                            <div className="flex justify-between text-sm gap-3">
+                              <span className="text-muted-foreground">
+                                Amount
+                              </span>
+                              <span className="font-medium text-right">
+                                {feeAmount != null
+                                  ? formatMoney(feeAmount)
+                                  : "—"}
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })()}
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          )}
+
           {/* Financial Summary Card */}
           <Card className="bg-muted/20 border-primary/20 shadow-sm overflow-hidden">
             <CardHeader className="bg-muted/40 pb-4 border-b">
@@ -373,22 +507,6 @@ export function InvoiceDetail() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Metadata / Notes (if any) */}
-          {invoice.metadata?.notes && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm text-muted-foreground uppercase">
-                  Notes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground italic">
-                  "{invoice.metadata.notes}"
-                </p>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
 

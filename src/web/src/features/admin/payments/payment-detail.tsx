@@ -417,7 +417,7 @@ export function PaymentDetail() {
                         "—"
                       )}
                       <br />
-                      {payment.invoice?.penalty_amount && (
+                      {payment.invoice?.penalty_amount !== 0 && (
                         <>
                           Penalty Amount:{" "}
                           <b>{formatMoney(payment.invoice.penalty_amount)}</b>

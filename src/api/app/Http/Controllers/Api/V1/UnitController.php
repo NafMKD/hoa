@@ -152,6 +152,8 @@ class UnitController extends Controller
                 'leases',
                 'leases.tenant',
                 'currentLease',
+                'invoices',
+                'invoices.source',
             ]);
 
             return response()->json(new UnitResource($unit));

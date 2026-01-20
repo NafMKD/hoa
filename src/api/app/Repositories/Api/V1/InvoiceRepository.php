@@ -108,6 +108,44 @@ class InvoiceRepository
         });
     }
 
+    /**
+     * Apply a penalty to an invoice (multiple).
+     * 
+     * @param  Invoice  $invoice
+     * @param  array  $penalties
+     * @return array
+     * @throws RepositoryException
+     */
+    public function applyPenalties(Invoice $invoice, array $penalties): array
+    {
+        $appliedPenalties = [];
+        $totalPenalty = 0.0;
+        DB::transaction(function () use ($invoice, $penalties): void {
+            foreach ($penalties as $penalty) {
+                // check if penalty already exists for this invoice on the same date
+                $existingPenalty = $invoice->penalties()->where('applied_date', $penalty['applied_date'])->where('reason', $penalty['reason'])->first();
+                if ($existingPenalty) continue;
+
+                $appliedPenalties[] = $penalty;
+                $invoice->penalties()->create([
+                    'amount' => $penalty['amount'],
+                    'reason' => $penalty['reason'],
+                    'applied_date' => $penalty['applied_date'],
+                ]);
+
+                $totalPenalty += $penalty['amount'];
+            }
+
+            // Update the invoice with the total penalty amount
+            $invoice->update([
+                'penalty_amount' => $invoice->penalty_amount + $totalPenalty,
+            ]);
+
+        });
+
+        return [$appliedPenalties, $totalPenalty];
+    }
+
     /*
     |--------------------------------------------------------------------------------------------
     |
@@ -157,12 +195,15 @@ class InvoiceRepository
      */
     public function setAsPaid(Invoice $invoice, Payment  $payment): Invoice
     {
+        // check invoice is legacy 
+        $legacy = $invoice->metadata['legacy'] ?? false;
+
         if ($payment->amount <= 0) {
             throw new RepositoryException('Payment amount must be greater than zero.');
         }
 
         // check if the invoice is overdue
-        if ($invoice->is_overdue) {
+        if ($invoice->is_overdue && !$legacy) {
             if ($invoice->status !== Controller::_INVOICE_STATUSES[3]) {
                 // mark as overdue if not already marked
                 $invoice = $this->markInvoiceAsOverdue($invoice);

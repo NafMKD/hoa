@@ -19,6 +19,11 @@ export const PrintableInvoice = forwardRef<HTMLDivElement, PrintableInvoiceProps
             <div className="space-y-1">
                 <h1 className="text-3xl font-bold tracking-tight uppercase">Invoice</h1>
                 <p className="text-sm font-semibold text-gray-500">#{invoice.invoice_number}</p>
+                 <div className="pt-2">
+                     <span className={`text-xs px-2 py-0.5 border rounded uppercase font-bold ${invoice.status === 'paid' ? 'border-black text-black' : 'border-gray-300 text-gray-400'}`}>
+                        {invoice.status}
+                     </span>
+                </div>
             </div>
             <div className="text-right">
                 {/* Replace with your Company Logo/Name */}

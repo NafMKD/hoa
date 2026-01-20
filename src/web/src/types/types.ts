@@ -246,7 +246,8 @@ export interface FeePaginatedResponse {
   };
 }
 
-export type InvoiceStatus = 'issued' | 'partial' |'paid' | 'overdue' | 'cancelled';
+export type InvoiceStatus = 'issued' | 'partial' | 'paid' | 'overdue' | 'cancelled';
+export type PaymentStatus = 'pending' | 'confirmed' | 'failed' | 'refunded';
 
 
 export interface Payment {
@@ -254,7 +255,7 @@ export interface Payment {
   amount: number;
   method: string;
   reference: string;
-  status: string;
+  status: PaymentStatus;
   type: string;
   processed_by?: string;
   processed_at: string | null; 

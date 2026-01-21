@@ -189,7 +189,7 @@ class UnitController extends Controller
 
             $data = $request->validate([
                 'building_id'      => ['sometimes', 'exists:buildings,id'],
-                'name'             => ['sometimes', 'string', 'max:255', Rule::unique('units')->ignore($unit->id)],
+                'name'             => ['sometimes', 'string', 'max:255', new UniqueUnitName()],
                 'floor_number'     => ['sometimes', 'integer', 'min:0'],
                 'unit_type'        => ['sometimes', 'string', Rule::in(self::_UNIT_TYPES)],
                 'size_m2'          => ['nullable', 'numeric', 'min:0'],

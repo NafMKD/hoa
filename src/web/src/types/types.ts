@@ -55,6 +55,10 @@ export type UserSelectOption = {
   data: User[];
 }
 
+export type UnitSelectOption = {
+  data: Unit[];
+}
+
 export type InvoiceSelectOption = {
   data: Invoice[];
 }
@@ -238,6 +242,29 @@ export interface Fee {
 
 export interface FeePaginatedResponse {
   data: Fee[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export interface Vehicle {
+  id: string | number;
+  unit?: Unit;
+  make: string;
+  model: string;
+  year: number | string;
+  license_plate: string;
+  color: string | null;
+  document?: Document;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VehiclePaginatedResponse {
+  data: Vehicle[];
   meta: {
     current_page: number;
     per_page: number;

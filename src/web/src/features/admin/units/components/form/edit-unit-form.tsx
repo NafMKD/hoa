@@ -117,13 +117,13 @@ export function EditUnitForm({ unit, onSuccess }: EditUnitFormProps) {
       appendIfChanged("status", values.status, unit.status);
 
       if (formData.entries().next().done) {
-        toast.info("No changes detected.", { position: "top-right" });
+        toast.info("No changes detected.");
         return;
       }
 
       await updateUnit(unit.id, formData);
 
-      toast.success("Unit updated successfully!", { position: "top-right" });
+      toast.success("Unit updated successfully!");
       onSuccess?.();
     } catch (error) {
       const err = error as ApiError;

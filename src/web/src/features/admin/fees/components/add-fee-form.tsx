@@ -86,7 +86,7 @@ export function AddFeeForm({ onSuccess }: AddFeeFormProps) {
       }
 
       await createFee(formData);
-      toast.success("Fee added successfully!", { position: "top-right" });
+      toast.success("Fee added successfully!");
       onSuccess?.();
     } catch (error) {
       const err = error as ApiError;

@@ -13,18 +13,18 @@ return new class extends Migration
     {
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
             $table->foreignId('unit_id')->nullable()->constrained('units');
             $table->string('make')->nullable();
             $table->string('model')->nullable();
             $table->integer('year')->nullable();
-            $table->string('license_plate')->unique();
+            $table->string('license_plate');
             $table->string('color')->nullable();
             $table->foreignId('vehicle_document_id')->nullable()->constrained('documents');
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index('user_id');
+            $table->index('unit_id');
+            $table->unique(['unit_id', 'license_plate']);
         });
     }
 

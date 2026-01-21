@@ -17,7 +17,6 @@ class Vehicle extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'user_id',
         'unit_id',
         'make',
         'model',
@@ -37,16 +36,6 @@ class Vehicle extends Model
         return [
             'year' => 'integer',
         ];
-    }
-
-    /**
-     * Get the owner of the vehicle.
-     *
-     * @return BelongsTo
-     */
-    public function owner(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

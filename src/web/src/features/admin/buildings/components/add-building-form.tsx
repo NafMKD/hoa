@@ -50,7 +50,7 @@ export function AddBuildingForm({ onSuccess }: AddBuildingFormProps) {
       }
 
       await createBuilding(formData);
-      toast.success("Building added successfully!", { position: "top-right" });
+      toast.success("Building added successfully!");
       onSuccess?.();
     } catch (error) {
       const err = error as ApiError;

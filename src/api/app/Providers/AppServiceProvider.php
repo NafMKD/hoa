@@ -11,6 +11,7 @@ use App\Models\UnitLease;
 use App\Models\Unit;
 use App\Models\UnitOwner;
 use App\Models\User;
+use App\Models\Vehicle;
 use App\Observers\AuditLogObserver;
 use App\Policies\Api\V1\BuildingPolicy;
 use App\Policies\Api\V1\DocumentTemplatePolicy;
@@ -21,6 +22,7 @@ use App\Policies\Api\V1\UnitLeasePolicy;
 use App\Policies\Api\V1\UnitPolicy;
 use App\Policies\Api\V1\UserPolicy;
 use App\Policies\Api\V1\UnitOwnerPolicy;
+use App\Policies\Api\V1\VehiclePolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -49,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(UnitOwner::class, UnitOwnerPolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
+        Gate::policy(Vehicle::class, VehiclePolicy::class);
 
         // Observers
         User::observe(AuditLogObserver::class);

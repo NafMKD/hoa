@@ -16,9 +16,6 @@ class VehicleResource extends JsonResource
     {
         return [
             'id'                => $this->id,
-            'owner'             => $this->whenLoaded('owner', function () {
-                return new UserResource($this->owner);
-            }),
             'unit'              => $this->whenLoaded('unit', function () {
                 return new UnitResource($this->unit);
             }),
@@ -27,7 +24,9 @@ class VehicleResource extends JsonResource
             'year'              => $this->year,
             'license_plate'     => $this->license_plate,
             'color'             => $this->color,
-            'document'          => $this->vehicle_document_id,
+            'document'          => $this->whenLoaded('document', function () {
+                return new DocumentResource($this->document);
+            }),
             // 'stickers'          => $this->whenLoaded('stickers', function () {
             //     return StickerIssueResource::collection($this->stickers);
             // }),

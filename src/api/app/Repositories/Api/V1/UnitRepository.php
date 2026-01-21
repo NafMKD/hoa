@@ -56,6 +56,27 @@ class UnitRepository
     }
 
     /**
+     * Search units by name.
+     * Additional filters can be added.
+     * ['status']
+     * 
+     * @param  string  $term
+     * @param  array  $filers
+     * @return Collection
+     */
+    public function search(string $term, array $filers = []): Collection
+    {
+        $query = Unit::query()
+            ->where('name', 'like', "%{$term}%");
+
+        if (!empty($filers['status'])) {
+            $query->whereIn('status', $filers['status']);
+        }
+
+        return $query->orderBy('name', 'asc')->get();
+    }
+
+    /**
      * Create a new unit.
      * 
      * @param array<string, mixed> $data

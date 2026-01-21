@@ -112,7 +112,7 @@ export function AddUnitForm({ onSuccess }: AddUnitFormProps) {
 
       await createUnit(formData);
 
-      toast.success("Unit added successfully!", { position: "top-right" });
+      toast.success("Unit added successfully!");
       form.reset();
       onSuccess?.();
     } catch (error) {

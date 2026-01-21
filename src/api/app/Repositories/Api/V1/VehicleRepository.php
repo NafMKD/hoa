@@ -122,7 +122,7 @@ class VehicleRepository
      */
     public function delete(Vehicle $vehicle): ?bool
     {
-        return DB::transaction(function ($vehicle) {
+        return DB::transaction(function () use($vehicle) {
             // TODO: Handle related data (e.g. sticker issues, document)
             $vehicle->delete();
         });

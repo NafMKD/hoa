@@ -83,6 +83,44 @@ class UnitController extends Controller
     }
 
     /**
+     * Search units by name.
+     * filtered by status if provided.
+     * 
+     * @param  Request  $request
+     * @return AnonymousResourceCollection|JsonResponse
+     */
+    public function search(Request $request): AnonymousResourceCollection|JsonResponse
+    {
+        try {
+            $this->authorize('viewAny', Unit::class);
+
+            $term = $request->query('term');
+            $status = $request->query('status');
+
+            $filters = compact('status');
+
+            $users = $this->units->search($term, $filters);
+
+            return UnitResource::collection($users);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
      * Store a newly created unit.
      * 
      * @param Request $request

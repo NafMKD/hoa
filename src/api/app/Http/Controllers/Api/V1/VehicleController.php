@@ -42,6 +42,8 @@ class VehicleController extends Controller
 
             $vehicles = $this->vehicles->all($perPage, $filters);
 
+            $vehicles->load(['unit']);
+
             return VehicleResource::collection($vehicles);
         } catch (AuthorizationException) {
             return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);

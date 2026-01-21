@@ -1,5 +1,5 @@
 import api, { handleApi } from "@/lib/api";
-import type { Unit, UnitLeaseResource, UnitPaginatedResponse } from "@/types/types";
+import type { Unit, UnitLeaseResource, UnitPaginatedResponse, UnitSelectOption } from "@/types/types";
 
 /**
  * Fetch paginated units
@@ -51,6 +51,16 @@ export const createUnit = (formData: FormData) =>
     api.post("/v1/units", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     })
+  );
+
+export const searchUnits = async (
+  query: string,
+  status?: string,
+): Promise<UnitSelectOption> =>
+  handleApi<UnitSelectOption>(
+    api.get(`/v1/units/search`, {
+      params: { term: query, status },
+    }),
   );
 
 /**

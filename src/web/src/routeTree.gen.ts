@@ -18,10 +18,12 @@ import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminVehiclesIndexRouteImport } from './routes/_authenticated/admin/vehicles/index'
 import { Route as AuthenticatedAdminUsersIndexRouteImport } from './routes/_authenticated/admin/users/index'
 import { Route as AuthenticatedAdminUnitsIndexRouteImport } from './routes/_authenticated/admin/units/index'
 import { Route as AuthenticatedAdminTemplatesIndexRouteImport } from './routes/_authenticated/admin/templates/index'
 import { Route as AuthenticatedAdminBuildingsIndexRouteImport } from './routes/_authenticated/admin/buildings/index'
+import { Route as AuthenticatedAdminVehiclesVehicleIdRouteImport } from './routes/_authenticated/admin/vehicles/$vehicleId'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin/users/$userId'
 import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/admin/templates/$templateId'
 import { Route as AuthenticatedAdminBuildingsBuildingIdRouteImport } from './routes/_authenticated/admin/buildings/$buildingId'
@@ -80,6 +82,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminVehiclesIndexRoute =
+  AuthenticatedAdminVehiclesIndexRouteImport.update({
+    id: '/vehicles/',
+    path: '/vehicles/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminUsersIndexRoute =
   AuthenticatedAdminUsersIndexRouteImport.update({
     id: '/users/',
@@ -102,6 +110,12 @@ const AuthenticatedAdminBuildingsIndexRoute =
   AuthenticatedAdminBuildingsIndexRouteImport.update({
     id: '/buildings/',
     path: '/buildings/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminVehiclesVehicleIdRoute =
+  AuthenticatedAdminVehiclesVehicleIdRouteImport.update({
+    id: '/vehicles/$vehicleId',
+    path: '/vehicles/$vehicleId',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminUsersUserIdRoute =
@@ -190,10 +204,12 @@ export interface FileRoutesByFullPath {
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
   '/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
+  '/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
+  '/admin/vehicles': typeof AuthenticatedAdminVehiclesIndexRoute
   '/admin/financials/fees/$feeId': typeof AuthenticatedAdminFinancialsFeesFeeIdRoute
   '/admin/financials/invoices/$invoiceId': typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   '/admin/financials/payments/$paymentId': typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
@@ -216,10 +232,12 @@ export interface FileRoutesByTo {
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
   '/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
+  '/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
+  '/admin/vehicles': typeof AuthenticatedAdminVehiclesIndexRoute
   '/admin/financials/fees/$feeId': typeof AuthenticatedAdminFinancialsFeesFeeIdRoute
   '/admin/financials/invoices/$invoiceId': typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   '/admin/financials/payments/$paymentId': typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
@@ -244,10 +262,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
   '/_authenticated/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/_authenticated/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
+  '/_authenticated/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
   '/_authenticated/admin/buildings/': typeof AuthenticatedAdminBuildingsIndexRoute
   '/_authenticated/admin/templates/': typeof AuthenticatedAdminTemplatesIndexRoute
   '/_authenticated/admin/units/': typeof AuthenticatedAdminUnitsIndexRoute
   '/_authenticated/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
+  '/_authenticated/admin/vehicles/': typeof AuthenticatedAdminVehiclesIndexRoute
   '/_authenticated/admin/financials/fees/$feeId': typeof AuthenticatedAdminFinancialsFeesFeeIdRoute
   '/_authenticated/admin/financials/invoices/$invoiceId': typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   '/_authenticated/admin/financials/payments/$paymentId': typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
@@ -273,10 +293,12 @@ export interface FileRouteTypes {
     | '/admin/buildings/$buildingId'
     | '/admin/templates/$templateId'
     | '/admin/users/$userId'
+    | '/admin/vehicles/$vehicleId'
     | '/admin/buildings'
     | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
+    | '/admin/vehicles'
     | '/admin/financials/fees/$feeId'
     | '/admin/financials/invoices/$invoiceId'
     | '/admin/financials/payments/$paymentId'
@@ -299,10 +321,12 @@ export interface FileRouteTypes {
     | '/admin/buildings/$buildingId'
     | '/admin/templates/$templateId'
     | '/admin/users/$userId'
+    | '/admin/vehicles/$vehicleId'
     | '/admin/buildings'
     | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
+    | '/admin/vehicles'
     | '/admin/financials/fees/$feeId'
     | '/admin/financials/invoices/$invoiceId'
     | '/admin/financials/payments/$paymentId'
@@ -326,10 +350,12 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/buildings/$buildingId'
     | '/_authenticated/admin/templates/$templateId'
     | '/_authenticated/admin/users/$userId'
+    | '/_authenticated/admin/vehicles/$vehicleId'
     | '/_authenticated/admin/buildings/'
     | '/_authenticated/admin/templates/'
     | '/_authenticated/admin/units/'
     | '/_authenticated/admin/users/'
+    | '/_authenticated/admin/vehicles/'
     | '/_authenticated/admin/financials/fees/$feeId'
     | '/_authenticated/admin/financials/invoices/$invoiceId'
     | '/_authenticated/admin/financials/payments/$paymentId'
@@ -417,6 +443,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/vehicles/': {
+      id: '/_authenticated/admin/vehicles/'
+      path: '/vehicles'
+      fullPath: '/admin/vehicles'
+      preLoaderRoute: typeof AuthenticatedAdminVehiclesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/users/': {
       id: '/_authenticated/admin/users/'
       path: '/users'
@@ -443,6 +476,13 @@ declare module '@tanstack/react-router' {
       path: '/buildings'
       fullPath: '/admin/buildings'
       preLoaderRoute: typeof AuthenticatedAdminBuildingsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/vehicles/$vehicleId': {
+      id: '/_authenticated/admin/vehicles/$vehicleId'
+      path: '/vehicles/$vehicleId'
+      fullPath: '/admin/vehicles/$vehicleId'
+      preLoaderRoute: typeof AuthenticatedAdminVehiclesVehicleIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/users/$userId': {
@@ -537,10 +577,12 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminBuildingsBuildingIdRoute: typeof AuthenticatedAdminBuildingsBuildingIdRoute
   AuthenticatedAdminTemplatesTemplateIdRoute: typeof AuthenticatedAdminTemplatesTemplateIdRoute
   AuthenticatedAdminUsersUserIdRoute: typeof AuthenticatedAdminUsersUserIdRoute
+  AuthenticatedAdminVehiclesVehicleIdRoute: typeof AuthenticatedAdminVehiclesVehicleIdRoute
   AuthenticatedAdminBuildingsIndexRoute: typeof AuthenticatedAdminBuildingsIndexRoute
   AuthenticatedAdminTemplatesIndexRoute: typeof AuthenticatedAdminTemplatesIndexRoute
   AuthenticatedAdminUnitsIndexRoute: typeof AuthenticatedAdminUnitsIndexRoute
   AuthenticatedAdminUsersIndexRoute: typeof AuthenticatedAdminUsersIndexRoute
+  AuthenticatedAdminVehiclesIndexRoute: typeof AuthenticatedAdminVehiclesIndexRoute
   AuthenticatedAdminFinancialsFeesFeeIdRoute: typeof AuthenticatedAdminFinancialsFeesFeeIdRoute
   AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute: typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   AuthenticatedAdminFinancialsPaymentsPaymentIdRoute: typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
@@ -560,12 +602,15 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminTemplatesTemplateIdRoute:
       AuthenticatedAdminTemplatesTemplateIdRoute,
     AuthenticatedAdminUsersUserIdRoute: AuthenticatedAdminUsersUserIdRoute,
+    AuthenticatedAdminVehiclesVehicleIdRoute:
+      AuthenticatedAdminVehiclesVehicleIdRoute,
     AuthenticatedAdminBuildingsIndexRoute:
       AuthenticatedAdminBuildingsIndexRoute,
     AuthenticatedAdminTemplatesIndexRoute:
       AuthenticatedAdminTemplatesIndexRoute,
     AuthenticatedAdminUnitsIndexRoute: AuthenticatedAdminUnitsIndexRoute,
     AuthenticatedAdminUsersIndexRoute: AuthenticatedAdminUsersIndexRoute,
+    AuthenticatedAdminVehiclesIndexRoute: AuthenticatedAdminVehiclesIndexRoute,
     AuthenticatedAdminFinancialsFeesFeeIdRoute:
       AuthenticatedAdminFinancialsFeesFeeIdRoute,
     AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute:

@@ -4,9 +4,11 @@ namespace App\Rules;
 
 use App\Models\Vehicle;
 use Closure;
+use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Facades\Log;
 
-class UniqueVehiclePlateNumber implements ValidationRule
+class UniqueVehiclePlateNumber implements ValidationRule, DataAwareRule
 {
     protected array $data = [];
 

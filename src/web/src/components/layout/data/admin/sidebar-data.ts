@@ -10,15 +10,13 @@ import {
   Wallet,
   BarChart3,
   Car,
-  PlusCircle,
   Vote,
   Inbox,
   FileSignature,
   MessageSquareWarning,
   HelpCircle,
-  List,
-  Sticker,
   FileArchive,
+  UserCheck,
 } from "lucide-react";
 import { type SidebarData } from "@/components/layout/types";
 
@@ -56,6 +54,11 @@ export const sidebarData: SidebarData = {
           title: "Units",
           url: "/admin/units",
           icon: Home,
+        },
+        {
+          title: "Employees",
+          url: "/admin/employees",
+          icon: UserCheck,
         },
       ],
     },
@@ -104,56 +107,18 @@ export const sidebarData: SidebarData = {
       items: [
         {
           title: "Vehicles",
+          url: "/admin/vehicles", 
           icon: Car,
-          items: [
-            {
-              title: "All Vehicles",
-              url: "/admin/vehicles",
-              icon: List,
-            },
-            {
-              title: "Add Vehicle",
-              url: "/admin/vehicles/add",
-              icon: PlusCircle,
-            },
-            {
-              title: "Parking Stickers",
-              url: "/admin/vehicles/stickers",
-              icon: Sticker,
-            },
-          ],
         },
         {
           title: "Community Poll",
+          url: "/admin/polls", 
           icon: Vote,
-          items: [
-            {
-              title: "All Polls",
-              url: "/admin/polls",
-              icon: List,
-            },
-            {
-              title: "Create Poll",
-              url: "/admin/polls/create",
-              icon: PlusCircle,
-            },
-          ],
         },
         {
           title: "Complaints",
+          url: "/admin/complaints", 
           icon: MessageSquareWarning,
-          items: [
-            {
-              title: "All Complaints",
-              url: "/admin/complaints",
-              icon: List,
-            },
-            {
-              title: "Create Complaint",
-              url: "/admin/complaints/create",
-              icon: PlusCircle,
-            },
-          ],
         },
       ],
     },

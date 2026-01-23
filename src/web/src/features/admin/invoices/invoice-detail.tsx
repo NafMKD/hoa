@@ -116,6 +116,8 @@ export function InvoiceDetail() {
               <AddPaymentModal
                 onSuccess={refreshData}
                 invoiceId={Number(invoiceId)}
+                amount={invoice.total_amount as number ?? 0}
+                paymentDate={invoice.metadata?.legacy ?  '2024-04-19' : undefined}
               />
               <div className="h-6 w-px bg-border mx-1 hidden sm:block"></div>
             </>

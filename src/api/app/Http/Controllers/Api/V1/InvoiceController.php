@@ -121,17 +121,17 @@ class InvoiceController extends Controller
             $this->authorize('create', Invoice::class);
 
             $validated = $request->validate([
-                'user_id'        => ['required', 'integer', 'exists:users,id'],
                 'unit_id'        => ['required', 'integer', 'exists:units,id'],
                 'total_amount'   => ['required', 'numeric', 'min:0'],
                 'issue_date'     => ['required', 'date'],
                 'due_date'       => ['required', 'date', 'after_or_equal:issue_date'],
-                'source_type'    => ['nullable', 'string'],
-                'source_id'      => ['nullable', 'integer'],
-                'penalty_amount' => ['nullable', 'numeric', 'min:0'],
+                'source_id'      => ['required', 'integer', 'exists:fees,id'],
             ]);
 
-            $validated['metadata'] = ['generated_by' => Auth::id()];
+            $validated['metadata'] = [
+                'generated_by' => Auth::id(),
+                'legacy' => false
+            ];
             $invoice = $this->invoices->create($validated);
 
             return response()->json(new InvoiceResource($invoice), 201);

@@ -76,12 +76,35 @@ class InvoiceRepository
         DB::beginTransaction();
 
         try {
+
+            $fee = Fee::find($data['source_id']);
+            $unit = Unit::find($data['unit_id']);
+
+            if (!$fee) throw new RepositoryException('Fee not found');
+            if (!$unit) throw new RepositoryException('Unit not found');
+
+            if ($unit->currentLease) {
+                $data['user_id'] = $unit->currentLease->tenant->id;
+            } else if ($unit->currentOwner) {
+                $data['user_id'] = $unit->currentOwner->owner->id;
+            } else {
+                $data['user_id'] = null;
+            }
+
             // Generate unique invoice number
             $data['invoice_number'] = $this->generateNextInvoiceNumber();
             $data['amount_paid'] = 0.00;
             $data['status'] = Controller::_INVOICE_STATUSES[0]; // issued
             $data['penalty_amount'] = 0.00;
             $data['metadata'] = $data['metadata'] ?? [];
+            $data['source_type'] = \App\Models\Fee::class;
+
+            $data['metadata']['fee_snapshot'] = [
+                'id'       => $fee->id,
+                'name'     => $fee->name,
+                'category' => $fee->category,
+                'amount'   => (float) $fee->amount,
+            ];
 
             $invoice = Invoice::create($data);
             DB::commit();
@@ -170,7 +193,7 @@ class InvoiceRepository
             // Use database locking to prevent race conditions
             $lastInvoice = Invoice::where('invoice_number', 'LIKE', $prefix . '%')
                 ->lockForUpdate()
-                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->first();
             
             if ($lastInvoice) {

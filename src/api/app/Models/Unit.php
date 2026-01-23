@@ -148,4 +148,17 @@ class Unit extends Model
     {
         return $this->hasMany(Invoice::class, 'unit_id')->latest();
     }
+
+    /**
+     * Unit issue (check if the unit have any issue)
+     * 
+     * @return bool
+     */
+    public function getHaveIssueAttribute(): bool
+    {
+        return $this->invoices()
+        ->whereNotIn('status', ['paid', 'cancelled'])
+        ->exists();
+    }
+
 }

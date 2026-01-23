@@ -38,6 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import type { ApiError } from "@/types/api-error";
 import { InvoiceList } from "./components/invoices/invoice-list";
+import { AddInvoiceModal } from "../invoices/components/add-invoice-modal";
 
 function getFileType(url?: string | null): "image" | "pdf" | "unknown" {
   if (!url) return "unknown";
@@ -72,17 +73,20 @@ export function UnitDetail() {
   const [unitStatus, setUnitStatus] = useState<string>("");
   const [previewFile, setPreviewFile] = useState<PreviewFile | null>(null);
 
+  const refreshData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchUnitDetail(unitId as string);
+      setUnit(data);
+      setUnitStatus(data.status || "");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadUnit = async () => {
-      try {
-        const data = await fetchUnitDetail(unitId as string);
-        setUnit(data);
-        setUnitStatus(data.status || "");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadUnit();
+    refreshData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unitId]);
 
   const owners = (unit as Unit)?.owners ?? [];
@@ -168,15 +172,35 @@ export function UnitDetail() {
   return (
     <>
       <Main className="container mx-auto px-4 py-6 space-y-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">Unit Details</h1>
-          <Button variant="outline" asChild>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div>
+                    <h1 className="text-2xl font-bold tracking-tight flex items-center gap-3">
+                      Unit Details
+                      {unit.have_issue && (
+                        <Badge
+                          variant="destructive"
+                          className="text-xs font-medium rounded-full px-2 py-0.5"
+                        >
+                          Have an issue
+                        </Badge>
+                      )}
+                    </h1>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 items-center">
+                  <AddInvoiceModal
+                    onSuccess={refreshData}
+                    unitId={Number(unitId)}
+                  />
+                  <Button variant="outline" asChild>
             <Link to="/admin/units">
               <IconArrowLeft size={16} className="mr-1" />
               Back
             </Link>
           </Button>
-        </div>
+                </div>
+              </div>
 
         {/* --- UNIT SNAPSHOT CARD (more elegant / structured) --- */}
         <Card className="shadow-sm border-muted/60">

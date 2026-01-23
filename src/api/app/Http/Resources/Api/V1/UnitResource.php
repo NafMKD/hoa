@@ -20,6 +20,7 @@ class UnitResource extends JsonResource
             'building'         => $this->whenLoaded('building', function () {
                 return new IdNameResource($this->building);
             }),
+            'have_issue'       => $this->have_issue,
             'name'             => $this->name,
             'floor_number'     => $this->floor_number,
             'floor_name'       => $this->floor_name,

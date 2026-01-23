@@ -175,6 +175,7 @@ export type BuildingPaginatedResponse = {
 export type Unit = {
   id: string | number;
   building?: Building; 
+  have_issue: boolean;
   name: string;
   floor_number: number | null;
   floor_name?: string;
@@ -333,6 +334,15 @@ export interface Invoice {
   created_at: string;
   updated_at: string;
 }
+
+export interface UnitInvoiceProp { 
+  unit_id: number; 
+  total_amount: number; 
+  issue_date: string; 
+  due_date: string; 
+  source_id: number; 
+}
+
 
 export interface InvoicePenalities {
   id: number | string;

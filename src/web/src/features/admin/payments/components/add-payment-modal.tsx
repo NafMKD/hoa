@@ -47,11 +47,13 @@ const formSchema = z.object({
 interface AddPaymentModalProps {
   onSuccess: () => void;
   invoiceId?: number | null;
+  amount?: number;
+  paymentDate?: string;
 }
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function AddPaymentModal({ onSuccess, invoiceId }: AddPaymentModalProps) {
+export function AddPaymentModal({ onSuccess, invoiceId, amount, paymentDate }: AddPaymentModalProps) {  
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,7 +65,7 @@ export function AddPaymentModal({ onSuccess, invoiceId }: AddPaymentModalProps) 
       amount: 0,
       method: "bank_transfer",
       reference: "",
-      payment_date: new Date().toISOString().split("T")[0],
+      payment_date: paymentDate ?? new Date().toISOString().split("T")[0],
       ...(hasInvoiceId ? { invoice_id: invoiceId } : {}),
     },
   });
@@ -86,7 +88,7 @@ export function AddPaymentModal({ onSuccess, invoiceId }: AddPaymentModalProps) 
       amount: 0,
       method: "bank_transfer",
       reference: "",
-      payment_date: new Date().toISOString().split("T")[0],
+      payment_date: paymentDate ?? new Date().toISOString().split("T")[0],
       ...(hasInvoiceId ? { invoice_id: invoiceId! } : {}),
     });
   };
@@ -123,6 +125,10 @@ export function AddPaymentModal({ onSuccess, invoiceId }: AddPaymentModalProps) 
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  const handleAllAmount = () => {
+    form.setValue("amount", amount ?? 0);
   }
 
   return (
@@ -195,7 +201,7 @@ export function AddPaymentModal({ onSuccess, invoiceId }: AddPaymentModalProps) 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Amount <span className="text-red-500">*</span>
+                      Amount <span className="text-red-500">*</span> <span className="text-muted-foreground cursor-pointer" onClick={handleAllAmount}>(All)</span>
                     </FormLabel>
                     <FormControl>
                       <Input

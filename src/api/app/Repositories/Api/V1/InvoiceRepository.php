@@ -9,6 +9,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Unit;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -365,6 +366,14 @@ class InvoiceRepository
     {
         $generable = true;
 
+        $startDate = Carbon::parse($fee->next_recurring_date);
+
+        $for_months = [
+            $startDate->format('F/Y'),                  // first month
+            $startDate->copy()->addMonth()->format('F/Y'),  // next month
+            $startDate->copy()->addMonths(2)->format('F/Y'), // month after next
+        ];
+        
         $data = [
             'invoice_number' => $this->generateNextInvoiceNumber(),
             'unit_id' => $unit->id,
@@ -376,7 +385,19 @@ class InvoiceRepository
             'source_type' => 'App\\Models\\Fee',
             'source_id' => $fee->id,
             'penalty_amount' => 0.00,
-            'metadata' => ['generated_by' => 'system']
+            'metadata' => [
+                'generated_by' => 'system',
+                'legacy' => false,
+                'fee_snapshot' => [
+                    'id'       => $fee->id,
+                    'name'     => $fee->name,
+                    'category' => $fee->category,
+                    'amount'   => (float) $fee->amount,
+                ],
+                'invoice_snapshot' => [
+                    'invoice_months' => $for_months
+                ]
+            ]
         ];
 
         // check the unit status

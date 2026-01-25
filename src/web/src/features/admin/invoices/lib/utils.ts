@@ -23,9 +23,6 @@ export type LegacyMetadata = MetadataObject & {
 export const isMetadataObject = (v: unknown): v is MetadataObject =>
   !!v && typeof v === "object" && !Array.isArray(v);
 
-export const isLegacyMetadata = (m: MetadataObject | null | undefined): m is LegacyMetadata =>
-  !!m && isMetadataObject(m) && m["legacy"] === true;
-
 export const getString = (obj: MetadataObject, key: string): string | undefined => {
   const v = obj[key];
   return typeof v === "string" ? v : undefined;

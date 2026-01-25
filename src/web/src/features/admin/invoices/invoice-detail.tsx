@@ -35,7 +35,7 @@ import {
 import { getPaymentStatusColor } from "../payments/lib/payments";
 import { AddPaymentModal } from "../payments/components/add-payment-modal";
 import { AddPenaltyModal } from "./components/add-penalty-modal";
-import { isLegacyMetadata, getString, getObject, getNumber, getStringArray, formatFeeCategory } from "./lib/utils";
+import { getString, getObject, getNumber, getStringArray, formatFeeCategory } from "./lib/utils";
 
 export function InvoiceDetail() {
   const { invoiceId } = useParams({
@@ -348,20 +348,17 @@ export function InvoiceDetail() {
             </CardContent>
           </Card>
 
-          {isLegacyMetadata(invoice.metadata) && (
+          {invoice.metadata && (
             <Collapsible defaultOpen={false}>
               <Card className="border-primary/20 shadow-sm overflow-hidden">
                 {/* HEADER (clickable) */}
-                <CardHeader className="bg-muted/40 pb-4 border-b">
+                <CardHeader className="bg-muted/40 border-b">
                   <CollapsibleTrigger asChild>
-                    <button className="flex w-full items-center justify-between gap-3 text-left">
+                    <button className="flex w-full items-center justify-between gap-3 text-left cursor-pointer">
                       <div className="flex items-center gap-3">
                         <CardTitle className="text-base">
-                          Legacy Details
+                          Invoice Metadata
                         </CardTitle>
-                        <Badge variant="outline" className="text-[10px]">
-                          Legacy
-                        </Badge>
                       </div>
 
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />

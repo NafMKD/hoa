@@ -32,10 +32,7 @@ export function InvoiceList({ invoices, invoicesCount }: InvoiceListProps) {
     if (!aIsPriority && bIsPriority) return 1;
 
     if (aIsPriority && bIsPriority) {
-      return (
-        new Date(b.created_at).getTime() -
-        new Date(a.created_at).getTime()
-      );
+      return Number(b.id) - Number(a.id);
     }
     return 0;
   });

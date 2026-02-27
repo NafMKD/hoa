@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class InvoicePenalties extends Model
+class InvoicePenalty extends Model
 {
     use SoftDeletes;
 

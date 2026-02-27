@@ -75,6 +75,15 @@ export const PrintableInvoice = forwardRef<HTMLDivElement, PrintableInvoiceProps
                     </tr>
                 </thead>
                 <tbody className="text-sm">
+                    <tr className="border-b border-gray-200">
+                        <td className="py-3 text-gray-700">
+                            {invoice.source?.name || "Services Rendered"}
+                            {invoice.source?.description && <div className="text-xs text-gray-500">{invoice.source.description}</div>}
+                        </td>
+                        <td className="py-3 text-right text-gray-700">1</td>
+                        <td className="py-3 text-right text-gray-700">{Number(invoice.total_amount).toLocaleString()}</td>
+                        <td className="py-3 text-right font-medium">{Number(invoice.total_amount).toLocaleString()}</td>
+                    </tr>
                     { invoice.penalties && invoice.penalties.length > 0 && invoice.penalties.map((penalty) => (
                         <tr key={penalty.id} className="border-b border-gray-200">
                             <td className="py-3 text-gray-700">

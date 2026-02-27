@@ -310,6 +310,7 @@ export interface InvoiceSource {
   id: number;
   name?: string; 
   description?: string;
+  is_recurring?: boolean;
 }
 
 export interface Invoice {

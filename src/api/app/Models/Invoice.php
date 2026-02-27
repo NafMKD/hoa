@@ -109,7 +109,7 @@ class Invoice extends Model
      */
     public function penalties(): HasMany
     {
-        return $this->hasMany(InvoicePenalties::class);
+        return $this->hasMany(InvoicePenalty::class);
     }
 
 

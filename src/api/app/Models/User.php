@@ -34,6 +34,7 @@ class User extends Authenticatable
         'role',
         'last_login_at',
         'status',
+        'telegram_user_id',
     ];
 
     /**

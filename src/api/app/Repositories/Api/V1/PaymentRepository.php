@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class PaymentRepository
 {
@@ -81,6 +82,49 @@ class PaymentRepository
             DB::rollBack();
             Log::info('Failed to create payment: ' . $e->getMessage());
             throw new RepositoryException('Failed to create payment: ');
+        }
+    }
+
+    /**
+     * Create a payment from Telegram Mini App (screenshot upload).
+     *
+     * @param array<string, mixed> $data
+     * @return Payment
+     * @throws RepositoryException
+     */
+    public function createFromTelegram(array $data): Payment
+    {
+        DB::beginTransaction();
+        try {
+            if ($this->hasPendingPayment($data['invoice_id'])) {
+                throw new RepositoryException('A pending payment already exists for this invoice.');
+            }
+
+            if ($this->exceedsOutstandingAmount($data['invoice_id'], (float) $data['amount'])) {
+                throw new RepositoryException('Payment amount exceeds the outstanding invoice amount.');
+            }
+
+            $reference = 'TGRAM-' . strtoupper(Str::uuid()->toString());
+            $payment = Payment::create([
+                'invoice_id'               => $data['invoice_id'],
+                'amount'                   => $data['amount'],
+                'method'                   => Controller::_PAYMENT_METHODS[1], // bank_transfer
+                'reference'                => $reference,
+                'status'                   => Controller::_PAYMENT_STATUSES[0], // pending
+                'type'                     => Controller::_PAYMENT_TYPE[1], // telegram
+                'payment_screen_shoot_id'  => $data['payment_screen_shoot_id'],
+                'payment_date'             => $data['payment_date'],
+            ]);
+
+            DB::commit();
+            return $payment;
+        } catch (RepositoryException $e) {
+            DB::rollBack();
+            throw $e;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to create Telegram payment: ' . $e->getMessage());
+            throw new RepositoryException('Failed to create payment.');
         }
     }
 

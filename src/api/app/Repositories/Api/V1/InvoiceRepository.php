@@ -42,6 +42,35 @@ class InvoiceRepository
     }
 
     /**
+     * Get invoices for a specific user (payer), filtered by status.
+     *
+     * @param  User  $user
+     * @param  array  $filters  ['status' => 'pending'|'paid'|'all', 'per_page' => int, 'page' => int]
+     * @return Collection|LengthAwarePaginator
+     */
+    public function forUser(User $user, array $filters = []): Collection|LengthAwarePaginator
+    {
+        $query = Invoice::query()
+            ->where('user_id', $user->id);
+
+        $status = $filters['status'] ?? 'all';
+        if ($status === 'pending') {
+            $query->whereIn('status', [
+                Controller::_INVOICE_STATUSES[0], // issued
+                Controller::_INVOICE_STATUSES[1], // partial
+                Controller::_INVOICE_STATUSES[3], // overdue
+            ]);
+        } elseif ($status === 'paid') {
+            $query->where('status', Controller::_INVOICE_STATUSES[2]); // paid
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        $perPage = $filters['per_page'] ?? null;
+        return $perPage ? $query->paginate($perPage) : $query->get();
+    }
+
+    /**
      * Search users by invoice name or phone.
      * Additional filters can be added.
      * ['role', 'status']
@@ -144,7 +173,7 @@ class InvoiceRepository
     {
         $appliedPenalties = [];
         $totalPenalty = 0.0;
-        DB::transaction(function () use ($invoice, $penalties): void {
+        DB::transaction(function () use ($invoice, $penalties, $totalPenalty): void {
             foreach ($penalties as $penalty) {
                 // check if penalty already exists for this invoice on the same date
                 $existingPenalty = $invoice->penalties()->where('applied_date', $penalty['applied_date'])->where('reason', $penalty['reason'])->first();

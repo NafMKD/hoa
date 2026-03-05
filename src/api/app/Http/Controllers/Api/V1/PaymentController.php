@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api\V1;
 use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\PaymentResource;
+use App\Jobs\Api\V1\ProcessPaymentOcrJob;
+use App\Models\Invoice;
 use App\Models\Payment;
+use App\Repositories\Api\V1\DocumentRepository;
 use App\Repositories\Api\V1\PaymentRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -18,10 +21,12 @@ use Illuminate\Validation\ValidationException;
 class PaymentController extends Controller
 {
     protected PaymentRepository $payments;
+    protected DocumentRepository $documents;
 
-    public function __construct(PaymentRepository $payments)
+    public function __construct(PaymentRepository $payments, DocumentRepository $documents)
     {
         $this->payments = $payments;
+        $this->documents = $documents;
     }
 
     /**
@@ -59,6 +64,74 @@ class PaymentController extends Controller
             Log::error('Error fetching payments: ' . $e->getMessage());
             return response()->json([
                 'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Store a payment from Telegram Mini App (with screenshot).
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function storeTelegram(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'invoice_id'    => ['required', 'integer', 'exists:invoices,id'],
+                'amount'        => ['required', 'numeric', 'min:0'],
+                'payment_date'  => ['required', 'date'],
+                'screenshot'    => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:' . self::_MAX_FILE_SIZE],
+            ]);
+
+            $invoice = Invoice::findOrFail($validated['invoice_id']);
+            $this->authorize('createFromTelegram', $invoice);
+
+            if ($invoice->user_id !== $request->user()->id) {
+                return response()->json([
+                    'status'  => self::_ERROR,
+                    'message' => 'Invoice does not belong to you.',
+                ], 403);
+            }
+
+            $document = $this->documents->create(
+                $request->file('screenshot'),
+                Controller::_DOCUMENT_TYPES[3] // payments
+            );
+
+            $payment = $this->payments->createFromTelegram([
+                'invoice_id'              => $validated['invoice_id'],
+                'amount'                  => $validated['amount'],
+                'payment_date'            => $validated['payment_date'],
+                'payment_screen_shoot_id' => $document->id,
+            ]);
+
+            ProcessPaymentOcrJob::dispatch($payment->id);
+
+            $payment->load(['invoice', 'invoice.user', 'invoice.unit', 'screenshot']);
+
+            return response()->json(new PaymentResource($payment), 201);
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status'  => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status'  => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors'  => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status'  => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error creating Telegram payment: ' . $e->getMessage());
+            return response()->json([
+                'status'  => self::_ERROR,
                 'message' => self::_UNKNOWN_ERROR,
             ], 400);
         }

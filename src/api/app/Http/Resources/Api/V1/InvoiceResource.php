@@ -36,7 +36,7 @@ class InvoiceResource extends JsonResource
             }),
             'final_amount_due' => $this->final_amount_due,
             'issue_date'        => Carbon::parse($this->issue_date)->toFormattedDateString(),
-            'due_date'          => Carbon::parse($this->due_date)->toFormattedDateString(),
+            'due_date'          => $this->due_date ? Carbon::parse($this->due_date)->toFormattedDateString() : null,
             'total_amount'      => $this->total_amount,
             'amount_paid'       => $this->amount_paid,
             'penalty_amount'    => $this->penalty_amount,

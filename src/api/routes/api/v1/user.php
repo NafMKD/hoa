@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -9,6 +10,8 @@ Route::post('/', [UserController::class,  'store'])->name('store');
 Route::get('by-role', [UserController::class, 'getUsersByRole'])->name('by-role');
 Route::get('/search', [UserController::class,  'search'])->name('search');
 Route::get('/get-active', [UserController::class,  'getActiveUsers'])->name('get-active');
+
+Route::get('me/invoices', [MeController::class, 'invoices'])->name('me.invoices');
 
 Route::get('/{user}', [UserController::class,  'show'])->name('show');
 Route::put('/{user}', [UserController::class,  'update'])->name('update');

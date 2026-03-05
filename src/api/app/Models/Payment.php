@@ -28,6 +28,7 @@ class Payment extends Model
         'receipt_number',
         'reconciliation_metadata',
         'payment_screen_shoot_id',
+        'bank_transaction_id',
         'payment_date',
     ];
 
@@ -74,5 +75,15 @@ class Payment extends Model
     public function revenueSchedules(): HasMany
     {
         return $this->hasMany(RevenueSchedule::class);
+    }
+
+    /**
+     * Get the matched bank transaction.
+     *
+     * @return BelongsTo
+     */
+    public function bankTransaction(): BelongsTo
+    {
+        return $this->belongsTo(BankTransaction::class);
     }
 }

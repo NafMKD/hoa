@@ -4,9 +4,13 @@ use App\Http\Controllers\Api\V1\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/', [PaymentController::class,  'index'])->name(name: 'index');
-Route::post('/', [PaymentController::class,  'store'])->name('store');
-Route::post('/{payment}/confirm', [PaymentController::class,  'confirmPayment'])->name('confirm-payment');
+Route::get('/', [PaymentController::class, 'index'])->name('index');
+Route::post('/', [PaymentController::class, 'store'])->name('store');
+Route::post('telegram', [PaymentController::class, 'storeTelegram'])
+    ->middleware('throttle:10,1')
+    ->name('telegram');
+
+Route::post('/{payment}/confirm', [PaymentController::class, 'confirmPayment'])->name('confirm-payment');
 Route::post('/{payment}/fail', [PaymentController::class,  'failPayment'])->name('fail-payment');
 Route::post('/{payment}/refund', [PaymentController::class,  'refundPayment'])->name('refund-payment');
 Route::post('/{payment}/add_receipt_number', [PaymentController::class,  'addReceiptNumber'])->name('add-receipt-number');

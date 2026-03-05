@@ -1,24 +1,24 @@
-# Database Schema - Noah Garden HOA Management System 
+# Database Schema - Noah Garden HOA Management System
+
+> **Last updated:** March 2025 — reflects current migrations and `Controller` constants.
 
 ## Tables
-
 
 ### 1. documents
 
 ```
-
 - id int (pk)
 - file_path varchar(255) not null
 - file_name varchar(255) nullable
 - mime_type varchar(100) nullable
 - file_size int nullable
-- category enum('users', 'payslip', 'payments', 'tenantLeases', 'vehicles', 'stickers') nullable
+- category enum('id_files','ownership_files','payslip','payments','lease_document','vehicles','stickers','representative_document') nullable
 - uploaded_at timestamp default current_timestamp
 - created_at timestamp
 - updated_at timestamp
 - deleted_at timestamp
-
 ```
+
 ---
 
 ### 2. users
@@ -30,9 +30,16 @@
 - phone varchar unique -- login
 - email varchar nullable -- notifications only
 - password varchar -- login
+- city varchar nullable
+- sub_city varchar nullable
+- woreda varchar nullable
+- house_number varchar nullable
 - id_file int nullable (fk → documents.id) -- link to ID file
-- role enum('admin','accountant','secretary','homeowner','tenant') default 'tenant'
+- email_verified_at timestamp nullable
+- role enum('admin','accountant','secretary','homeowner','tenant','representative') default 'tenant'
 - last_login_at datetime nullable
+- status enum('active','inactive','suspended') default 'active'
+- remember_token varchar nullable
 - created_at datetime
 - updated_at datetime
 - deleted_at datetime
@@ -44,7 +51,7 @@
 
 ```
 - id int (pk)
-- name char(10) 
+- name varchar unique
 - floors int -- number of floors in building
 - units_per_floor int -- number of units in each floor
 - address text nullable
@@ -61,75 +68,106 @@
 ```
 - id int (pk)
 - building_id int (fk → buildings.id)
-- name char(10) -- unique within building
+- name varchar -- unique per building (unique constraint on building_id, name)
 - floor_number int
-- owner_id int nullable (fk → users.id) -- primary owner 
-- size_m2 decimal nullable
-- status enum('available','occupied','vacant','maintenance') default 'available'
+- unit_type enum('1','2','3','4') nullable -- bedroom count
+- size_m2 decimal(8,2) nullable
+- status enum('rented','owner_occupied','vacant') default 'vacant'
 - created_at datetime
 - updated_at datetime
 - deleted_at datetime
 ```
 
+> **Note:** Ownership is tracked via `unit_owners` table. See `db-unit-schema.md` for details.
+
 ---
 
-### 5. tenant\_lease
+### 5. unit_owners
+
+```
+- id int (pk)
+- unit_id int (fk → units.id)
+- user_id int (fk → users.id)
+- start_date date
+- end_date date nullable
+- status enum('active','inactive') default 'active'
+- ownership_file_id int (fk → documents.id)
+- created_by int (fk → users.id)
+- updated_by int nullable (fk → users.id)
+- created_at datetime
+- updated_at datetime
+- deleted_at datetime
+- UNIQUE(unit_id, user_id, start_date, end_date)
+```
+
+---
+
+### 6. unit_leases
 
 ```
 - id int (pk)
 - unit_id int (fk → units.id)
 - tenant_id int (fk → users.id)
-- agreement_amount decimal(12,2) -- rent in local currency
-- frequency int -- billing frequency in months (1=monthly, 3=quarterly, etc.)
+- representative_id int nullable (fk → users.id)
+- representative_document_id int nullable (fk → documents.id)
+- agreement_type enum('owner','representative') default 'owner'
+- agreement_amount decimal(12,2)
+- lease_template_id int nullable (fk → document_templates.id)
+- lease_document_id int nullable (fk → documents.id)
 - lease_start_date date
 - lease_end_date date nullable
-- agreement_document_id int nullable (fk → documents.id) -- link to lease document
-- status enum('active','terminated','expired','draft') default 'active'
+- status enum('active','terminated','expired','draft') default 'draft'
+- witness_1_full_name varchar nullable
+- witness_2_full_name varchar nullable
+- witness_3_full_name varchar nullable
 - notes text nullable
-- created_by int (fk → users.id) -- responsible person
+- created_by int (fk → users.id)
+- updated_by int nullable (fk → users.id)
 - created_at datetime
 - updated_at datetime
 - deleted_at datetime
+- UNIQUE(unit_id, tenant_id, lease_start_date, lease_end_date)
 ```
+
 ---
 
-### 6. fees
+### 7. fees
 
 ```
-
 - id int (pk)
 - name varchar(100) not null
 - description text nullable
 - is_recurring boolean default false
-- recurring_period_months int nullable -- e.g., 1, 2, 3; null if not recurring
 - last_recurring_date datetime nullable
 - next_recurring_date datetime nullable
-- category enm('administrational', 'special_assessment')
+- recurring_period_months int nullable -- e.g., 1, 2, 3; null if not recurring
+- category enum('monthly','administrational','special_assessment','fine','other')
 - amount decimal(12,2) not null
 - is_penalizable boolean default false
+- status enum('active','terminated')
 - created_at datetime
 - updated_at datetime
 - deleted_at datetime
-
 ```
-----
 
-### 7. invoices
+---
+
+### 8. invoices
 
 ```
 - id int (pk)
 - invoice_number varchar unique
-- user_id int (fk → users.id) -- the payer (homeowner or tenant) — decoupled from units/fees
+- user_id int nullable (fk → users.id) -- the payer (homeowner or tenant); decoupled from units/fees
 - unit_id int nullable (fk → units.id) -- optional link for convenience
 - issue_date date
 - due_date date nullable
 - total_amount decimal(14,2)
 - amount_paid decimal(14,2) default 0
-- status enum('issued','partial','paid','overdue','cancelled') default 'draft'
-- source_type varchar nullable -- e.g., 'fee'
+- status enum('issued','partial','paid','overdue','cancelled') default 'issued'
+- source_type varchar nullable -- e.g., 'App\Models\Fee'
 - source_id int nullable -- id of source record if applicable
 - penalty_amount decimal(12,2) default 0 -- applied if payment is late
-- metadata json nullable
+- metadata jsonb nullable
 - created_at datetime
 - updated_at datetime
 - deleted_at datetime
@@ -137,19 +175,36 @@
 
 ---
 
-### 8. payments
+### 9. invoice_penalties
 
 ```
 - id int (pk)
-- payment_number varchar unique
+- invoice_id int (fk → invoices.id)
+- amount decimal(12,2)
+- applied_date date
+- reason varchar
+- created_at datetime
+- updated_at datetime
+- deleted_at datetime
+```
+
+---
+
+### 10. payments
+
+```
+- id int (pk)
 - invoice_id int nullable (fk → invoices.id) -- payments may be received unapplied
 - amount decimal(14,2)
-- method enum('cash','bank_transfer')
-- reference varchar nullable -- bank tx id
+- method enum('cash','bank_transfer','other')
+- reference varchar unique -- bank tx id or unique reference
 - status enum('pending','confirmed','failed','refunded') default 'pending'
+- type enum('web','telegram')
+- processed_by enum('system','manual') nullable
 - processed_at datetime nullable
+- receipt_number varchar nullable
 - reconciliation_metadata json nullable
-- payment_screen_shoot int nullable (fk → documents.id) -- link to payment prof document
+- payment_screen_shoot_id int nullable (fk → documents.id) -- link to payment proof document
 - payment_date datetime default current_timestamp
 - created_at datetime
 - updated_at datetime
@@ -158,7 +213,7 @@
 
 ---
 
-### 9. revenue\_schedule
+### 11. revenue_schedules
 
 ```
 - id int (pk)
@@ -173,15 +228,11 @@
 - deleted_at datetime
 ```
 
-Purpose:
-
-* Breaks down **paid cash** into recognition buckets (deferred revenue → recognized revenue per period). Reports SUM(revenue\_schedule.amount) grouped by `period_start` give accurate revenue by month.
-
-when payment is applied, create or update the `revenue_schedule` rows that map payment to the relevant periods (see Scheduling section below).
+**Purpose:** Breaks down **paid cash** into recognition buckets (deferred revenue → recognized revenue per period). Reports `SUM(revenue_schedules.amount)` grouped by `period_start` give accurate revenue by month. When payment is applied, create or update `revenue_schedules` rows that map payment to the relevant periods.
 
 ---
 
-### 10. expenses
+### 12. expenses
 
 ```
 - id int (pk)
@@ -200,11 +251,11 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 
 ---
 
-### 11. vendors
+### 13. vendors
 
 ```
 - id int (pk)
-- name varchar
+- name varchar unique
 - phone varchar nullable
 - email varchar nullable
 - address text nullable
@@ -215,13 +266,13 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 
 ---
 
-### 12. employees
+### 14. employees
 
 ```
 - id int (pk)
 - first_name varchar
 - last_name varchar
-- role enum('maintenance','security','cleaning','accountant', 'secretary', 'other')
+- role enum('maintenance','security','cleaning','accountant','secretary','other')
 - employment_type enum('permanent','contract','hourly')
 - base_salary decimal(14,2)
 - bank_account_encrypted varchar nullable
@@ -234,7 +285,7 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 
 ---
 
-### 13. payroll
+### 15. payrolls
 
 ```
 - id int (pk)
@@ -247,7 +298,7 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 - net_salary decimal(14,2)
 - pay_date date nullable
 - status enum('pending','paid') default 'pending'
-- payslip_document_id int nullable (fk → payroll_documents.id)
+- payslip_document_id int nullable (fk → documents.id)
 - created_at datetime
 - updated_at datetime
 - deleted_at datetime
@@ -255,26 +306,26 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 
 ---
 
-### 14. vehicles
+### 16. vehicles
 
 ```
 - id int (pk)
-- user_id int (fk → users.id) -- owner/registrant
-- unit_id int nullable (fk → units.id)
+- unit_id int nullable (fk → units.id) -- unit where vehicle is registered
 - make varchar nullable
 - model varchar nullable
 - year int nullable
-- license_plate varchar unique
+- license_plate varchar
 - color varchar nullable
-- vehicle_document int nullable (fk → documents.id) -- link to vehicle document
+- vehicle_document_id int nullable (fk → documents.id) -- link to vehicle document
 - created_at datetime
 - updated_at datetime
 - deleted_at datetime
+- UNIQUE(unit_id, license_plate)
 ```
 
 ---
 
-### 15. sticker\_issues
+### 17. sticker_issues
 
 ```
 - id int (pk)
@@ -284,7 +335,7 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 - issued_at datetime
 - expires_at datetime nullable
 - status enum('active','lost','revoked','expired','replaced') default 'active'
-- qr_code_file int (fk → documents.id) -- link to qr sticker document
+- qr_code_file_id int (fk → documents.id) -- link to qr sticker document
 - created_at datetime
 - updated_at datetime
 - deleted_at datetime
@@ -292,13 +343,35 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 
 ---
 
-### 16. poll 
+### 18. document_templates
+
+```
+- id int (pk)
+- category enum('lease_agreement','letter','reminder','other')
+- sub_category varchar
+- name varchar
+- path varchar
+- pdf_path varchar nullable
+- placeholders json nullable
+- description text nullable
+- version int unsigned default 1
+- created_by int (fk → users.id)
+- updated_by int nullable (fk → users.id)
+- created_at datetime
+- updated_at datetime
+- deleted_at datetime
+- UNIQUE(category, sub_category, version)
+```
+
+---
+
+### 19. polls
 
 ```
 - id int (pk)
 - title varchar
 - description text nullable
-- eligible_scope json/null -- building/unit list or 'all'
+- eligible_scope json nullable -- building/unit list or 'all'
 - start_at datetime
 - end_at datetime
 - status enum('draft','open','closed') default 'draft'
@@ -309,7 +382,7 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 
 ---
 
-### 17. poll\_options 
+### 20. poll_options
 
 ```
 - id int (pk)
@@ -320,9 +393,10 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 - updated_at datetime
 - deleted_at datetime
 ```
+
 ---
 
-### 18. votes
+### 21. votes
 
 ```
 - id int (pk)
@@ -332,9 +406,10 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 - created_at datetime
 - UNIQUE(poll_id, user_id) -- one vote per poll per user
 ```
+
 ---
 
-### 19. audit\_logs
+### 22. audit_logs
 
 ```
 - id int (pk)
@@ -347,3 +422,13 @@ when payment is applied, create or update the `revenue_schedule` rows that map p
 - user_agent varchar nullable
 - created_at datetime
 ```
+
+---
+
+## Laravel System Tables (not documented in detail)
+
+- `personal_access_tokens` — Sanctum tokens
+- `password_reset_tokens` — password reset
+- `sessions` — session storage
+- `cache` — cache
+- `jobs` — queue jobs

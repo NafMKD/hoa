@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\BankStatementBatch;
 use App\Models\Building;
 use App\Models\DocumentTemplate;
 use App\Models\Fee;
@@ -13,10 +14,13 @@ use App\Models\UnitOwner;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Observers\AuditLogObserver;
+use App\Models\ReconciliationEscalation;
+use App\Policies\Api\V1\BankStatementBatchPolicy;
 use App\Policies\Api\V1\BuildingPolicy;
 use App\Policies\Api\V1\DocumentTemplatePolicy;
 use App\Policies\Api\V1\FeePolicy;
 use App\Policies\Api\V1\InvoicePolicy;
+use App\Policies\Api\V1\ReconciliationEscalationPolicy;
 use App\Policies\Api\V1\PaymentPolicy;
 use App\Policies\Api\V1\UnitLeasePolicy;
 use App\Policies\Api\V1\UnitPolicy;
@@ -43,6 +47,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Policies
         Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(BankStatementBatch::class, BankStatementBatchPolicy::class);
+        Gate::policy(ReconciliationEscalation::class, ReconciliationEscalationPolicy::class);
         Gate::policy(Building::class, BuildingPolicy::class);
         Gate::policy(Unit::class, UnitPolicy::class);
         Gate::policy(DocumentTemplate::class, DocumentTemplatePolicy::class);

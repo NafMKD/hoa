@@ -90,14 +90,14 @@
 
 | # | Task | Phase | Notes |
 |---|------|-------|-------|
-| F1 | ☐ Create `ProcessPaymentOcrJob` (implements ShouldQueue) | 4 | |
-| F2 | ☐ Job: load Payment + screenshot document; fetch image | 4 | |
-| F3 | ☐ Integrate OCR lib (Tesseract PHP or Google Vision) | 4 | |
-| F4 | ☐ Parse: amount, date, reference, bank name | 4 | |
-| F5 | ☐ Update `payments.reconciliation_metadata` with extracted data | 4 | |
-| F6 | ☐ If confidence low, set `ocr_needs_review: true` | 4 | |
-| F7 | ☐ Handle job failure (log, retry 3x) | 4 | |
-| F8 | ☐ Add config for OCR provider and confidence threshold | 4 | |
+| F1 | ☑ Create `ProcessPaymentOcrJob` (implements ShouldQueue) | 4 | |
+| F2 | ☑ Job: load Payment + screenshot document; fetch image | 4 | |
+| F3 | ☑ Integrate OCR lib (Tesseract PHP or Google Vision) | 4 | |
+| F4 | ☑ Parse: amount, date, reference, bank name | 4 | |
+| F5 | ☑ Update `payments.reconciliation_metadata` with extracted data | 4 | |
+| F6 | ☑ If confidence low, set `ocr_needs_review: true` | 4 | |
+| F7 | ☑ Handle job failure (log, retry 3x) | 4 | |
+| F8 | ☑ Add config for OCR provider and confidence threshold | 4 | |
 
 ---
 
@@ -105,21 +105,21 @@
 
 | # | Task | Phase | Notes |
 |---|------|-------|-------|
-| G1 | ☐ Create `BankStatementBatchRepository` (create, parse CSV) | 5 | |
-| G2 | ☐ Define CSV column mapping (config or first-row header) | 5 | |
-| G3 | ☐ Create `POST /api/v1/reconciliation/bank-statements` (admin/accountant) | 5 | |
-| G4 | ☐ Upload file; parse; create batch + transactions; dispatch reconciliation job | 5 | |
-| G5 | ☐ Create `ReconcileBankBatchJob` | 5 | |
-| G6 | ☐ Matching: amount ±tolerance, date ±N days, reference fuzzy | 5 | |
-| G7 | ☐ On match: link bank_transaction to payment; call PaymentRepository::confirm | 5 | |
-| G8 | ☐ On no match: create ReconciliationEscalation | 5 | |
-| G9 | ☐ On multiple candidates: escalate for manual | 5 | |
-| G10 | ☐ Create `ReconciliationRepository` for matching logic | 5 | |
-| G11 | ☐ Add `GET /api/v1/reconciliation/batches` | 5 | |
-| G12 | ☐ Add `GET /api/v1/reconciliation/batches/{id}` with transactions | 5 | |
-| G13 | ☐ Add `GET /api/v1/reconciliation/escalations` | 5 | |
-| G14 | ☐ Add `POST /api/v1/reconciliation/escalations/{id}/resolve` | 5 | |
-| G15 | ☐ Policies for reconciliation endpoints (admin, accountant) | 5 | |
+| G1 | ☑ Create `BankStatementBatchRepository` (create, parse CSV) | 5 | |
+| G2 | ☑ Define CSV column mapping (config or first-row header) | 5 | |
+| G3 | ☑ Create `POST /api/v1/reconciliation/bank-statements` (admin/accountant) | 5 | |
+| G4 | ☑ Upload file; parse; create batch + transactions; dispatch reconciliation job | 5 | |
+| G5 | ☑ Create `ReconcileBankBatchJob` | 5 | |
+| G6 | ☑ Matching: amount ±tolerance, date ±N days, reference fuzzy | 5 | |
+| G7 | ☑ On match: link bank_transaction to payment; call PaymentRepository::confirm | 5 | |
+| G8 | ☑ On no match: create ReconciliationEscalation | 5 | |
+| G9 | ☑ On multiple candidates: escalate for manual | 5 | |
+| G10 | ☑ Create `ReconciliationRepository` for matching logic | 5 | |
+| G11 | ☑ Add `GET /api/v1/reconciliation/batches` | 5 | |
+| G12 | ☑ Add `GET /api/v1/reconciliation/batches/{id}` with transactions | 5 | |
+| G13 | ☑ Add `GET /api/v1/reconciliation/escalations` | 5 | |
+| G14 | ☑ Add `POST /api/v1/reconciliation/escalations/{id}/resolve` | 5 | |
+| G15 | ☑ Policies for reconciliation endpoints (admin, accountant) | 5 | |
 
 ---
 
@@ -127,14 +127,14 @@
 
 | # | Task | Phase | Notes |
 |---|------|-------|-------|
-| H1 | ☐ Create `src/telegram` directory | 2 | |
-| H2 | ☐ Init package.json (Vite, React, TypeScript) | 2 | |
-| H3 | ☐ Install `@telegram-apps/sdk-react` (or equivalent) | 2 | |
-| H4 | ☐ Configure Vite for Telegram Mini App (base URL, build output) | 2 | |
-| H5 | ☐ Create `index.html`, `main.tsx`, `App.tsx` | 2 | |
-| H6 | ☐ Create `lib/api.ts` — axios instance, `VITE_API_URL` | 2 | |
-| H7 | ☐ Create `lib/telegram.ts` — get initData, requestContact | 2 | |
-| H8 | ☐ Add routing (e.g. TanStack Router or React Router) | 2 | |
+| H1 | ☑ Create `src/telegram` directory | 2 | |
+| H2 | ☑ Init package.json (Vite, React, TypeScript) | 2 | |
+| H3 | ☑ Install `@telegram-apps/sdk-react` (or equivalent) | 2 | |
+| H4 | ☑ Configure Vite for Telegram Mini App (base URL, build output) | 2 | |
+| H5 | ☑ Create `index.html`, `main.tsx`, `App.tsx` | 2 | |
+| H6 | ☑ Create `lib/api.ts` — axios instance, `VITE_API_URL` | 2 | |
+| H7 | ☑ Create `lib/telegram.ts` — get initData, requestContact | 2 | |
+| H8 | ☑ Add routing (e.g. TanStack Router or React Router) | 2 | |
 
 ---
 
@@ -156,16 +156,16 @@
 
 | # | Task | Phase | Notes |
 |---|------|-------|-------|
-| J1 | ☐ Create invoices list screen (pending tab) | 3 | |
-| J2 | ☐ Fetch `GET /me/invoices?status=pending` | 3 | |
-| J3 | ☐ Display: invoice number, amount due, due date, status | 3 | |
-| J4 | ☐ Create invoices history screen (paid tab) | 3 | |
-| J5 | ☐ Create "Pay" button per pending invoice | 3 | |
-| J6 | ☐ Create payment flow screen: amount, bank details, instructions | 3 | |
-| J7 | ☐ Add file input for screenshot (image only) | 3 | |
-| J8 | ☐ Submit: POST /payments/telegram with form data | 3 | |
-| J9 | ☐ Show success message; refresh invoice list | 3 | |
-| J10 | ☐ Handle validation errors (amount, file type, size) | 3 | |
+| J1 | ☑ Create invoices list screen (pending tab) | 3 | |
+| J2 | ☑ Fetch `GET /me/invoices?status=pending` | 3 | |
+| J3 | ☑ Display: invoice number, amount due, due date, status | 3 | |
+| J4 | ☑ Create invoices history screen (paid tab) | 3 | |
+| J5 | ☑ Create "Pay" button per pending invoice | 3 | |
+| J6 | ☑ Create payment flow screen: amount, bank details, instructions | 3 | |
+| J7 | ☑ Add file input for screenshot (image only) | 3 | |
+| J8 | ☑ Submit: POST /payments/telegram with form data | 3 | |
+| J9 | ☑ Show success message; refresh invoice list | 3 | |
+| J10 | ☑ Handle validation errors (amount, file type, size) | 3 | |
 
 ---
 

@@ -35,3 +35,6 @@ Route::prefix('import')->middleware('auth:sanctum')->name('api.v1.import.')->gro
     Route::post('/buildings', [ImportController::class, 'importBuildings'])->name('buildings');
     Route::post('/units', [ImportController::class, 'importUnits'])->name('units');;
 });
+Route::prefix('reconciliation')->middleware('auth:sanctum')->name('api.v1.reconciliation.')->group(function () { 
+    require __DIR__.'/reconciliation.php';
+});

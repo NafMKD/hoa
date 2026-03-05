@@ -88,7 +88,17 @@ class PaymentController extends Controller
             $invoice = Invoice::findOrFail($validated['invoice_id']);
             $this->authorize('createFromTelegram', $invoice);
 
-            if ($invoice->user_id !== $request->user()->id) {
+            if ($invoice->user_id && $invoice->user_id !== $request->user()->id) {
+                return response()->json([
+                    'status'  => self::_ERROR,
+                    'message' => 'Invoice does not belong to you.',
+                ], 403);
+            } else if (!$invoice->user_id && $invoice->unit->currentOwner && $invoice->unit->currentOwner->user_id !== $request->user()->id) {
+                return response()->json([
+                    'status'  => self::_ERROR,
+                    'message' => 'Invoice does not belong to you.',
+                ], 403);
+            } else if (!$invoice->user_id && $invoice->unit->currentLease && $invoice->unit->currentLease->tenant_id !== $request->user()->id) {
                 return response()->json([
                     'status'  => self::_ERROR,
                     'message' => 'Invoice does not belong to you.',

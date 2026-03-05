@@ -53,6 +53,13 @@ class InvoiceRepository
         $query = Invoice::query()
             ->where('user_id', $user->id);
 
+        if ($user->currentOwnedUnit) {
+            $query->orWhere('unit_id', $user->currentOwnedUnit->unit_id);
+        }
+        if ($user->currentRentedUnit) {
+            $query->orWhere('unit_id', $user->currentRentedUnit->unit_id);
+        }
+
         $status = $filters['status'] ?? 'all';
         if ($status === 'pending') {
             $query->whereIn('status', [

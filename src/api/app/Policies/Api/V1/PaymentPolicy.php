@@ -88,17 +88,4 @@ class PaymentPolicy
     {
         return $authUser->hasRole(Controller::_ROLES[0]) || $authUser->hasRole(Controller::_ROLES[1]);
     }
-
-    /**
-     * Homeowner and tenant can create payment for their own invoice (Telegram flow).
-     */
-    public function createFromTelegram(User $authUser, Invoice $invoice): bool
-    {
-        if ($invoice->user_id !== $authUser->id) {
-            return false;
-        }
-        return $authUser->hasRole(Controller::_ROLES[3]) // homeowner
-            || $authUser->hasRole(Controller::_ROLES[4]) // tenant
-            || $authUser->hasRole(Controller::_ROLES[0]); // admin (for testing)
-    }
 }

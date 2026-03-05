@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -130,12 +131,22 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the units owned by the user.
+     * Get the current owned unit of the user.
      * 
-     * @return HasMany
+     * @return HasOne
      */
-    public function ownedUnits(): HasMany
+    public function currentOwnedUnit(): HasOne
     {
-        return $this->hasMany(UnitOwner::class, 'user_id');
+        return $this->hasOne(UnitOwner::class, 'user_id')->where('status', 'active');
+    }
+
+    /**
+     * Get the current rented unit of the user.
+     * 
+     * @return HasOne
+     */
+    public function currentRentedUnit(): HasOne
+    {
+        return $this->hasOne(UnitLease::class, 'tenant_id')->where('status', 'active');
     }
 }

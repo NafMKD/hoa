@@ -1,7 +1,10 @@
 <?php 
 
+use App\Http\Controllers\Api\V1\Telegram\TelegramWebhookController;
 use App\Http\Controllers\ImportController;
 use Illuminate\Support\Facades\Route;
+
+Route::post('telegram/webhook', TelegramWebhookController::class)->name('api.v1.telegram.webhook');
 
 Route::prefix('auth')->name('api.v1.auth.')->group(function () { 
     require __DIR__.'/auth.php';

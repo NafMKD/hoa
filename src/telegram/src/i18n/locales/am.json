@@ -16,7 +16,13 @@
     "errorRequired": "እባክዎ ስልክ ቁጥርዎን ያስገቡ።",
     "errorNotFound": "በዚህ ስልክ ቁጥር ምንም መለያ አልተገኘም። እባክዎ አስተዳዳሪውን ያነጋግሩ።",
     "errorInvalid": "ልክ ያልሆነ ወይም ጊዜው ያለፈ ክንዋኔክንዋኔ። እባክዎ እንደገና ይሞክሩ።",
-    "errorGeneric": "የሆነ ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።"
+    "errorGeneric": "የሆነ ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።",
+    "openInTelegram": "በቴሌግራም ክፈት",
+    "openInTelegramSubtitle": "ይህ መተግበሪያ በቴሌግራም ውስጥ ብቻ ይሠራል። ለመቀጠል ከታች ያለውን አገናኝ በቴሌግራም ይክፈቱ።",
+    "sharePhoneToContinue": "መለያዎን ለማገናኘት ስልክ ቁጥርዎን ያጋሩ።",
+    "sharePhoneButton": "ስልክ ቁጥር አጋራ",
+    "linkingAccount": "መለያ በማገናኘት ላይ...",
+    "sharePhoneHint": "ስልክ ቁጥርዎን ለመተግበሪያው ለማጋራት ከታች ያለውን ቁልፍ ይጠቀሙ።"
   },
   "invoices": {
     "title": "የኔ ቢሎች",

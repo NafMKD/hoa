@@ -37,6 +37,7 @@ return [
 
     'telegram' => [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'bot_id'   => env('TELEGRAM_BOT_ID'), // Optional: first part of bot token (e.g. 123456 from 123456:ABC-DEF)
     ],
 
 ];

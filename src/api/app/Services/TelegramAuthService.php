@@ -52,10 +52,29 @@ class TelegramAuthService
             return null;
         }
 
+        $botId = config('services.telegram.bot_id');
+        if (!empty($botId) && is_string($token)) {
+            $tokenBotId = explode(':', $token, 2)[0] ?? null;
+            if ($tokenBotId !== null && (string) $botId !== (string) $tokenBotId) {
+                return null;
+            }
+        }
+
         return [
             'user'      => isset($params['user']) ? json_decode($params['user'], true) : null,
             'auth_date' => $authDate,
         ];
+    }
+
+    /**
+     * Find user by Telegram user id (from validated init data).
+     *
+     * @param int $telegramUserId
+     * @return User|null
+     */
+    public function findUserByTelegramId(int $telegramUserId): ?User
+    {
+        return User::where('telegram_user_id', $telegramUserId)->first();
     }
 
     /**
@@ -82,5 +101,35 @@ class TelegramAuthService
         }
 
         return $user;
+    }
+
+    /**
+     * Link a Telegram user id to an existing user by phone (e.g. after contact shared via webhook).
+     *
+     * @param string $phone Normalized phone (e.g. 0912345678 or +251912345678)
+     * @param int $telegramUserId
+     * @return User|null
+     */
+    public function linkTelegramUserByPhone(string $phone, int $telegramUserId): ?User
+    {
+        $phone = preg_replace('/\s+/', '', $phone);
+        $phone = ltrim($phone, '+');
+        if (empty($phone)) {
+            return null;
+        }
+
+        $user = User::where('phone', $phone)->first();
+        if (!$user && preg_match('/^0(\d{9})$/', $phone, $m)) {
+            $user = User::where('phone', '+251' . $m[1])->first();
+        }
+        if (!$user && preg_match('/^251(\d{9})$/', $phone, $m)) {
+            $user = User::where('phone', '0' . $m[1])->first();
+        }
+        if (!$user) {
+            return null;
+        }
+
+        $user->update(['telegram_user_id' => $telegramUserId]);
+        return $user->fresh();
     }
 }

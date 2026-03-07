@@ -8,28 +8,23 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class TelegramAuthController extends Controller
 {
     protected TelegramAuthService $telegramAuth;
 
-    /**
-     * TelegramAuthController constructor.
-     *
-     * @param TelegramAuthService $telegramAuth
-     */
     public function __construct(TelegramAuthService $telegramAuth)
     {
         $this->telegramAuth = $telegramAuth;
     }
 
     /**
-     * Authenticate user via Telegram init data and phone.
-     *
-     * @param Request $request
-     * @return JsonResponse
+     * Authenticate via Telegram Mini App.
+     * - init_data (required): validated on server; contains telegram user id.
+     * - phone (optional): required only on first run; after user shares contact via requestContact(),
+     *   the bot webhook links telegram_user_id to the user. Next opens use init_data only.
+     * If phone is omitted and no user is found for the telegram user id, returns 401 with need_phone.
      */
     public function authenticate(Request $request): JsonResponse
     {
@@ -37,7 +32,7 @@ class TelegramAuthController extends Controller
 
         $validated = $request->validate([
             'init_data' => ['required', 'string'],
-            'phone'     => ['required', 'string', 'regex:/^\+?[0-9]{10,15}$/'],
+            'phone'     => ['nullable', 'string', 'regex:/^\+?[0-9]{10,15}$/'],
         ]);
 
         $parsed = $this->telegramAuth->validateInitData($validated['init_data']);
@@ -46,18 +41,40 @@ class TelegramAuthController extends Controller
             return response()->json([
                 'status'  => self::_ERROR,
                 'message' => 'Invalid or expired Telegram init data.',
+                'code'    => 'invalid_init_data',
             ], 401);
         }
 
-        $telegramUserId = $parsed['user']['id'] ?? null;
-        $user = $this->telegramAuth->findUserByPhone($validated['phone'], $telegramUserId);
-
-        if (!$user) {
-            RateLimiter::hit($this->throttleKey($request));
+        $telegramUserId = isset($parsed['user']['id']) ? (int) $parsed['user']['id'] : null;
+        if ($telegramUserId === null) {
             return response()->json([
                 'status'  => self::_ERROR,
-                'message' => 'No account found with this phone number. Please contact the administrator.',
-            ], 404);
+                'message' => 'Invalid init data: missing user.',
+                'code'    => 'invalid_init_data',
+            ], 401);
+        }
+
+        $user = null;
+
+        if (!empty($validated['phone'])) {
+            $user = $this->telegramAuth->findUserByPhone($validated['phone'], $telegramUserId);
+            if (!$user) {
+                RateLimiter::hit($this->throttleKey($request));
+                return response()->json([
+                    'status'  => self::_ERROR,
+                    'message' => 'No account found with this phone number. Please contact the administrator.',
+                    'code'    => 'user_not_found',
+                ], 404);
+            }
+        } else {
+            $user = $this->telegramAuth->findUserByTelegramId($telegramUserId);
+            if (!$user) {
+                return response()->json([
+                    'status'  => self::_ERROR,
+                    'message' => 'Share your phone number to link your account.',
+                    'code'    => 'need_phone',
+                ], 401);
+            }
         }
 
         if ($user->status !== 'active') {
@@ -83,13 +100,6 @@ class TelegramAuthController extends Controller
         ]);
     }
 
-    /**
-     * Ensure requests are not rate limited.
-     *
-     * @param Request $request
-     * @return void
-     * @throws ValidationException
-     */
     protected function ensureIsNotRateLimited(Request $request): void
     {
         if (!RateLimiter::tooManyAttempts($this->throttleKey($request), 10)) {
@@ -104,12 +114,6 @@ class TelegramAuthController extends Controller
         ]);
     }
 
-    /**
-     * Get the throttle key.
-     *
-     * @param Request $request
-     * @return string
-     */
     protected function throttleKey(Request $request): string
     {
         return 'telegram-auth|' . $request->ip();

@@ -16,7 +16,13 @@
     "errorRequired": "Please enter your phone number.",
     "errorNotFound": "No account found with this phone number. Please contact the administrator.",
     "errorInvalid": "Invalid or expired session. Please try again.",
-    "errorGeneric": "Something went wrong. Please try again."
+    "errorGeneric": "Something went wrong. Please try again.",
+    "openInTelegram": "Open in Telegram",
+    "openInTelegramSubtitle": "This app only works inside Telegram. Open the link below in Telegram to continue.",
+    "sharePhoneToContinue": "Share your phone number to link your account.",
+    "sharePhoneButton": "Share phone number",
+    "linkingAccount": "Linking account...",
+    "sharePhoneHint": "Use the button below to share your phone number with the app."
   },
   "invoices": {
     "title": "My Invoices",

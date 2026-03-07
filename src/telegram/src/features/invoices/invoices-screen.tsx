@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import api, { TOKEN_KEY } from "@/lib/api.ts";
@@ -6,40 +6,84 @@ import type { Invoice } from "@/types/index.ts";
 import { hasPendingPayment } from "@/types/index.ts";
 import { LoadingSpinner } from "@/components/loading-spinner.tsx";
 
+const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
+
 export function InvoicesScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [pending, setPending] = useState<Invoice[]>([]);
   const [history, setHistory] = useState<Invoice[]>([]);
+  const [pendingFetchedAt, setPendingFetchedAt] = useState<number | null>(null);
+  const [historyFetchedAt, setHistoryFetchedAt] = useState<number | null>(null);
   const [tab, setTab] = useState<"pending" | "history">("pending");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const [pendingRes, historyRes] = await Promise.all([
-          api.get("/users/me/invoices?status=pending&per_page=50"),
-          api.get("/users/me/invoices?status=paid&per_page=20"),
-        ]);
-        setPending(Array.isArray(pendingRes.data) ? pendingRes.data : pendingRes.data?.data ?? []);
-        setHistory(Array.isArray(historyRes.data) ? historyRes.data : historyRes.data?.data ?? []);
-      } catch (err: unknown) {
-        const res = (err as { response?: { status?: number; data?: { message?: string } } })?.response;
-        if (res?.status === 401) {
-          localStorage.removeItem(TOKEN_KEY);
-          navigate("/auth", { replace: true });
-          return;
-        }
-        setError(t("invoices.loadError"));
-      } finally {
-        setLoading(false);
+  const isCacheValid = useCallback((fetchedAt: number | null) => {
+    return fetchedAt !== null && Date.now() - fetchedAt < CACHE_TTL_MS;
+  }, []);
+
+  const fetchPending = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api.get("/users/me/invoices?status=pending&per_page=50");
+      const data = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
+      setPending(data);
+      setPendingFetchedAt(Date.now());
+    } catch (err: unknown) {
+      const res = (err as { response?: { status?: number; data?: { message?: string } } })?.response;
+      if (res?.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        navigate("/auth", { replace: true });
+        return;
       }
-    };
-    load();
+      setError(t("invoices.loadError"));
+    } finally {
+      setLoading(false);
+    }
   }, [navigate, t]);
+
+  const fetchHistory = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api.get("/users/me/invoices?status=paid&per_page=20");
+      const data = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
+      setHistory(data);
+      setHistoryFetchedAt(Date.now());
+    } catch (err: unknown) {
+      const res = (err as { response?: { status?: number; data?: { message?: string } } })?.response;
+      if (res?.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        navigate("/auth", { replace: true });
+        return;
+      }
+      setError(t("invoices.loadError"));
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate, t]);
+
+  // Initial load: fetch default tab (pending)
+  useEffect(() => {
+    fetchPending();
+  }, [fetchPending]);
+
+  const handleTabClick = useCallback(
+    (newTab: "pending" | "history") => {
+      setTab(newTab);
+      setError("");
+      if (newTab === "pending") {
+        if (isCacheValid(pendingFetchedAt)) return;
+        fetchPending();
+      } else {
+        if (isCacheValid(historyFetchedAt)) return;
+        fetchHistory();
+      }
+    },
+    [isCacheValid, pendingFetchedAt, historyFetchedAt, fetchPending, fetchHistory]
+  );
 
   const list = tab === "pending" ? pending : history;
 
@@ -53,7 +97,7 @@ export function InvoicesScreen() {
         <button
           type="button"
           className={`tab ${tab === "pending" ? "active" : ""}`}
-          onClick={() => setTab("pending")}
+          onClick={() => handleTabClick("pending")}
           aria-pressed={tab === "pending"}
         >
           {t("invoices.tabPending")}
@@ -61,7 +105,7 @@ export function InvoicesScreen() {
         <button
           type="button"
           className={`tab ${tab === "history" ? "active" : ""}`}
-          onClick={() => setTab("history")}
+          onClick={() => handleTabClick("history")}
           aria-pressed={tab === "history"}
         >
           {t("invoices.tabHistory")}

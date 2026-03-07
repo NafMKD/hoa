@@ -78,47 +78,14 @@ class TelegramAuthService
     }
 
     /**
-     * Find or create user by phone and optionally link Telegram user id.
+     * Find user by phone (from Mini App) and optionally link Telegram user id.
+     * Normalizes so Telegram format "+251 98 437 1917" matches system "0984371917".
      *
-     * @param string $phone User phone (must exist in system)
+     * @param string $phone Phone from Telegram (e.g. "+251 98 437 1917") or "0984371917"
      * @param int|null $telegramUserId Telegram user id from init data
      * @return User|null
      */
     public function findUserByPhone(string $phone, ?int $telegramUserId = null): ?User
-    {
-        $phone = preg_replace('/\s+/', '', $phone);
-        if (empty($phone)) {
-            return null;
-        }
-
-        $user = User::where('phone', $phone)->first();
-        if (!$user) {
-            return null;
-        }
-
-        if ($telegramUserId !== null && (int) $user->telegram_user_id !== (int) $telegramUserId) {
-            $user->update(['telegram_user_id' => $telegramUserId]);
-        }
-
-        return $user;
-    }
-
-    /**
-     * Link a Telegram user id to an existing user by phone (e.g. after contact shared via webhook).
-     *
-     * @param string $phone Normalized phone (e.g. 0912345678 or +251912345678)
-     * @param int $telegramUserId
-     * @return User|null
-     */
-    /**
-     * Link a Telegram user id to an existing user by phone (e.g. after contact shared via webhook).
-     * Tries multiple formats: 0984371917, +251984371917, 251984371917 (all normalize to 09xxxxxxxx for lookup).
-     *
-     * @param string $phone Raw phone from Telegram (e.g. "+251 98 437 1917")
-     * @param int $telegramUserId
-     * @return User|null
-     */
-    public function linkTelegramUserByPhone(string $phone, int $telegramUserId): ?User
     {
         $digits = preg_replace('/\D/', '', $phone);
         if (strlen($digits) < 9) {
@@ -141,7 +108,9 @@ class TelegramAuthService
         foreach ($variants as $p) {
             $user = User::where('phone', $p)->first();
             if ($user) {
-                $user->update(['telegram_user_id' => $telegramUserId]);
+                if ($telegramUserId !== null && (int) $user->telegram_user_id !== (int) $telegramUserId) {
+                    $user->update(['telegram_user_id' => $telegramUserId]);
+                }
                 return $user->fresh();
             }
         }

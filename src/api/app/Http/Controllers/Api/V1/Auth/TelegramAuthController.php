@@ -22,8 +22,8 @@ class TelegramAuthController extends Controller
     /**
      * Authenticate via Telegram Mini App.
      * - init_data (required): validated on server; contains telegram user id.
-     * - phone (optional): required only on first run; after user shares contact via requestContact(),
-     *   the bot webhook links telegram_user_id to the user. Next opens use init_data only.
+     * - phone (optional): when provided, find user by phone (normalized: "+251 98 437 1917" matches "0984371917")
+     *   and link telegram_user_id; then return token. Omit phone to sign in by telegram_user_id only.
      * If phone is omitted and no user is found for the telegram user id, returns 401 with need_phone.
      */
     public function authenticate(Request $request): JsonResponse
@@ -32,7 +32,7 @@ class TelegramAuthController extends Controller
 
         $validated = $request->validate([
             'init_data' => ['required', 'string'],
-            'phone'     => ['nullable', 'string', 'regex:/^\+?[0-9]{10,15}$/'],
+            'phone'     => ['nullable', 'string', 'max:30'],
         ]);
 
         $parsed = $this->telegramAuth->validateInitData($validated['init_data']);

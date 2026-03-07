@@ -66,6 +66,24 @@ export const deleteFee = (feeId: string | number) =>
 export const terminate = (feeId: string | number) =>
   handleApi<Fee>(api.post(`/v1/fees/${feeId}/terminate`));
 
+export interface GenerateInvoicesPayload {
+  fee_id: number;
+  quarter: string;
+  year: number;
+  due_date: string;
+}
+
+export interface GenerateInvoicesResponse {
+  status: string;
+  message: string;
+  data: { generated: number };
+}
+
+export const generateInvoices = (payload: GenerateInvoicesPayload) =>
+  handleApi<GenerateInvoicesResponse>(
+    api.post("/v1/fees/generate-invoices", payload)
+  );
+
 export const getFeeStatusColor = (status: string) => {
   switch (status) {
     case "active":

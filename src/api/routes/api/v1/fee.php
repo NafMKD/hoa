@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [FeeController::class,  'index'])->name('index');
 Route::post('/', [FeeController::class,  'store'])->name('store');
 Route::get('/all', [FeeController::class,  'getAll'])->name('getAll');
+Route::post('/generate-invoices', [FeeController::class, 'generateInvoices'])->name('generateInvoices');
 Route::post('/{fee}/terminate', [FeeController::class,  'terminate'])->name('terminate');
 
 Route::get('/{fee}', [FeeController::class,  'show'])->name('show');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
+use App\Repositories\Api\V1\InvoiceRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\Repositories\Api\V1\FeeRepository;
@@ -238,9 +239,7 @@ class FeeController extends Controller
     }
 
     /**
-     * Process recurring fees (generate invoices).
-     * 
-     * @return JsonResponse
+     * @deprecated Use generateInvoices() instead. Kept for backward compatibility.
      */
     public function processRecurring(): JsonResponse
     {
@@ -259,6 +258,55 @@ class FeeController extends Controller
             return response()->json(['status' => self::_ERROR, 'message' => $e->getMessage()], 400);
         } catch (\Exception $e) {
             Log::error('Error processing recurring fees: ' . $e->getMessage());
+            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        }
+    }
+
+    /**
+     * Generate invoices for all active recurring fees for a given quarter.
+     * Admin-initiated replacement for the deprecated automatic generation.
+     *
+     * @param  Request $request
+     * @return JsonResponse
+     */
+    public function generateInvoices(Request $request): JsonResponse
+    {
+        try {
+            $this->authorize('create', Fee::class);
+
+            $validated = $request->validate([
+                'fee_id'   => ['required', 'integer', 'exists:fees,id'],
+                'quarter'  => ['required', 'string', Rule::in(array_keys(InvoiceRepository::QUARTERS))],
+                'year'     => ['required', 'integer', 'min:2020', 'max:2099'],
+                'due_date' => ['required', 'date', 'after_or_equal:today'],
+            ]);
+
+            $invoiceRepo = app(InvoiceRepository::class);
+
+            $result = $invoiceRepo->generateInvoicesForQuarter(
+                (int) $validated['fee_id'],
+                $validated['quarter'],
+                (int) $validated['year'],
+                $validated['due_date'],
+            );
+
+            return response()->json([
+                'status'  => self::_SUCCESS,
+                'message' => "{$result['generated']} invoices generated successfully.",
+                'data'    => $result,
+            ]);
+        } catch (AuthorizationException) {
+            return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status'  => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors'  => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json(['status' => self::_ERROR, 'message' => $e->getMessage()], 400);
+        } catch (\Exception $e) {
+            Log::error('Error generating invoices: ' . $e->getMessage());
             return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
         }
     }

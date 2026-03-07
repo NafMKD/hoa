@@ -120,13 +120,7 @@ class InvoiceRepository
             if (!$fee) throw new RepositoryException('Fee not found');
             if (!$unit) throw new RepositoryException('Unit not found');
 
-            if ($unit->currentLease) {
-                $data['user_id'] = $unit->currentLease->tenant->id;
-            } else if ($unit->currentOwner) {
-                $data['user_id'] = $unit->currentOwner->owner->id;
-            } else {
-                $data['user_id'] = null;
-            }
+            $data['user_id'] = $this->resolveBillableUserId($unit);
 
             // Generate unique invoice number
             $data['invoice_number'] = $this->generateNextInvoiceNumber();
@@ -343,119 +337,200 @@ class InvoiceRepository
     /*
     |--------------------------------------------------------------------------------------------
     |
-    | --- Automatic Invoice Generation for Recurring Fees ---
+    | --- Invoice Generation for Recurring Fees ---
     |
     |---------------------------------------------------------------------------------------------
     */
 
     /**
-     * Generate an invoice for a given fee.
-     * 
-     * @param Collection $units
-     * @param Fee $fee
-     * @return bool
+     * Quarter definitions: quarter key => [start_month, end_month].
+     * Months are 1-indexed (1 = January).
+     */
+    public const QUARTERS = [
+        'sep-nov' => [9, 10, 11],
+        'dec-feb' => [12, 1, 2],
+        'mar-may' => [3, 4, 5],
+        'jun-aug' => [6, 7, 8],
+    ];
+
+    /**
+     * Resolve the three invoice months for a given quarter and year.
+     *
+     * @param  string $quarter  One of the QUARTERS keys
+     * @param  int    $year     The fiscal year the quarter starts in
+     * @return array<string>    e.g. ['September/2026','October/2026','November/2026']
+     */
+    public function resolveQuarterMonths(string $quarter, int $year): array
+    {
+        $monthNumbers = self::QUARTERS[$quarter];
+        $months = [];
+
+        foreach ($monthNumbers as $i => $m) {
+            $y = $year;
+            // For dec-feb quarter, Jan and Feb roll into the next calendar year
+            if ($quarter === 'dec-feb' && $m <= 2) {
+                $y = $year + 1;
+            }
+            $months[] = Carbon::createFromDate($y, $m, 1)->format('F/Y');
+        }
+
+        return $months;
+    }
+
+    /**
+     * Generate exactly one invoice per unit for the selected fee and quarter.
+     * Fully atomic: either ALL units get invoices or NONE do.
+     *
+     * @param  int    $feeId    The fee to invoice (must be active, recurring, monthly)
+     * @param  string $quarter  Quarter key (e.g. 'sep-nov')
+     * @param  int    $year     Year the quarter starts in
+     * @param  string $dueDate  Due date (Y-m-d)
+     * @return array{generated: int}
      * @throws RepositoryException
+     */
+    public function generateInvoicesForQuarter(int $feeId, string $quarter, int $year, string $dueDate): array
+    {
+        $fee = Fee::find($feeId);
+
+        if ($fee === null) {
+            throw new RepositoryException('Fee not found.');
+        }
+
+        if ($fee->category !== Controller::_FEE_CATEGORIES[0]) {
+            throw new RepositoryException('Only monthly fees can be used for quarterly invoice generation.');
+        }
+
+        if ($fee->status !== Controller::_FEE_STATUSES[0]) {
+            throw new RepositoryException('Cannot generate invoices for a terminated fee. Please select an active fee.');
+        }
+
+        if (!$fee->is_recurring) {
+            throw new RepositoryException('Only recurring fees can be used for quarterly invoice generation.');
+        }
+
+        $forMonths = $this->resolveQuarterMonths($quarter, $year);
+
+        $units = Unit::all();
+
+        if ($units->isEmpty()) {
+            throw new RepositoryException('No units found in the system.');
+        }
+
+        $feeSnapshot = [
+            'id'       => $fee->id,
+            'name'     => $fee->name,
+            'category' => $fee->category,
+            'amount'   => (float) $fee->amount,
+        ];
+
+        return DB::transaction(function () use ($units, $fee, $feeSnapshot, $forMonths, $dueDate) {
+            $generated = 0;
+
+            foreach ($units as $unit) {
+                $userId = $this->resolveBillableUserId($unit);
+
+                Invoice::create([
+                    'invoice_number' => $this->generateNextInvoiceNumber(),
+                    'unit_id'        => $unit->id,
+                    'user_id'        => $userId,
+                    'issue_date'     => now(),
+                    'due_date'       => $dueDate,
+                    'total_amount'   => $fee->amount,
+                    'amount_paid'    => 0.00,
+                    'status'         => Controller::_INVOICE_STATUSES[0],
+                    'source_type'    => Fee::class,
+                    'source_id'      => $fee->id,
+                    'penalty_amount' => 0.00,
+                    'metadata'       => [
+                        'generated_by'     => 'admin',
+                        'legacy'           => false,
+                        'fee_snapshot'     => $feeSnapshot,
+                        'invoice_snapshot' => [
+                            'invoice_months' => $forMonths,
+                        ],
+                    ],
+                ]);
+
+                $generated++;
+            }
+
+            return ['generated' => $generated];
+        });
+    }
+
+    /**
+     * Resolve the user ID to link to an invoice for a unit.
+     * Tenant takes priority over owner; if neither exists, returns null.
+     *
+     * @param  Unit $unit
+     * @return int|null  null when the unit has no tenant and no owner
+     */
+    private function resolveBillableUserId(Unit $unit): ?int
+    {
+        if ($unit->currentLease && $unit->currentLease->tenant) {
+            return $unit->currentLease->tenant->id;
+        }
+
+        if ($unit->currentOwner && $unit->currentOwner->owner) {
+            return $unit->currentOwner->owner->id;
+        }
+
+        return null;
+    }
+
+    /**
+     * @deprecated Use generateInvoicesForQuarter() instead. Kept for seeder/legacy compatibility.
      */
     public function generateInvoiceForFee(Collection $units, Fee $fee): bool
     {
-        // Check if the category is valid for `monthly' invoicing 
         if ($fee->category !== Controller::_FEE_CATEGORIES[0]) {
-            // throw new RepositoryException('Fee category not valid for automatic invoicing.');
             return false;
         }
         if ($fee->status !== Controller::_FEE_STATUSES[0]) {
-            // throw new RepositoryException('Fee status not valid for automatic invoicing.');
             return false;
         }
 
-        DB::beginTransaction();
-        
-        try {
-
-            // Loop through units to create invoices
-            foreach ($units as $unit) {
-                $data = $this->createInvoiceForUnit($unit, $fee);
-
-                if ($data === null) {
-                    continue; // Skip invoice generation for this unit
-                }
-
-                Invoice::create($data);
-            }
-
-            DB::commit();
-            return true;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            throw new RepositoryException('Failed to generate invoice: ' . $e->getMessage());
-        }
-    }
-
-        /**
-     * Create an invoice for a specific unit based on its status.
-     * 
-     * @param Unit $unit 
-     * @return array|null
-     * @throws RepositoryException
-     */
-    public function createInvoiceForUnit(Unit $unit, Fee $fee): array|null
-    {
-        $generable = true;
-
         $startDate = Carbon::parse($fee->next_recurring_date);
-
-        $for_months = [
-            $startDate->format('F/Y'),                  // first month
-            $startDate->copy()->addMonth()->format('F/Y'),  // next month
-            $startDate->copy()->addMonths(2)->format('F/Y'), // month after next
-        ];
-        
-        $data = [
-            'invoice_number' => $this->generateNextInvoiceNumber(),
-            'unit_id' => $unit->id,
-            'issue_date' => now(),
-            'due_date' => now()->addDays(Controller::_DEFAULT_DUE_DAYS), 
-            'total_amount' => $fee->amount,
-            'amount_paid' => 0.00,
-            'status' => Controller::_INVOICE_STATUSES[0], // issued
-            'source_type' => 'App\\Models\\Fee',
-            'source_id' => $fee->id,
-            'penalty_amount' => 0.00,
-            'metadata' => [
-                'generated_by' => 'system',
-                'legacy' => false,
-                'fee_snapshot' => [
-                    'id'       => $fee->id,
-                    'name'     => $fee->name,
-                    'category' => $fee->category,
-                    'amount'   => (float) $fee->amount,
-                ],
-                'invoice_snapshot' => [
-                    'invoice_months' => $for_months
-                ]
-            ]
+        $forMonths = [
+            $startDate->format('F/Y'),
+            $startDate->copy()->addMonth()->format('F/Y'),
+            $startDate->copy()->addMonths(2)->format('F/Y'),
         ];
 
-        // check the unit status
-        if ($unit->currentLease) {
-            if ($unit->currentLease->tenant->id === null) {
-                throw new RepositoryException('Rented unit has no active tenant.');
-            }
-            $data['user_id'] = $unit->currentLease->tenant->id;
-        } else {
-            if ($unit->currentOwner) {
-                $data['user_id'] = $unit->currentOwner->owner->id;
-            } else {
-                $data['user_id'] = null; 
-                $generable = false; // Skip invoice generation for vacant units
-            }
-        }
+        return DB::transaction(function () use ($units, $fee, $forMonths) {
+            foreach ($units as $unit) {
+                $userId = $this->resolveBillableUserId($unit);
 
-        if ($generable) {
-            return $data;
-        } 
+                Invoice::create([
+                    'invoice_number' => $this->generateNextInvoiceNumber(),
+                    'unit_id'        => $unit->id,
+                    'user_id'        => $userId,
+                    'issue_date'     => now(),
+                    'due_date'       => now()->addDays(Controller::_DEFAULT_DUE_DAYS),
+                    'total_amount'   => $fee->amount,
+                    'amount_paid'    => 0.00,
+                    'status'         => Controller::_INVOICE_STATUSES[0],
+                    'source_type'    => Fee::class,
+                    'source_id'      => $fee->id,
+                    'penalty_amount' => 0.00,
+                    'metadata'       => [
+                        'generated_by'     => 'system',
+                        'legacy'           => false,
+                        'fee_snapshots'    => [[
+                            'id'       => $fee->id,
+                            'name'     => $fee->name,
+                            'category' => $fee->category,
+                            'amount'   => (float) $fee->amount,
+                        ]],
+                        'invoice_snapshot' => [
+                            'invoice_months' => $forMonths,
+                        ],
+                    ],
+                ]);
+            }
 
-        return null;
+            return true;
+        });
     }
 
 

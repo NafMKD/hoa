@@ -15,8 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withSchedule(function (Schedule $schedule) {
-        app(ProcessRecurringFeesTask::class)->schedule($schedule);
-        app(MarkOverdueInvoicesTask::class)->schedule($schedule);
+        // @deprecated — Invoice generation and penalty marking are now admin-initiated.
+        // app(ProcessRecurringFeesTask::class)->schedule($schedule);
+        // app(MarkOverdueInvoicesTask::class)->schedule($schedule);
     })
     ->withMiddleware(function (Middleware $middleware): void {
         //

@@ -24,7 +24,8 @@ import { Button } from "@/components/ui/button";
 import { AddFeeForm } from "./components/add-fee-form"; 
 import type { Fee } from "@/types/types";
 import { IconPlus } from "@tabler/icons-react";
-import { EditFeeForm } from "./components/edit-fee-form"; 
+import { EditFeeForm } from "./components/edit-fee-form";
+import { GenerateInvoicesModal } from "./components/generate-invoices-modal";
 
 export function Fees() {
   const [pagination, setPagination] = React.useState<PaginationState>({
@@ -89,6 +90,8 @@ export function Fees() {
 
         {/* Right-side actions */}
         <div className="flex flex-wrap items-center gap-2">
+          <GenerateInvoicesModal />
+
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button onClick={() => setOpen(true)} className="gap-2">

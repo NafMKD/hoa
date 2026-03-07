@@ -115,7 +115,7 @@ const yyyyMmDd = (d: Date) => d.toISOString().split("T")[0]
 const formSchema = z.object({
   fee_id: z.number().min(1, "Please select a fee"),
   quarterKey: z.string().min(1, "Please select a quarter"),
-  due_date: z.date({ required_error: "Due date is required" }),
+  due_date: z.date("Due date is required"),
 })
 
 type FormValues = z.infer<typeof formSchema>

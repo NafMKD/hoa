@@ -43,6 +43,8 @@ class InvoiceRepository
 
     /**
      * Get invoices for a specific user (payer), filtered by status.
+     * Only returns invoices where user_id equals the given user (no unit-based inclusion).
+     * This ensures that when unit owner/tenant changes, the new user does not see previous occupants' invoices.
      *
      * @param  User  $user
      * @param  array  $filters  ['status' => 'pending'|'paid'|'all', 'per_page' => int, 'page' => int]
@@ -52,13 +54,6 @@ class InvoiceRepository
     {
         $query = Invoice::query()
             ->where('user_id', $user->id);
-
-        if ($user->currentOwnedUnit) {
-            $query->orWhere('unit_id', $user->currentOwnedUnit->unit_id);
-        }
-        if ($user->currentRentedUnit) {
-            $query->orWhere('unit_id', $user->currentRentedUnit->unit_id);
-        }
 
         $status = $filters['status'] ?? 'all';
         if ($status === 'pending') {

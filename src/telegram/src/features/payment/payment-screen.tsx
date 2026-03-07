@@ -61,9 +61,9 @@ export function PaymentScreen() {
 
   if (fetchError) {
     return (
-      <div className="payment-screen" style={{ paddingTop: 40 }}>
+      <div className="payment-screen payment-screen--centered">
         <p className="error-text">{fetchError}</p>
-        <Link to="/invoices" className="btn-link" style={{ marginTop: 16, display: "inline-block" }}>
+        <Link to="/invoices" className="btn-primary" style={{ marginTop: 24, textAlign: "center" }}>
           Back to invoices
         </Link>
       </div>
@@ -72,7 +72,7 @@ export function PaymentScreen() {
 
   if (!invoice) {
     return (
-      <div className="payment-screen" style={{ paddingTop: 40 }}>
+      <div className="payment-screen payment-screen--centered">
         <p className="status-text">Loading invoice...</p>
       </div>
     );
@@ -81,10 +81,10 @@ export function PaymentScreen() {
   if (success) {
     return (
       <div className="payment-screen success-view">
-        <div className="success-icon">&#10003;</div>
+        <div className="success-icon" aria-hidden="true">&#10003;</div>
         <h2>Payment Submitted</h2>
         <p>Your payment is being reviewed. You'll be notified once it's confirmed.</p>
-        <button onClick={() => navigate("/invoices", { replace: true })} className="btn-primary" style={{ marginTop: 24 }}>
+        <button type="button" onClick={() => navigate("/invoices", { replace: true })} className="btn-primary" style={{ marginTop: 24 }}>
           Back to Invoices
         </button>
         <style>{`
@@ -98,25 +98,29 @@ export function PaymentScreen() {
             padding: 40px 0;
           }
           .success-icon {
-            width: 64px;
-            height: 64px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            background: var(--color-success);
+            background: var(--color-cta);
             color: #fff;
-            font-size: 32px;
+            font-size: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
           }
           .success-view h2 {
-            font-size: 20px;
-            margin-bottom: 8px;
+            font-family: "Baloo 2", sans-serif;
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: var(--color-text);
           }
           .success-view p {
             color: var(--color-text-secondary);
-            font-size: 14px;
-            max-width: 280px;
+            font-size: 17px;
+            max-width: 300px;
+            line-height: 1.5;
           }
         `}</style>
       </div>
@@ -125,7 +129,7 @@ export function PaymentScreen() {
 
   return (
     <div className="payment-screen">
-      <Link to="/invoices" className="back-link">&larr; Back</Link>
+      <Link to="/invoices" className="back-link">&larr; Back to invoices</Link>
 
       <h1>Submit Payment</h1>
 
@@ -149,6 +153,7 @@ export function PaymentScreen() {
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           required
+          aria-required="true"
         />
 
         <label htmlFor="paymentDate">Payment Date</label>
@@ -158,6 +163,7 @@ export function PaymentScreen() {
           value={paymentDate}
           onChange={(e) => setPaymentDate(e.target.value)}
           required
+          aria-required="true"
         />
 
         <label htmlFor="screenshot">Screenshot</label>
@@ -167,6 +173,7 @@ export function PaymentScreen() {
           accept="image/jpeg,image/png,image/webp"
           onChange={(e) => setScreenshot(e.target.files?.[0] ?? null)}
           required
+          aria-required="true"
         />
 
         {submitError && <p className="error-text">{submitError}</p>}
@@ -178,70 +185,96 @@ export function PaymentScreen() {
 
       <style>{`
         .payment-screen {
-          padding: 20px 0;
+          padding: 24px 0;
           flex: 1;
         }
+        .payment-screen--centered {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding-top: 48px;
+        }
         .back-link {
-          display: inline-block;
-          margin-bottom: 16px;
-          font-size: 14px;
+          display: inline-flex;
+          align-items: center;
+          min-height: 44px;
+          margin-bottom: 20px;
+          font-size: 16px;
+          font-weight: 600;
           color: var(--color-text-secondary);
+          transition: color var(--transition);
+          cursor: pointer;
+        }
+        .back-link:hover {
+          color: var(--color-primary);
         }
         .payment-screen h1 {
-          font-size: 22px;
+          font-family: "Baloo 2", sans-serif;
+          font-size: 26px;
           font-weight: 700;
-          margin-bottom: 16px;
+          margin-bottom: 20px;
+          color: var(--color-primary);
         }
         .invoice-summary {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 16px;
+          padding: 20px;
           background: var(--color-primary-light);
+          border: 2px solid var(--color-border);
           border-radius: var(--radius-lg);
-          margin-bottom: 16px;
+          margin-bottom: 20px;
         }
         .invoice-label {
+          font-family: "Baloo 2", sans-serif;
           font-weight: 600;
+          font-size: 17px;
+          color: var(--color-text);
         }
         .invoice-total {
-          font-size: 18px;
+          font-size: 20px;
           font-weight: 700;
-          color: var(--color-primary);
+          color: var(--color-cta);
         }
         .help-text {
-          font-size: 14px;
+          font-size: 16px;
           color: var(--color-text-secondary);
-          margin-bottom: 20px;
+          margin-bottom: 24px;
+          line-height: 1.5;
         }
         .payment-screen form label {
           display: block;
-          font-size: 14px;
-          font-weight: 500;
-          margin-bottom: 6px;
-          color: var(--color-text-secondary);
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 8px;
+          color: var(--color-text);
         }
         .payment-screen form input {
           width: 100%;
-          padding: 14px;
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius);
-          font-size: 16px;
-          margin-bottom: 16px;
+          min-height: 48px;
+          padding: 14px 18px;
+          border: 2px solid var(--color-border);
+          border-radius: var(--radius-lg);
+          font-size: 17px;
+          margin-bottom: 20px;
           outline: none;
-          transition: border-color 0.15s;
+          transition: border-color var(--transition), box-shadow 0.2s ease;
+          background: var(--color-surface);
         }
         .payment-screen form input:focus {
           border-color: var(--color-primary);
+          box-shadow: 0 0 0 3px var(--color-primary-light);
         }
         .payment-screen form input[type="file"] {
-          padding: 12px;
-          font-size: 14px;
-          margin-bottom: 20px;
+          padding: 14px;
+          font-size: 16px;
+          margin-bottom: 24px;
         }
         .status-text {
           color: var(--color-text-secondary);
           text-align: center;
+          font-size: 17px;
         }
       `}</style>
     </div>

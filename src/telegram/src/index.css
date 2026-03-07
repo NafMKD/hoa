@@ -1,15 +1,39 @@
+/* Noah Garden – friendly, accessible, no hard edges (design-system: community + accessible) */
 :root {
-  --color-primary: #229ed9;
-  --color-primary-light: rgba(34, 158, 217, 0.08);
-  --color-bg: #ffffff;
-  --color-surface: #f9fafb;
-  --color-border: #e5e7eb;
-  --color-text: #111827;
-  --color-text-secondary: #6b7280;
-  --color-error: #dc2626;
-  --color-success: #16a34a;
-  --radius: 10px;
-  --radius-lg: 14px;
+  /* Primary: warm purple */
+  --color-primary: #7C3AED;
+  --color-primary-light: rgba(124, 58, 237, 0.12);
+  --color-primary-foreground: #ffffff;
+  /* Secondary / accent */
+  --color-secondary: #A78BFA;
+  --color-secondary-light: rgba(167, 139, 250, 0.2);
+  /* CTA / success (green) */
+  --color-cta: #22C55E;
+  --color-cta-hover: #16A34A;
+  --color-success: #22C55E;
+  /* Backgrounds */
+  --color-bg: #FAF5FF;
+  --color-surface: #ffffff;
+  --color-surface-soft: #F5F3FF;
+  /* Borders – soft, visible */
+  --color-border: #E9E5FF;
+  --color-border-strong: #DDD6FE;
+  /* Text – high contrast for accessibility */
+  --color-text: #4C1D95;
+  --color-text-secondary: #5B21B6;
+  --color-text-muted: #6D28D9;
+  /* Feedback */
+  --color-error: #DC2626;
+  --color-error-bg: #FEF2F2;
+  /* No hard edges: generous radius */
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+  /* Touch & a11y */
+  --touch-min: 44px;
+  --focus-ring: 3px solid var(--color-primary);
+  --transition: 200ms ease;
 }
 
 * {
@@ -22,14 +46,22 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "Comic Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--color-bg);
   color: var(--color-text);
   min-height: 100dvh;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 16px;
 }
 
 #root {
@@ -38,13 +70,20 @@ body {
   flex-direction: column;
 }
 
+h1, h2, h3 {
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+}
+
 button {
   font-family: inherit;
   cursor: pointer;
+  min-height: var(--touch-min);
 }
 
 input, select, textarea {
   font-family: inherit;
+  font-size: 16px;
 }
 
 a {
@@ -52,18 +91,35 @@ a {
   text-decoration: none;
 }
 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Primary button – CTA green, rounded */
 .btn-primary {
   display: block;
   width: 100%;
-  padding: 14px;
-  background: var(--color-primary);
+  min-height: var(--touch-min);
+  padding: 14px 20px;
+  background: var(--color-cta);
   color: #ffffff;
   border: none;
-  border-radius: var(--radius);
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: var(--radius-lg);
+  font-size: 17px;
+  font-weight: 700;
   text-align: center;
-  transition: opacity 0.15s;
+  transition: background-color var(--transition), opacity var(--transition);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-cta-hover);
 }
 
 .btn-primary:disabled {
@@ -75,13 +131,22 @@ a {
   background: none;
   border: none;
   color: var(--color-text-secondary);
-  font-size: 14px;
-  padding: 4px 0;
+  font-size: 16px;
+  padding: 12px 0;
   text-decoration: underline;
+  min-height: auto;
+  cursor: pointer;
+}
+
+.btn-link:hover {
+  color: var(--color-primary);
 }
 
 .error-text {
   color: var(--color-error);
-  font-size: 14px;
+  font-size: 16px;
   margin-top: 12px;
+  padding: 12px;
+  background: var(--color-error-bg);
+  border-radius: var(--radius);
 }

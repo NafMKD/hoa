@@ -48,19 +48,23 @@ export function InvoicesScreen() {
     <div className="invoices-screen">
       <div className="invoices-header">
         <h1>My Invoices</h1>
-        <button onClick={handleLogout} className="btn-link">Sign out</button>
+        <button onClick={handleLogout} className="btn-link" type="button">Sign out</button>
       </div>
 
       <div className="tab-bar">
         <button
+          type="button"
           className={`tab ${tab === "pending" ? "active" : ""}`}
           onClick={() => setTab("pending")}
+          aria-pressed={tab === "pending"}
         >
           Pending
         </button>
         <button
+          type="button"
           className={`tab ${tab === "history" ? "active" : ""}`}
           onClick={() => setTab("history")}
+          aria-pressed={tab === "history"}
         >
           History
         </button>
@@ -99,80 +103,101 @@ export function InvoicesScreen() {
 
       <style>{`
         .invoices-screen {
-          padding: 20px 0;
+          padding: 24px 0;
           flex: 1;
         }
         .invoices-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
         .invoices-header h1 {
-          font-size: 22px;
+          font-family: "Baloo 2", sans-serif;
+          font-size: 26px;
           font-weight: 700;
+          color: var(--color-primary);
         }
         .tab-bar {
           display: flex;
-          gap: 8px;
-          margin-bottom: 20px;
+          gap: 12px;
+          margin-bottom: 24px;
         }
         .tab {
-          padding: 8px 18px;
-          border-radius: 20px;
-          border: 1px solid var(--color-border);
-          background: transparent;
-          font-size: 14px;
-          font-weight: 500;
+          min-height: var(--touch-min);
+          padding: 12px 24px;
+          border-radius: var(--radius-full);
+          border: 2px solid var(--color-border);
+          background: var(--color-surface);
+          font-size: 16px;
+          font-weight: 600;
           color: var(--color-text-secondary);
-          transition: all 0.15s;
+          transition: background-color var(--transition), border-color var(--transition), color var(--transition);
+          cursor: pointer;
+        }
+        .tab:hover {
+          border-color: var(--color-secondary);
+          color: var(--color-text);
         }
         .tab.active {
           background: var(--color-primary-light);
           border-color: var(--color-primary);
           color: var(--color-primary);
-          font-weight: 600;
         }
         .invoice-list {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 16px;
         }
         .invoice-card {
-          padding: 16px;
-          border: 1px solid var(--color-border);
+          padding: 20px;
+          border: 2px solid var(--color-border);
           border-radius: var(--radius-lg);
           background: var(--color-surface);
+          box-shadow: 0 2px 12px rgba(124, 58, 237, 0.06);
+          transition: border-color var(--transition), box-shadow var(--transition);
+        }
+        .invoice-card:hover {
+          border-color: var(--color-border-strong);
+          box-shadow: 0 4px 16px rgba(124, 58, 237, 0.1);
         }
         .invoice-row {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 6px;
+          margin-bottom: 8px;
         }
         .invoice-number {
+          font-family: "Baloo 2", sans-serif;
           font-weight: 600;
-          font-size: 15px;
+          font-size: 17px;
+          color: var(--color-text);
         }
         .invoice-amount {
           font-weight: 700;
-          color: var(--color-primary);
-          font-size: 15px;
+          font-size: 18px;
+          color: var(--color-cta);
         }
         .invoice-meta {
-          font-size: 13px;
-          color: var(--color-text-secondary);
-          margin-bottom: 12px;
+          font-size: 15px;
+          color: var(--color-text-muted);
+          margin-bottom: 16px;
         }
-        .btn-sm {
-          display: inline-block;
-          padding: 10px 20px;
-          font-size: 14px;
+        .invoice-card .btn-sm {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 44px;
+          padding: 12px 24px;
+          font-size: 16px;
+          font-weight: 600;
+          border-radius: var(--radius);
         }
         .status-text {
           color: var(--color-text-secondary);
           text-align: center;
-          padding: 40px 0;
+          padding: 48px 0;
+          font-size: 17px;
         }
       `}</style>
     </div>

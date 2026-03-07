@@ -55,9 +55,10 @@ export function AuthScreen() {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           autoComplete="tel"
+          aria-label="Phone number"
         />
 
-        <button onClick={handleConnect} disabled={loading} className="btn-primary">
+        <button onClick={handleConnect} disabled={loading} className="btn-primary" type="button">
           {loading ? "Connecting..." : "Sign In"}
         </button>
 
@@ -76,33 +77,39 @@ export function AuthScreen() {
           margin-bottom: 32px;
         }
         .auth-header h1 {
-          font-size: 28px;
+          font-family: "Baloo 2", sans-serif;
+          font-size: 32px;
           font-weight: 700;
-          margin-bottom: 8px;
+          margin-bottom: 12px;
+          color: var(--color-primary);
         }
         .auth-header p {
           color: var(--color-text-secondary);
-          font-size: 15px;
+          font-size: 17px;
+          line-height: 1.5;
         }
         .auth-form label {
           display: block;
-          font-size: 14px;
-          font-weight: 500;
-          margin-bottom: 6px;
-          color: var(--color-text-secondary);
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 8px;
+          color: var(--color-text);
         }
         .auth-form input {
           width: 100%;
-          padding: 14px;
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius);
-          font-size: 16px;
-          margin-bottom: 16px;
+          min-height: 48px;
+          padding: 14px 18px;
+          border: 2px solid var(--color-border);
+          border-radius: var(--radius-lg);
+          font-size: 17px;
+          margin-bottom: 20px;
           outline: none;
-          transition: border-color 0.15s;
+          transition: border-color var(--transition), box-shadow 0.2s ease;
+          background: var(--color-surface);
         }
         .auth-form input:focus {
           border-color: var(--color-primary);
+          box-shadow: 0 0 0 3px var(--color-primary-light);
         }
       `}</style>
     </div>

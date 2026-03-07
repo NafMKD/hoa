@@ -15,8 +15,8 @@ class LegacyPaymentImportSeeder extends Seeder
     public function run(): void
     {
         // 1. Configuration
-        $csvPath = base_path('database/seeders/csv/june_payments.csv');
-        $targetMonth = "June/2024";
+        $csvPath = base_path('database/seeders/csv/march_2026_payments.csv');
+        $targetMonth = "March/2026";
         $issueDate = Carbon::parse(env('LEGACY_SEED_DATE', '2024-04-19'))->toDateString();
         $log_date = str_replace('/', '_', $targetMonth);
         $log = Log::build([
@@ -53,7 +53,7 @@ class LegacyPaymentImportSeeder extends Seeder
 
             // A. Find Unit ID
             if (!isset($unitsMap[$unitName])) {
-                $log->warning("Unit not found: $unitName. Skipping.");
+                $log->warning("Unit not found: $unitName. Skipping unit: $unitName.");
                 $skippedCount++;
                 continue;
             }
@@ -71,24 +71,27 @@ class LegacyPaymentImportSeeder extends Seeder
                 });
 
             if (!$invoice) {
-                $log->warning("Target invoice ($targetMonth) not found for unit: $unitName. Skipping.");
+                $log->warning("Target invoice ($targetMonth) not found for unit: $unitName. Skipping unit: $unitName.");
                 $skippedCount++;
                 continue;
             }
 
             // C. Check for duplicate payment (Idempotency)
             if (Payment::where('reference', $reference)->exists()) {
-                $log->warning("Payment reference $reference already exists. Skipping.");
-                $skippedCount++;
-                continue;
+                if ($paymentAmount > 0) $reference = $reference . '-' . rand(1000, 9999);
+                else {
+                    $log->warning("Payment reference $reference already exists and amount is 0. Skipping unit: $unitName.");
+                    $skippedCount++;
+                    continue;
+                }
             }
 
-            // D. Check if the amount greater than 2400 or less than 2100
-            if ($paymentAmount > 2400 || $paymentAmount < 2100) {
-                if ($paymentAmount > 2400) {
-                    $log->warning("Payment amount $paymentAmount greater than 2400. Skipping.");
+            // D. Check if the amount greater than 3300 or less than 3000
+            if ($paymentAmount > 3300 || $paymentAmount < 3000) {
+                if ($paymentAmount > 3300) {
+                    $log->warning("Payment amount $paymentAmount greater than 3300. Skipping unit: $unitName.");
                 } else {  
-                    $log->warning("Payment amount $paymentAmount less than 2100. Skipping.");
+                    $log->warning("Payment amount $paymentAmount less than 3000. Skipping unit: $unitName.");
                 }
                 $skippedCount++;
                 continue;
@@ -102,11 +105,11 @@ class LegacyPaymentImportSeeder extends Seeder
                     $penaltyCount = 0;
                     
                     // Logic based on specific amounts provided
-                    if ($paymentAmount == 2200) {
+                    if ($paymentAmount == 3100) {
                         $penaltyCount = 1;
-                    } elseif ($paymentAmount == 2300) {
+                    } elseif ($paymentAmount == 3200) {
                         $penaltyCount = 2;
-                    } elseif ($paymentAmount == 2400) {
+                    } elseif ($paymentAmount == 3300) {
                         $penaltyCount = 3;
                     }
                     // If 2100, count remains 0.

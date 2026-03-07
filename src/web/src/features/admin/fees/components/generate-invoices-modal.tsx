@@ -85,30 +85,26 @@ function getFutureQuarters(): Array<{ value: string; year: number; label: string
 
   const curIdx = getCurrentQuarterIndex(currentMonth)
 
-  let curYear = currentYear
+  let yr = currentYear
   if (curIdx === 1 && currentMonth <= 2) {
-    curYear = currentYear - 1
+    yr = currentYear - 1
   }
 
   const results: Array<{ value: string; year: number; label: string }> = []
-  let prevIdx = curIdx
-  let yr = curYear
+  let idx = curIdx
 
   for (let i = 0; i < 4; i++) {
-    const nextIdx = (prevIdx + 1) % 4
-
-    if (prevIdx === 1 && nextIdx === 2) {
-      yr++
-    }
-
-    const quarter = QUARTER_ORDER[nextIdx]
+    const quarter = QUARTER_ORDER[idx]
     results.push({
       value: quarter,
       year: yr,
       label: formatQuarterLabel(quarter, yr),
     })
-
-    prevIdx = nextIdx
+    const nextIdx = (idx + 1) % 4
+    if (idx === 1 && nextIdx === 2) {
+      yr++
+    }
+    idx = nextIdx
   }
 
   return results

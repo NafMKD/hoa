@@ -116,4 +116,18 @@ class TelegramAuthService
         }
         return null;
     }
+
+    /**
+     * Link telegram_user_id to an existing user by phone. Used by the bot webhook when the user
+     * shares their contact (or sends phone as text) from the Mini App. Normalizes phone so
+     * "+251 98 437 1917" matches system "0984371917".
+     *
+     * @param string $phone Raw phone from Telegram (e.g. "+251 98 437 1917" or "0984371917")
+     * @param int $telegramUserId Telegram user id (from update.message.from.id)
+     * @return User|null
+     */
+    public function linkTelegramUserByPhone(string $phone, int $telegramUserId): ?User
+    {
+        return $this->findUserByPhone($phone, $telegramUserId);
+    }
 }

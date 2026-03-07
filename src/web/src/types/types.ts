@@ -364,3 +364,65 @@ export interface InvoicePaginatedResponse {
     last_page: number;
   };
 }
+
+export interface BankStatementBatch {
+  id: number;
+  admin: User | null;
+  file_path: string;
+  file_name: string;
+  row_count: number;
+  status: string;
+  uploaded_at: string;
+  transactions?: BankTransaction[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BankStatementBatchPaginatedResponse {
+  data: BankStatementBatch[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export interface BankTransaction {
+  id: number;
+  batch_id: number;
+  amount: number;
+  reference: string;
+  transaction_date: string;
+  description: string;
+  raw_data: Record<string, string> | null;
+  matched_payment_id: number | null;
+  matched_payment?: Payment | null;
+  status: string;
+  created_at: string;
+}
+
+export interface ReconciliationEscalation {
+  id: number;
+  payment_id: number | null;
+  payment?: Payment | null;
+  bank_transaction_id: number | null;
+  bank_transaction?: BankTransaction | null;
+  reason: string;
+  status: string;
+  resolved_by: number | null;
+  resolver?: User | null;
+  resolved_at: string | null;
+  resolution_notes: string | null;
+  created_at: string;
+}
+
+export interface EscalationPaginatedResponse {
+  data: ReconciliationEscalation[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}

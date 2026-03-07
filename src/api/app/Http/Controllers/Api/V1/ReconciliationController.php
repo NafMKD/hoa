@@ -15,6 +15,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -152,30 +153,32 @@ class ReconciliationController extends Controller
                 'resolution_notes' => ['nullable', 'string', 'max:1000'],
             ]);
 
-            $payment = $escalation->payment;
-            $bankTransaction = $escalation->bankTransaction;
+            DB::transaction(function () use ($escalation, $validated, $request) {
+                $payment = $escalation->payment;
+                $bankTransaction = $escalation->bankTransaction;
 
-            if ($validated['action'] === 'confirm' && $payment) {
-                $this->paymentRepository->confirm($payment);
-                if ($bankTransaction) {
+                if ($validated['action'] === 'confirm' && $payment) {
+                    $this->paymentRepository->confirm($payment);
+                    if ($bankTransaction) {
+                        $bankTransaction->update(['matched_payment_id' => $payment->id, 'status' => 'matched']);
+                        $payment->update(['bank_transaction_id' => $bankTransaction->id]);
+                    }
+                } elseif ($validated['action'] === 'fail' && $payment) {
+                    $this->paymentRepository->fail($payment);
+                } elseif ($validated['action'] === 'link' && $validated['payment_id'] && $bankTransaction) {
+                    $payment = \App\Models\Payment::findOrFail($validated['payment_id']);
+                    $this->paymentRepository->confirm($payment);
                     $bankTransaction->update(['matched_payment_id' => $payment->id, 'status' => 'matched']);
                     $payment->update(['bank_transaction_id' => $bankTransaction->id]);
                 }
-            } elseif ($validated['action'] === 'fail' && $payment) {
-                $this->paymentRepository->fail($payment);
-            } elseif ($validated['action'] === 'link' && $validated['payment_id'] && $bankTransaction) {
-                $payment = \App\Models\Payment::findOrFail($validated['payment_id']);
-                $this->paymentRepository->confirm($payment);
-                $bankTransaction->update(['matched_payment_id' => $payment->id, 'status' => 'matched']);
-                $payment->update(['bank_transaction_id' => $bankTransaction->id]);
-            }
 
-            $escalation->update([
-                'status'           => 'resolved',
-                'resolved_by'      => $request->user()->id,
-                'resolved_at'      => now(),
-                'resolution_notes' => $validated['resolution_notes'] ?? null,
-            ]);
+                $escalation->update([
+                    'status'           => 'resolved',
+                    'resolved_by'      => $request->user()->id,
+                    'resolved_at'      => now(),
+                    'resolution_notes' => $validated['resolution_notes'] ?? null,
+                ]);
+            });
 
             return response()->json(new ReconciliationEscalationResource($escalation->fresh(['payment', 'bankTransaction', 'resolver'])));
         } catch (AuthorizationException $e) {

@@ -173,15 +173,15 @@
 
 | # | Task | Phase | Notes |
 |---|------|-------|-------|
-| K1 | ☐ Add route `/admin/financials/reconciliation` | 6 | |
-| K2 | ☐ Create reconciliation page layout (tabs: Upload, Batches, Escalations) | 6 | |
-| K3 | ☐ Upload tab: file input, CSV upload, submit | 6 | |
-| K4 | ☐ Batches tab: table of batches (date, status, matched, escalated) | 6 | |
-| K5 | ☐ Batch detail: list transactions with match status | 6 | |
-| K6 | ☐ Escalations tab: list items needing review | 6 | |
-| K7 | ☐ Escalation actions: Confirm, Fail, Link to payment | 6 | |
-| K8 | ☐ Wire to API endpoints | 6 | |
-| K9 | ☐ Add to sidebar (Financials > Payment Reconciliation) | 6 | |
+| K1 | ☑ Add route `/admin/financials/reconciliation` | 6 | |
+| K2 | ☑ Create reconciliation page layout (tabs: Upload, Batches, Escalations) | 6 | |
+| K3 | ☑ Upload tab: file input, CSV upload, submit | 6 | |
+| K4 | ☑ Batches tab: table of batches (date, status, matched, escalated) | 6 | |
+| K5 | ☑ Batch detail: list transactions with match status | 6 | |
+| K6 | ☑ Escalations tab: list items needing review | 6 | |
+| K7 | ☑ Escalation actions: Confirm, Fail, Link to payment | 6 | |
+| K8 | ☑ Wire to API endpoints | 6 | |
+| K9 | ☑ Add to sidebar (Financials > Payment Reconciliation) | 6 | Already existed |
 
 ---
 
@@ -189,13 +189,13 @@
 
 | # | Task | Phase | Notes |
 |---|------|-------|-------|
-| L1 | ☐ Audit log: payment create (telegram), confirm, fail | 7 | |
-| L2 | ☐ Audit log: bank batch upload, reconciliation match, escalation resolve | 7 | |
-| L3 | ☐ CORS: allow Telegram Mini App origin | 7 | |
-| L4 | ☐ Rate limit: /auth/telegram, /payments/telegram | 7 | |
-| L5 | ☐ Validate screenshot file type (jpg, png, webp) and size (max 5MB) | 7 | |
-| L6 | ☐ Ensure Payment::confirm runs in DB transaction | 7 | |
-| L7 | ☐ Add integration test for reconciliation match flow | 7 | |
+| L1 | ☑ Audit log: payment create (telegram), confirm, fail | 7 | AuditLogObserver on Payment |
+| L2 | ☑ Audit log: bank batch upload, reconciliation match, escalation resolve | 7 | AuditLogObserver on BankStatementBatch, BankTransaction, ReconciliationEscalation |
+| L3 | ☑ CORS: allow Telegram Mini App origin | 7 | config/cors.php with TELEGRAM_APP_URL |
+| L4 | ☑ Rate limit: /auth/telegram, /payments/telegram | 7 | throttle:10,1 already applied |
+| L5 | ☑ Validate screenshot file type (jpg, png, webp) and size (max 5MB) | 7 | mimes:jpg,jpeg,png,webp max:5120 already in storeTelegram |
+| L6 | ☑ Ensure Payment::confirm runs in DB transaction | 7 | DB::transaction wrapper added |
+| L7 | ☑ Add integration test for reconciliation match flow | 7 | ReconciliationMatchTest |
 
 ---
 

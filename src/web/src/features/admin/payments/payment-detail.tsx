@@ -24,12 +24,20 @@ import {
   IconCreditCard,
   IconCalendarEvent,
   IconPhoto,
-  IconDownload,
   IconLoader2,
   IconX,
   IconCheck,
   IconArrowBackUp,
+  IconEye,
+  IconFileText,
 } from "@tabler/icons-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import type { ApiError } from "@/types/api-error";
@@ -45,6 +53,28 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+type PreviewFile = {
+  title: string
+  url: string
+}
+
+function getFileType(url?: string | null): "image" | "pdf" | "unknown" {
+  if (!url) return "unknown"
+  const lower = url.toLowerCase()
+  if (
+    lower.endsWith(".png") ||
+    lower.endsWith(".jpg") ||
+    lower.endsWith(".jpeg") ||
+    lower.endsWith(".webp")
+  ) {
+    return "image"
+  }
+  if (lower.endsWith(".pdf")) {
+    return "pdf"
+  }
+  return "unknown"
+}
+
 export function PaymentDetail() {
   const { paymentId } = useParams({
     // Adjust route path as per your router config
@@ -59,6 +89,7 @@ export function PaymentDetail() {
   >(null);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [receiptNumber, setReceiptNumber] = useState("");
+  const [previewFile, setPreviewFile] = useState<PreviewFile | null>(null)
 
   // Print Logic
   const printRef = useRef<HTMLDivElement>(null);
@@ -139,6 +170,7 @@ export function PaymentDetail() {
   };
 
   const dialogContent = getDialogDetails();
+  const handleOpenPreview = (file: PreviewFile | null) => setPreviewFile(file)
 
   const handleAction = async (action: "confirm" | "fail" | "refund") => {
     if (!payment) return;
@@ -504,8 +536,22 @@ export function PaymentDetail() {
                         </span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <IconDownload size={14} /> Download
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="inline-flex items-center gap-1 text-xs"
+                      onClick={() =>
+                        handleOpenPreview({
+                          title:
+                            payment.screenshot?.file_name ||
+                            "Payment Screenshot",
+                          url: payment.screenshot
+                            ?.url as string,
+                        })
+                      }
+                    >
+                      <IconEye size={14} />
+                      <span>View Screenshot</span>
                     </Button>
                   </div>
                 </CardContent>
@@ -595,6 +641,60 @@ export function PaymentDetail() {
             <PrintableReceipt payment={payment} />
           </div>
         </div>
+
+        {/* FILE PREVIEW MODAL */}
+      <Dialog
+        open={!!previewFile}
+        onOpenChange={(open) => !open && handleOpenPreview(null)}
+      >
+        <DialogContent className="max-w-6xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <IconFileText size={18} />
+              <span>
+                {previewFile?.title
+                  ? previewFile.title.split(".")[0].toUpperCase()
+                  : "Document preview"}
+              </span>
+            </DialogTitle>
+            <DialogDescription>
+              Preview of the selected document file.
+            </DialogDescription>
+          </DialogHeader>
+
+          {previewFile && (
+            <div className="mt-2">
+              {getFileType(previewFile.url) === "image" && (
+                <img
+                  src={previewFile.url}
+                  alt={previewFile.title}
+                  className="max-h-[70vh] w-full object-contain rounded-md border bg-muted"
+                />
+              )}
+              {getFileType(previewFile.url) === "pdf" && (
+                <iframe
+                  src={previewFile.url}
+                  className="h-[70vh] w-full rounded-md border bg-muted"
+                />
+              )}
+              {getFileType(previewFile.url) === "unknown" && (
+                <div className="text-sm text-muted-foreground">
+                  Cannot preview this file type.{" "}
+                  <a
+                    href={previewFile.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary underline"
+                  >
+                    Open in a new tab
+                  </a>
+                  .
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
       </Main>
   );
 }

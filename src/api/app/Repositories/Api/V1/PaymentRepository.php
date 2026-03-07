@@ -137,15 +137,17 @@ class PaymentRepository
      */
     public function confirm(Payment $payment): Payment
     {
-        try {
-            $this->invoiceRepository->setAsPaid($payment->invoice, $payment);
+        return DB::transaction(function () use ($payment) {
+            try {
+                $this->invoiceRepository->setAsPaid($payment->invoice, $payment);
 
-            return $payment->refresh();
-        } catch(RepositoryException $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            throw new RepositoryException('Failed to confirm payment: ' . $e->getMessage());
-        }
+                return $payment->refresh();
+            } catch (RepositoryException $e) {
+                throw $e;
+            } catch (\Exception $e) {
+                throw new RepositoryException('Failed to confirm payment: ' . $e->getMessage());
+            }
+        });
     }
 
     /**

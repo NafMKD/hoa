@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\BankStatementBatch;
+use App\Models\BankTransaction;
 use App\Models\Building;
 use App\Models\DocumentTemplate;
 use App\Models\Fee;
@@ -68,5 +69,9 @@ class AppServiceProvider extends ServiceProvider
         Fee::observe(AuditLogObserver::class);
         Invoice::observe(AuditLogObserver::class);
         UnitOwner::observe(AuditLogObserver::class);
+        Payment::observe(AuditLogObserver::class);
+        BankStatementBatch::observe(AuditLogObserver::class);
+        BankTransaction::observe(AuditLogObserver::class);
+        ReconciliationEscalation::observe(AuditLogObserver::class);
     }
 }

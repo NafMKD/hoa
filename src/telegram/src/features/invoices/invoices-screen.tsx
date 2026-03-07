@@ -43,16 +43,10 @@ export function InvoicesScreen() {
 
   const list = tab === "pending" ? pending : history;
 
-  const handleLogout = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    navigate("/auth", { replace: true });
-  };
-
   return (
     <div className="invoices-screen">
       <div className="invoices-header">
         <h1>{t("invoices.title")}</h1>
-        <button onClick={handleLogout} className="btn-link" type="button">{t("common.signOut")}</button>
       </div>
 
       <div className="tab-bar">

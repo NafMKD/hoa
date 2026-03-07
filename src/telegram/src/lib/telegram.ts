@@ -125,3 +125,11 @@ export function showMainButtonProgress(show: boolean): void {
   if (show) btn.showProgress?.();
   else btn.hideProgress?.();
 }
+
+export function hideMainButton(): void {
+  WebApp()?.MainButton?.hide?.();
+}
+
+export function showMainButton(): void {
+  WebApp()?.MainButton?.show?.();
+}

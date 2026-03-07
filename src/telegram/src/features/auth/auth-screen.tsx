@@ -9,8 +9,11 @@ import {
   expand,
   setMainButton,
   showMainButtonProgress,
+  hideMainButton,
+  showMainButton,
 } from "@/lib/telegram.ts";
 import { isDevMode } from "@/components/telegram-gate.tsx";
+import { LoadingSpinner } from "@/components/loading-spinner.tsx";
 
 const AUTH_RETRY_DELAY_MS = 1800;
 const AUTH_RETRY_MAX = 3;
@@ -95,15 +98,19 @@ export function AuthScreen() {
         return;
       }
     }
-    setError(t("auth.errorGeneric"));
+    setError(t("auth.errorNotFound"));
     setLoading(false);
   };
 
   useEffect(() => {
     if (!needPhone || isDevMode()) return;
+    if (loading) {
+      hideMainButton();
+      return () => { showMainButton(); };
+    }
     const cleanup = setMainButton(t("auth.sharePhoneButton"), handleSharePhone);
     return cleanup;
-  }, [needPhone]);
+  }, [needPhone, loading]);
 
   const handleConnect = async () => {
     setError("");
@@ -159,15 +166,24 @@ export function AuthScreen() {
   if (needPhone) {
     return (
       <div className="auth-screen">
-        <div className="auth-header">
-          <h1>{t("auth.title")}</h1>
-          <p>{t("auth.sharePhoneToContinue")}</p>
-        </div>
-        <p className="auth-hint">
-          {t("auth.sharePhoneHint")}
-        </p>
-        {error && <p className="error-text">{error}</p>}
-        <style>{authStyles}</style>
+        {loading ? (
+          <>
+            <LoadingSpinner label={t("auth.linkingAccount")} />
+            <style>{authStyles}</style>
+          </>
+        ) : (
+          <>
+            <div className="auth-header">
+              <h1>{t("auth.title")}</h1>
+              <p>{t("auth.sharePhoneToContinue")}</p>
+            </div>
+            <p className="auth-hint">
+              {t("auth.sharePhoneHint")}
+            </p>
+            {error && <p className="error-text">{error}</p>}
+            <style>{authStyles}</style>
+          </>
+        )}
       </div>
     );
   }

@@ -37,6 +37,12 @@ class TelegramWebhookController extends Controller
                         'telegram_user_id' => $telegramUserId,
                         'user_id'          => $user->id,
                     ]);
+                } else {
+                    Log::warning('Telegram webhook: no user found for phone', [
+                        'telegram_user_id' => $telegramUserId,
+                        'phone_raw'        => $contact['phone_number'] ?? '',
+                        'phone_normalized' => $phone,
+                    ]);
                 }
             }
         }
@@ -46,14 +52,22 @@ class TelegramWebhookController extends Controller
 
     private function normalizePhone(string $phone): string
     {
-        $phone = preg_replace('/\s+/', '', $phone);
-        $phone = ltrim($phone, '+');
-        if (preg_match('/^251(\d{9})$/', $phone, $m)) {
-            return '0' . $m[1];
+        $digits = preg_replace('/\D/', '', $phone);
+        if ($digits === '' || strlen($digits) < 9) {
+            return '';
         }
-        if (!preg_match('/^0/', $phone) && strlen($phone) >= 9) {
-            return '0' . $phone;
+        if (strlen($digits) === 12 && str_starts_with($digits, '251')) {
+            return '0' . substr($digits, 3, 9);
         }
-        return $phone;
+        if (strlen($digits) === 10 && str_starts_with($digits, '0')) {
+            return $digits;
+        }
+        if (strlen($digits) === 9) {
+            return '0' . $digits;
+        }
+        if (strlen($digits) >= 10 && str_starts_with($digits, '251')) {
+            return '0' . substr($digits, 3, 9);
+        }
+        return $digits;
     }
 }

@@ -110,26 +110,41 @@ class TelegramAuthService
      * @param int $telegramUserId
      * @return User|null
      */
+    /**
+     * Link a Telegram user id to an existing user by phone (e.g. after contact shared via webhook).
+     * Tries multiple formats: 0984371917, +251984371917, 251984371917 (all normalize to 09xxxxxxxx for lookup).
+     *
+     * @param string $phone Raw phone from Telegram (e.g. "+251 98 437 1917")
+     * @param int $telegramUserId
+     * @return User|null
+     */
     public function linkTelegramUserByPhone(string $phone, int $telegramUserId): ?User
     {
-        $phone = preg_replace('/\s+/', '', $phone);
-        $phone = ltrim($phone, '+');
-        if (empty($phone)) {
+        $digits = preg_replace('/\D/', '', $phone);
+        if (strlen($digits) < 9) {
             return null;
         }
-
-        $user = User::where('phone', $phone)->first();
-        if (!$user && preg_match('/^0(\d{9})$/', $phone, $m)) {
-            $user = User::where('phone', '+251' . $m[1])->first();
+        $canonical = null;
+        if (strlen($digits) === 12 && str_starts_with($digits, '251')) {
+            $canonical = '0' . substr($digits, 3, 9);
+        } elseif (strlen($digits) === 10 && $digits[0] === '0') {
+            $canonical = $digits;
+        } elseif (strlen($digits) === 9) {
+            $canonical = '0' . $digits;
+        } else {
+            $canonical = '0' . substr($digits, -9);
         }
-        if (!$user && preg_match('/^251(\d{9})$/', $phone, $m)) {
-            $user = User::where('phone', '0' . $m[1])->first();
+        $variants = [$canonical];
+        if (strlen($canonical) === 10 && $canonical[0] === '0') {
+            $variants[] = '+251' . substr($canonical, 1);
         }
-        if (!$user) {
-            return null;
+        foreach ($variants as $p) {
+            $user = User::where('phone', $p)->first();
+            if ($user) {
+                $user->update(['telegram_user_id' => $telegramUserId]);
+                return $user->fresh();
+            }
         }
-
-        $user->update(['telegram_user_id' => $telegramUserId]);
-        return $user->fresh();
+        return null;
     }
 }

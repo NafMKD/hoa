@@ -1,0 +1,51 @@
+{
+  "common": {
+    "loading": "በመፈለግ ላይ...",
+    "back": "ተመለስ",
+    "signOut": "ውጣ",
+    "appName": "ኖዋ ጋርድን",
+    "language": "ቋንቋ"
+  },
+  "auth": {
+    "title": "ኖዋ ጋርደን",
+    "subtitle": "የክፍያ ቢሎችን ለማየት እና ክፍያ ለመፈጸም በስልክ ቁጥርዎ ይግቡ።",
+    "phoneLabel": "ስልክ ቁጥር",
+    "phonePlaceholder": "09 XX XXX XXXX",
+    "signIn": "ግባ",
+    "connecting": "በማገናኘት ላይ...",
+    "errorRequired": "እባክዎ ስልክ ቁጥርዎን ያስገቡ።",
+    "errorNotFound": "በዚህ ስልክ ቁጥር ምንም መለያ አልተገኘም። እባክዎ አስተዳዳሪውን ያነጋግሩ።",
+    "errorInvalid": "ልክ ያልሆነ ወይም ጊዜው ያለፈ ክንዋኔክንዋኔ። እባክዎ እንደገና ይሞክሩ።",
+    "errorGeneric": "የሆነ ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።"
+  },
+  "invoices": {
+    "title": "የኔ ቢሎች",
+    "tabPending": "ያልተከፈሉ ቢሎች",
+    "tabHistory": "ያለፉ ቢሎች",
+    "payNow": "አሁን ይክፈሉ",
+    "pendingApproval": "ለማረጋገጥ በመጠባበቅ ላይ",
+    "noPending": "ምንም ያልተከፈሉ ቢሎች የሉም።",
+    "noHistory": "የክፍያ ታሪክ የለም።",
+    "loadError": "ቢሎችን ማውጣት አልተሳካም።",
+    "due": "የመጨረሻ መክፈያ ቀን"
+  },
+  "payment": {
+    "backToInvoices": "ወደ ቢሎች ተመለስ",
+    "title": "ክፍያ አስገባ",
+    "invoiceMonths": "የቢሉ ወራት",
+    "helpText": "በባንክ ብሩን ካስገቡ በኋላ የግብይት ማረጋገጫ ስክሪንሾትን ይጫኑ።",
+    "amountLabel": "መጠን (ብር)",
+    "paymentDateLabel": "የክፍያ ቀን",
+    "screenshotLabel": "ስክሪንሾት",
+    "submit": "ክፍያ አስገባ",
+    "submitting": "በማስገባት ላይ...",
+    "successTitle": "ክፍያው ገብቷል",
+    "successMessage": "ክፍያዎ በመረጋገጥ ላይ ነው። ከተረጋገጠ በኋላ አናሳውቆታለን፡፡",
+    "backToInvoicesButton": "ወደ ቢሎች ተመለስ",
+    "invoiceNotFound": "ቢሉ አልተገኘም።",
+    "failedLoad": "ቢሉን ማውጣት አልተሳካም።",
+    "errorScreenshot": "እባክዎ የክፍያ ስክሪንሾትን ይምረጡ።",
+    "errorSubmit": "ክፍያ ማስገባት አልተሳካም።",
+    "loadingInvoice": "ቢሉን በማውጣት ላይ..."
+  }
+}

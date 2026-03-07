@@ -1,0 +1,51 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "back": "Back",
+    "signOut": "Sign out",
+    "appName": "Noah Garden",
+    "language": "Language"
+  },
+  "auth": {
+    "title": "Noah Garden",
+    "subtitle": "Sign in with your phone to view invoices and make payments.",
+    "phoneLabel": "Phone number",
+    "phonePlaceholder": "09 XX XXX XXXX",
+    "signIn": "Sign In",
+    "connecting": "Connecting...",
+    "errorRequired": "Please enter your phone number.",
+    "errorNotFound": "No account found with this phone number. Please contact the administrator.",
+    "errorInvalid": "Invalid or expired session. Please try again.",
+    "errorGeneric": "Something went wrong. Please try again."
+  },
+  "invoices": {
+    "title": "My Invoices",
+    "tabPending": "Pending",
+    "tabHistory": "History",
+    "payNow": "Pay Now",
+    "pendingApproval": "Pending for approval",
+    "noPending": "No pending invoices.",
+    "noHistory": "No payment history.",
+    "loadError": "Failed to load invoices.",
+    "due": "Due"
+  },
+  "payment": {
+    "backToInvoices": "Back to invoices",
+    "title": "Submit Payment",
+    "invoiceMonths": "Months covered",
+    "helpText": "After paying via bank transfer, upload a screenshot of the transaction confirmation.",
+    "amountLabel": "Amount (ETB)",
+    "paymentDateLabel": "Payment Date",
+    "screenshotLabel": "Screenshot",
+    "submit": "Submit Payment",
+    "submitting": "Submitting...",
+    "successTitle": "Payment Submitted",
+    "successMessage": "Your payment is being reviewed. You'll be notified once it's confirmed.",
+    "backToInvoicesButton": "Back to Invoices",
+    "invoiceNotFound": "Invoice not found.",
+    "failedLoad": "Failed to load invoice.",
+    "errorScreenshot": "Please select a payment screenshot.",
+    "errorSubmit": "Failed to submit payment.",
+    "loadingInvoice": "Loading invoice..."
+  }
+}

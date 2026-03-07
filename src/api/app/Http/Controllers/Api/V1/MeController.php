@@ -46,7 +46,7 @@ class MeController extends Controller
             ];
 
             $invoices = $this->invoices->forUser($request->user(), $filters);
-            $invoices->load(['user', 'unit', 'source', 'penalties']);
+            $invoices->load(['user', 'unit', 'source', 'penalties', 'payments']);
 
             return InvoiceResource::collection($invoices);
         } catch (\Exception $e) {

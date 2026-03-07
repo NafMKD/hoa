@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import api, { TOKEN_KEY } from "@/lib/api.ts";
 import type { Invoice } from "@/types/index.ts";
+import { hasPendingPayment } from "@/types/index.ts";
+import { LoadingSpinner } from "@/components/loading-spinner.tsx";
 
 export function InvoicesScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [pending, setPending] = useState<Invoice[]>([]);
   const [history, setHistory] = useState<Invoice[]>([]);
@@ -29,13 +33,13 @@ export function InvoicesScreen() {
           navigate("/auth", { replace: true });
           return;
         }
-        setError(res?.data?.message ?? "Failed to load invoices.");
+        setError(t("invoices.loadError"));
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [navigate]);
+  }, [navigate, t]);
 
   const list = tab === "pending" ? pending : history;
 
@@ -47,8 +51,8 @@ export function InvoicesScreen() {
   return (
     <div className="invoices-screen">
       <div className="invoices-header">
-        <h1>My Invoices</h1>
-        <button onClick={handleLogout} className="btn-link" type="button">Sign out</button>
+        <h1>{t("invoices.title")}</h1>
+        <button onClick={handleLogout} className="btn-link" type="button">{t("common.signOut")}</button>
       </div>
 
       <div className="tab-bar">
@@ -58,7 +62,7 @@ export function InvoicesScreen() {
           onClick={() => setTab("pending")}
           aria-pressed={tab === "pending"}
         >
-          Pending
+          {t("invoices.tabPending")}
         </button>
         <button
           type="button"
@@ -66,38 +70,47 @@ export function InvoicesScreen() {
           onClick={() => setTab("history")}
           aria-pressed={tab === "history"}
         >
-          History
+          {t("invoices.tabHistory")}
         </button>
       </div>
 
       {loading ? (
-        <p className="status-text">Loading...</p>
+        <LoadingSpinner label={t("common.loading")} />
       ) : error ? (
         <p className="error-text">{error}</p>
       ) : list.length === 0 ? (
         <p className="status-text">
-          {tab === "pending" ? "No pending invoices." : "No payment history."}
+          {tab === "pending" ? t("invoices.noPending") : t("invoices.noHistory")}
         </p>
       ) : (
         <div className="invoice-list">
-          {list.map((inv) => (
-            <div key={inv.id} className="invoice-card">
-              <div className="invoice-row">
-                <span className="invoice-number">{inv.invoice_number}</span>
-                <span className="invoice-amount">
-                  {inv.status === "paid" ? inv.amount_paid?.toLocaleString?.() ?? inv.amount_paid : inv.final_amount_due?.toLocaleString?.() ?? inv.final_amount_due } ETB
-                </span>
+          {list.map((inv) => {
+            const isPendingPayment = tab === "pending" && hasPendingPayment(inv);
+            return (
+              <div key={inv.id} className="invoice-card">
+                <div className="invoice-row">
+                  <span className="invoice-number">{inv.invoice_number}</span>
+                  <span className="invoice-amount">
+                    {inv.status === "paid" ? inv.amount_paid?.toLocaleString?.() ?? inv.amount_paid : inv.final_amount_due?.toLocaleString?.() ?? inv.final_amount_due } ETB
+                  </span>
+                </div>
+                <div className="invoice-meta">
+                  {inv.invoice_type} &middot; {t("invoices.due")} {inv.due_date ?? "—"}
+                </div>
+                {tab === "pending" && (
+                  isPendingPayment ? (
+                    <button type="button" disabled className="btn-secondary-disabled">
+                      {t("invoices.pendingApproval")}
+                    </button>
+                  ) : (
+                    <Link to={`/payment/${inv.id}`} className="btn-primary btn-sm">
+                      {t("invoices.payNow")}
+                    </Link>
+                  )
+                )}
               </div>
-              <div className="invoice-meta">
-                {inv.invoice_type} &middot; Due {inv.due_date ?? "—"}
-              </div>
-              {tab === "pending" && (
-                <Link to={`/payment/${inv.id}`} className="btn-primary btn-sm">
-                  Pay Now
-                </Link>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -154,12 +167,12 @@ export function InvoicesScreen() {
           border: 2px solid var(--color-border);
           border-radius: var(--radius-lg);
           background: var(--color-surface);
-          box-shadow: 0 2px 12px rgba(124, 58, 237, 0.06);
+          box-shadow: 0 2px 12px rgba(212, 175, 55, 0.12);
           transition: border-color var(--transition), box-shadow var(--transition);
         }
         .invoice-card:hover {
           border-color: var(--color-border-strong);
-          box-shadow: 0 4px 16px rgba(124, 58, 237, 0.1);
+          box-shadow: 0 4px 16px rgba(212, 175, 55, 0.18);
         }
         .invoice-row {
           display: flex;

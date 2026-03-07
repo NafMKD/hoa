@@ -1,30 +1,30 @@
-/* Noah Garden – friendly, accessible, no hard edges (design-system: community + accessible) */
+/* Noah Garden – brand gold palette (matches web app) */
 :root {
-  /* Primary: warm purple */
-  --color-primary: #7C3AED;
-  --color-primary-light: rgba(124, 58, 237, 0.12);
-  --color-primary-foreground: #ffffff;
-  /* Secondary / accent */
-  --color-secondary: #A78BFA;
-  --color-secondary-light: rgba(167, 139, 250, 0.2);
-  /* CTA / success (green) */
-  --color-cta: #22C55E;
-  --color-cta-hover: #16A34A;
-  --color-success: #22C55E;
-  /* Backgrounds */
-  --color-bg: #FAF5FF;
+  /* Primary: brand gold */
+  --color-primary: #d4af37;
+  --color-primary-light: rgba(212, 175, 55, 0.15);
+  --color-primary-foreground: #1a1300;
+  /* Secondary / accent (royal blue from web) */
+  --color-secondary: #1d4ed8;
+  --color-secondary-light: rgba(29, 78, 216, 0.12);
+  /* CTA / primary actions – gold to match brand */
+  --color-cta: #d4af37;
+  --color-cta-hover: #c4a030;
+  --color-success: #10b981;
+  /* Backgrounds – warm ivory from web */
+  --color-bg: #fffcf6;
   --color-surface: #ffffff;
-  --color-surface-soft: #F5F3FF;
-  /* Borders – soft, visible */
-  --color-border: #E9E5FF;
-  --color-border-strong: #DDD6FE;
-  /* Text – high contrast for accessibility */
-  --color-text: #4C1D95;
-  --color-text-secondary: #5B21B6;
-  --color-text-muted: #6D28D9;
+  --color-surface-soft: #fff8e6;
+  /* Borders – warm gray from web */
+  --color-border: #e7e2d6;
+  --color-border-strong: #d4d0c4;
+  /* Text – ink from web */
+  --color-text: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #6b7280;
   /* Feedback */
-  --color-error: #DC2626;
-  --color-error-bg: #FEF2F2;
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
   /* No hard edges: generous radius */
   --radius: 16px;
   --radius-lg: 24px;
@@ -64,6 +64,10 @@ body {
   font-size: 16px;
 }
 
+[lang="am"] body {
+  font-family: "Noto Sans Ethiopic", "Comic Neue", sans-serif;
+}
+
 #root {
   min-height: 100dvh;
   display: flex;
@@ -79,6 +83,7 @@ button {
   font-family: inherit;
   cursor: pointer;
   min-height: var(--touch-min);
+  touch-action: manipulation;
 }
 
 input, select, textarea {
@@ -89,6 +94,7 @@ input, select, textarea {
 a {
   color: var(--color-primary);
   text-decoration: none;
+  touch-action: manipulation;
 }
 
 a:focus-visible,
@@ -100,14 +106,14 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-/* Primary button – CTA green, rounded */
+/* Primary button – brand gold CTA */
 .btn-primary {
   display: block;
   width: 100%;
   min-height: var(--touch-min);
   padding: 14px 20px;
   background: var(--color-cta);
-  color: #ffffff;
+  color: var(--color-primary-foreground);
   border: none;
   border-radius: var(--radius-lg);
   font-size: 17px;
@@ -115,7 +121,7 @@ textarea:focus-visible {
   text-align: center;
   transition: background-color var(--transition), opacity var(--transition);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -149,4 +155,54 @@ textarea:focus-visible {
   padding: 12px;
   background: var(--color-error-bg);
   border-radius: var(--radius);
+}
+
+/* Loading spinner */
+.loading-spinner-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px 0;
+}
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: loading-spin 0.8s linear infinite;
+}
+.loading-spinner-label {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+    border-top-color: var(--color-primary);
+  }
+}
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Disabled secondary button (pending state) */
+.btn-secondary-disabled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  background: var(--color-surface-soft);
+  color: var(--color-text-muted);
+  border: 2px solid var(--color-border);
+  cursor: not-allowed;
+  opacity: 0.9;
 }

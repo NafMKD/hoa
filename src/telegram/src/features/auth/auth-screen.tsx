@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import api, { TOKEN_KEY } from "@/lib/api.ts";
 
 export function AuthScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
@@ -13,7 +15,7 @@ export function AuthScreen() {
     const phoneToUse = phone.trim();
 
     if (!phoneToUse) {
-      setError("Please enter your phone number.");
+      setError(t("auth.errorRequired"));
       return;
     }
 
@@ -28,11 +30,11 @@ export function AuthScreen() {
     } catch (err: unknown) {
       const res = (err as { response?: { data?: { message?: string }; status?: number } })?.response;
       if (res?.status === 404) {
-        setError("No account found with this phone number. Please contact the administrator.");
+        setError(t("auth.errorNotFound"));
       } else if (res?.status === 401) {
-        setError("Invalid or expired session. Please try again.");
+        setError(t("auth.errorInvalid"));
       } else {
-        setError(res?.data?.message ?? "Something went wrong. Please try again.");
+        setError(res?.data?.message ?? t("auth.errorGeneric"));
       }
     } finally {
       setLoading(false);
@@ -42,24 +44,24 @@ export function AuthScreen() {
   return (
     <div className="auth-screen">
       <div className="auth-header">
-        <h1>Noah Garden</h1>
-        <p>Sign in with your phone to view invoices and make payments.</p>
+        <h1>{t("auth.title")}</h1>
+        <p>{t("auth.subtitle")}</p>
       </div>
 
       <div className="auth-form">
-        <label htmlFor="phone">Phone number</label>
+        <label htmlFor="phone">{t("auth.phoneLabel")}</label>
         <input
           id="phone"
           type="tel"
-          placeholder="+251 9XX XXX XXX"
+          placeholder={t("auth.phonePlaceholder")}
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           autoComplete="tel"
-          aria-label="Phone number"
+          aria-label={t("auth.phoneLabel")}
         />
 
         <button onClick={handleConnect} disabled={loading} className="btn-primary" type="button">
-          {loading ? "Connecting..." : "Sign In"}
+          {loading ? t("auth.connecting") : t("auth.signIn")}
         </button>
 
         {error && <p className="error-text">{error}</p>}

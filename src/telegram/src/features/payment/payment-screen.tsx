@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import api from "@/lib/api.ts";
 import type { Invoice } from "@/types/index.ts";
+import { getInvoiceMonths } from "@/types/index.ts";
+import { LoadingSpinner } from "@/components/loading-spinner.tsx";
 
 export function PaymentScreen() {
+  const { t } = useTranslation();
   const { invoiceId } = useParams<{ invoiceId: string }>();
   const navigate = useNavigate();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
@@ -26,16 +30,16 @@ export function PaymentScreen() {
           setInvoice(inv);
           setAmount(String(inv.final_amount_due ?? ""));
         } else {
-          setFetchError("Invoice not found.");
+          setFetchError(t("payment.invoiceNotFound"));
         }
       })
-      .catch(() => setFetchError("Failed to load invoice."));
-  }, [invoiceId]);
+      .catch(() => setFetchError(t("payment.failedLoad")));
+  }, [invoiceId, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!invoice || !screenshot) {
-      setSubmitError("Please select a payment screenshot.");
+      setSubmitError(t("payment.errorScreenshot"));
       return;
     }
     setSubmitError("");
@@ -52,19 +56,21 @@ export function PaymentScreen() {
       const res = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response;
       const msg = res?.data?.errors
         ? Object.values(res.data.errors).flat().join(" ")
-        : res?.data?.message ?? "Failed to submit payment.";
+        : res?.data?.message ?? t("payment.errorSubmit");
       setSubmitError(msg);
     } finally {
       setLoading(false);
     }
   };
 
+  const invoiceMonths = invoice ? getInvoiceMonths(invoice) : [];
+
   if (fetchError) {
     return (
       <div className="payment-screen payment-screen--centered">
         <p className="error-text">{fetchError}</p>
         <Link to="/invoices" className="btn-primary" style={{ marginTop: 24, textAlign: "center" }}>
-          Back to invoices
+          {t("payment.backToInvoices")}
         </Link>
       </div>
     );
@@ -73,7 +79,7 @@ export function PaymentScreen() {
   if (!invoice) {
     return (
       <div className="payment-screen payment-screen--centered">
-        <p className="status-text">Loading invoice...</p>
+        <LoadingSpinner label={t("payment.loadingInvoice")} />
       </div>
     );
   }
@@ -82,10 +88,10 @@ export function PaymentScreen() {
     return (
       <div className="payment-screen success-view">
         <div className="success-icon" aria-hidden="true">&#10003;</div>
-        <h2>Payment Submitted</h2>
-        <p>Your payment is being reviewed. You'll be notified once it's confirmed.</p>
+        <h2>{t("payment.successTitle")}</h2>
+        <p>{t("payment.successMessage")}</p>
         <button type="button" onClick={() => navigate("/invoices", { replace: true })} className="btn-primary" style={{ marginTop: 24 }}>
-          Back to Invoices
+          {t("payment.backToInvoicesButton")}
         </button>
         <style>{`
           .success-view {
@@ -101,14 +107,14 @@ export function PaymentScreen() {
             width: 72px;
             height: 72px;
             border-radius: 50%;
-            background: var(--color-cta);
+            background: var(--color-success);
             color: #fff;
             font-size: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
-            box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
           }
           .success-view h2 {
             font-family: "Baloo 2", sans-serif;
@@ -129,23 +135,30 @@ export function PaymentScreen() {
 
   return (
     <div className="payment-screen">
-      <Link to="/invoices" className="back-link">&larr; Back to invoices</Link>
+      <Link to="/invoices" className="back-link">&larr; {t("payment.backToInvoices")}</Link>
 
-      <h1>Submit Payment</h1>
+      <h1>{t("payment.title")}</h1>
 
       <div className="invoice-summary">
-        <span className="invoice-label">{invoice.invoice_number}</span>
+        <div className="invoice-summary-left">
+          <span className="invoice-label">{invoice.invoice_number}</span>
+          {invoiceMonths.length > 0 && (
+            <p className="invoice-months">
+              {t("payment.invoiceMonths")}: {invoiceMonths.join(", ")}
+            </p>
+          )}
+        </div>
         <span className="invoice-total">
           {invoice.final_amount_due?.toLocaleString?.() ?? invoice.final_amount_due} ETB
         </span>
       </div>
 
       <p className="help-text">
-        After paying via bank transfer, upload a screenshot of the transaction confirmation.
+        {t("payment.helpText")}
       </p>
 
       <form onSubmit={handleSubmit}>
-        <label htmlFor="amount">Amount (ETB)</label>
+        <label htmlFor="amount">{t("payment.amountLabel")}</label>
         <input
           id="amount"
           type="number"
@@ -156,7 +169,7 @@ export function PaymentScreen() {
           aria-required="true"
         />
 
-        <label htmlFor="paymentDate">Payment Date</label>
+        <label htmlFor="paymentDate">{t("payment.paymentDateLabel")}</label>
         <input
           id="paymentDate"
           type="date"
@@ -166,7 +179,7 @@ export function PaymentScreen() {
           aria-required="true"
         />
 
-        <label htmlFor="screenshot">Screenshot</label>
+        <label htmlFor="screenshot">{t("payment.screenshotLabel")}</label>
         <input
           id="screenshot"
           type="file"
@@ -179,7 +192,7 @@ export function PaymentScreen() {
         {submitError && <p className="error-text">{submitError}</p>}
 
         <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? "Submitting..." : "Submit Payment"}
+          {loading ? t("payment.submitting") : t("payment.submit")}
         </button>
       </form>
 
@@ -219,23 +232,36 @@ export function PaymentScreen() {
         .invoice-summary {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
+          gap: 16px;
           padding: 20px;
           background: var(--color-primary-light);
           border: 2px solid var(--color-border);
           border-radius: var(--radius-lg);
           margin-bottom: 20px;
         }
+        .invoice-summary-left {
+          flex: 1;
+          min-width: 0;
+        }
         .invoice-label {
           font-family: "Baloo 2", sans-serif;
           font-weight: 600;
           font-size: 17px;
           color: var(--color-text);
+          display: block;
+        }
+        .invoice-months {
+          font-size: 14px;
+          color: var(--color-text-muted);
+          margin-top: 6px;
+          margin-bottom: 0;
         }
         .invoice-total {
           font-size: 20px;
           font-weight: 700;
           color: var(--color-cta);
+          flex-shrink: 0;
         }
         .help-text {
           font-size: 16px;

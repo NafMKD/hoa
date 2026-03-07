@@ -70,7 +70,7 @@ class InvoicePolicy
      */
     public function createFromTelegram(User $authUser, Invoice $invoice): bool
     {
-        if ($invoice->user_id && $invoice->user_id !== $authUser->id) {
+        if ($invoice->user_id && $invoice->user_id != $authUser->id) {
             return false;
         }
         return $authUser->hasRole(Controller::_ROLES[3]) // homeowner

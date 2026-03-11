@@ -28,7 +28,7 @@ class TelegramWebhookController extends Controller
         }
 
         $from = $message['from'] ?? null;
-        $telegramUserId = isset($from['id']) ? (int) $from['id'] : null;
+        $telegramUserId = isset($from['id']) ? (string) $from['id'] : null;
         if ($telegramUserId === null) {
             return response()->json(['ok' => true]);
         }

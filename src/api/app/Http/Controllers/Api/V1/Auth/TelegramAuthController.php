@@ -45,7 +45,7 @@ class TelegramAuthController extends Controller
             ], 401);
         }
 
-        $telegramUserId = isset($parsed['user']['id']) ? (int) $parsed['user']['id'] : null;
+        $telegramUserId = isset($parsed['user']['id']) ? (string) $parsed['user']['id'] : null;
         if ($telegramUserId === null) {
             return response()->json([
                 'status'  => self::_ERROR,

@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('telegram_user_id')->nullable()->after('status');
+            // Store Telegram user id as string to support very large ids.
+            $table->string('telegram_user_id', 64)->nullable()->after('status');
             $table->index('telegram_user_id');
         });
     }

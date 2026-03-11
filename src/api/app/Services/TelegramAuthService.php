@@ -69,12 +69,12 @@ class TelegramAuthService
     /**
      * Find user by Telegram user id (from validated init data).
      *
-     * @param int $telegramUserId
+     * @param string $telegramUserId
      * @return User|null
      */
-    public function findUserByTelegramId(int $telegramUserId): ?User
+    public function findUserByTelegramId(string $telegramUserId): ?User
     {
-        return User::where('telegram_user_id', $telegramUserId)->first();
+        return User::where('telegram_user_id', (string) $telegramUserId)->first();
     }
 
     /**
@@ -82,38 +82,49 @@ class TelegramAuthService
      * Normalizes so Telegram format "+251 98 437 1917" matches system "0984371917".
      *
      * @param string $phone Phone from Telegram (e.g. "+251 98 437 1917") or "0984371917"
-     * @param int|null $telegramUserId Telegram user id from init data
+     * @param string|null $telegramUserId Telegram user id from init data (stored as string)
      * @return User|null
      */
-    public function findUserByPhone(string $phone, ?int $telegramUserId = null): ?User
+    public function findUserByPhone(string $phone, ?string $telegramUserId = null): ?User
     {
+        // 1. Remove everything except digits
         $digits = preg_replace('/\D/', '', $phone);
+
         if (strlen($digits) < 9) {
             return null;
         }
+
         $canonical = null;
-        if (strlen($digits) === 12 && str_starts_with($digits, '251')) {
-            $canonical = '0' . substr($digits, 3, 9);
-        } elseif (strlen($digits) === 10 && $digits[0] === '0') {
+
+        // 2. Normalize to 09... format
+        if (str_starts_with($digits, '251') && strlen($digits) === 12) {
+            $canonical = '0' . substr($digits, 3);
+        } elseif (str_starts_with($digits, '0') && strlen($digits) === 10) {
             $canonical = $digits;
         } elseif (strlen($digits) === 9) {
             $canonical = '0' . $digits;
         } else {
+            // Fallback: take the last 9 digits and prefix with 0
             $canonical = '0' . substr($digits, -9);
         }
-        $variants = [$canonical];
-        if (strlen($canonical) === 10 && $canonical[0] === '0') {
-            $variants[] = '+251' . substr($canonical, 1);
-        }
-        foreach ($variants as $p) {
-            $user = User::where('phone', $p)->first();
-            if ($user) {
-                if ($telegramUserId !== null && (int) $user->telegram_user_id !== (int) $telegramUserId) {
-                    $user->update(['telegram_user_id' => $telegramUserId]);
-                }
-                return $user->fresh();
+
+        // 3. Define all possible ways this phone might be stored
+        $variants = array_unique([
+            $canonical,                      // 0984371917
+            '+251' . substr($canonical, 1),  // +251984371917
+            substr($canonical, 1),           // 984371917
+        ]);
+
+        // 4. Search the database
+        $user = User::whereIn('phone', $variants)->first();
+
+        if ($user) {
+            if ($telegramUserId !== null && (string) $user->telegram_user_id !== (string) $telegramUserId) {
+                $user->update(['telegram_user_id' => (string) $telegramUserId]);
             }
+            return $user->fresh();
         }
+
         return null;
     }
 
@@ -123,10 +134,10 @@ class TelegramAuthService
      * "+251 98 437 1917" matches system "0984371917".
      *
      * @param string $phone Raw phone from Telegram (e.g. "+251 98 437 1917" or "0984371917")
-     * @param int $telegramUserId Telegram user id (from update.message.from.id)
+     * @param string $telegramUserId Telegram user id (from update.message.from.id), stored as string
      * @return User|null
      */
-    public function linkTelegramUserByPhone(string $phone, int $telegramUserId): ?User
+    public function linkTelegramUserByPhone(string $phone, string $telegramUserId): ?User
     {
         return $this->findUserByPhone($phone, $telegramUserId);
     }

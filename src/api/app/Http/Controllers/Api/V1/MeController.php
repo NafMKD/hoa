@@ -38,6 +38,9 @@ class MeController extends Controller
                 'status'   => ['nullable', 'string', Rule::in(['pending', 'paid', 'all'])],
                 'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
                 'page'     => ['nullable', 'integer', 'min:1'],
+                // scope=user: invoices for this user only (default)
+                // scope=unit: invoices for units where this user is current owner or tenant
+                'scope'    => ['nullable', 'string', Rule::in(['user', 'unit'])],
             ]);
 
             $filters = [
@@ -45,8 +48,15 @@ class MeController extends Controller
                 'per_page' => $validated['per_page'] ?? self::_DEFAULT_PAGINATION,
             ];
 
-            $invoices = $this->invoices->forUser($request->user(), $filters);
-            $invoices->load(['user', 'unit', 'source', 'penalties', 'payments']);
+            $scope = $validated['scope'] ?? 'user';
+
+            if ($scope === 'unit') {
+                $invoices = $this->invoices->forUserUnits($request->user(), $filters);
+            } else {
+                $invoices = $this->invoices->forUser($request->user(), $filters);
+            }
+
+            $invoices->load(['user', 'unit', 'unit.currentOwner', 'source', 'penalties', 'payments']);
 
             return InvoiceResource::collection($invoices);
         } catch (\Exception $e) {

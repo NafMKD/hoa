@@ -27,13 +27,15 @@
   "invoices": {
     "title": "የኔ ቢሎች",
     "tabPending": "ያልተከፈሉ ቢሎች",
-    "tabHistory": "ያለፉ ቢሎች",
+    "tabHistory": "የተክፈሉ ቢሎች",
     "payNow": "አሁን ይክፈሉ",
     "pendingApproval": "ለማረጋገጥ በመጠባበቅ ላይ",
     "noPending": "ምንም ያልተከፈሉ ቢሎች የሉም።",
     "noHistory": "የክፍያ ታሪክ የለም።",
     "loadError": "ቢሎችን ማውጣት አልተሳካም።",
-    "due": "የመጨረሻ መክፈያ ቀን"
+    "due": "የመጨረሻ መክፈያ ቀን",
+    "notYourInvoice": "ይህ ቢል የእርስዎ አይደለም።",
+    "settleInOffice": "እባክዎ ይህንን ጉዳይ በአካል ቢሮ ቀርበው ይፍቱ።"
   },
   "payment": {
     "backToInvoices": "ወደ ቢሎች ተመለስ",

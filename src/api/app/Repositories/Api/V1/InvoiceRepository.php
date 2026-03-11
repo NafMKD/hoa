@@ -73,6 +73,51 @@ class InvoiceRepository
     }
 
     /**
+     * Get invoices for units where the given user is the current owner or current tenant.
+     * Used for Telegram Mini App to show full unit history (including previous occupants)
+     * while still enforcing payment ownership on the payment endpoint.
+     *
+     * @param  User  $user
+     * @param  array $filters
+     * @return Collection|LengthAwarePaginator
+     */
+    public function forUserUnits(User $user, array $filters = []): Collection|LengthAwarePaginator
+    {
+        $unitIds = Unit::query()
+            ->whereHas('currentOwner', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orWhereHas('currentLease', function ($q) use ($user) {
+                $q->where('tenant_id', $user->id);
+            })
+            ->pluck('id');
+
+        $query = Invoice::query()
+            ->when($unitIds->isNotEmpty(), function ($q) use ($unitIds) {
+                $q->whereIn('unit_id', $unitIds);
+            }, function ($q) {
+                // No units -> no invoices
+                $q->whereRaw('1 = 0');
+            });
+
+        $status = $filters['status'] ?? 'all';
+        if ($status === 'pending') {
+            $query->whereIn('status', [
+                Controller::_INVOICE_STATUSES[0], // issued
+                Controller::_INVOICE_STATUSES[1], // partial
+                Controller::_INVOICE_STATUSES[3], // overdue
+            ]);
+        } elseif ($status === 'paid') {
+            $query->where('status', Controller::_INVOICE_STATUSES[2]); // paid
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        $perPage = $filters['per_page'] ?? null;
+        return $perPage ? $query->paginate($perPage) : $query->get();
+    }
+
+    /**
      * Search users by invoice name or phone.
      * Additional filters can be added.
      * ['role', 'status']

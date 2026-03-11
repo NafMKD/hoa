@@ -33,7 +33,9 @@
     "noPending": "No pending invoices.",
     "noHistory": "No payment history.",
     "loadError": "Failed to load invoices.",
-    "due": "Due"
+    "due": "Due",
+    "notYourInvoice": "This is not your invoice.",
+    "settleInOffice": "Please settle this case in person by visiting the office."
   },
   "payment": {
     "backToInvoices": "Back to invoices",

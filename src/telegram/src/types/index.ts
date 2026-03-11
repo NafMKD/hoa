@@ -26,6 +26,8 @@ export interface Invoice {
   id: number;
   invoice_number: string;
   invoice_type: string;
+  is_mine?: boolean;
+  is_unit_owner?: boolean;
   final_amount_due: number;
   issue_date: string;
   due_date: string | null;

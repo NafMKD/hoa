@@ -6,7 +6,7 @@ import type { Invoice } from "@/types/index.ts";
 import { hasPendingPayment } from "@/types/index.ts";
 import { LoadingSpinner } from "@/components/loading-spinner.tsx";
 
-const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
+const CACHE_TTL_MS = 60 * 1000; // 1 minute
 
 export function InvoicesScreen() {
   const { t } = useTranslation();
@@ -27,7 +27,7 @@ export function InvoicesScreen() {
     setLoading(true);
     setError("");
     try {
-      const res = await api.get("/users/me/invoices?status=pending&per_page=50");
+      const res = await api.get("/users/me/invoices?status=pending&per_page=50&scope=unit");
       const data = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
       setPending(data);
       setPendingFetchedAt(Date.now());
@@ -48,7 +48,7 @@ export function InvoicesScreen() {
     setLoading(true);
     setError("");
     try {
-      const res = await api.get("/users/me/invoices?status=paid&per_page=20");
+      const res = await api.get("/users/me/invoices?status=paid&per_page=20&scope=unit");
       const data = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
       setHistory(data);
       setHistoryFetchedAt(Date.now());
@@ -124,6 +124,7 @@ export function InvoicesScreen() {
         <div className="invoice-list">
           {list.map((inv) => {
             const isPendingPayment = tab === "pending" && hasPendingPayment(inv);
+            const canPay = tab === "pending" && (inv.is_mine ?? true);
             return (
               <div key={inv.id} className="invoice-card">
                 <div className="invoice-row">
@@ -140,10 +141,22 @@ export function InvoicesScreen() {
                     <button type="button" disabled className="btn-secondary-disabled">
                       {t("invoices.pendingApproval")}
                     </button>
-                  ) : (
+                  ) : canPay ? (
                     <Link to={`/payment/${inv.id}`} className="btn-primary btn-sm">
                       {t("invoices.payNow")}
                     </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn-secondary-disabled"
+                      onClick={() => {
+                        if (inv.is_unit_owner) {
+                          window.alert(t("invoices.settleInOffice"));
+                        }
+                      }}
+                    >
+                      {t("invoices.notYourInvoice")}
+                    </button>
                   )
                 )}
               </div>

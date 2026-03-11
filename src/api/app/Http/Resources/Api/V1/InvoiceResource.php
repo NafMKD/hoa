@@ -19,6 +19,12 @@ class InvoiceResource extends JsonResource
             'id'                => $this->id,
             'invoice_number'    => $this->invoice_number,
             'invoice_type'      => $this->invoice_type,
+            // True when this invoice belongs to the authenticated user (user_id match).
+            'is_mine'           => $request->user() ? $this->user_id === $request->user()->id : false,
+            // True when the authenticated user is the current owner for this invoice's unit.
+            'is_unit_owner'     => $request->user() && $this->unit && $this->unit->currentOwner
+                ? (int) $this->unit->currentOwner->user_id === (int) $request->user()->id
+                : false,
             'user'              => $this->whenLoaded('user', function () {
                 return new UserResource($this->user);
             }),

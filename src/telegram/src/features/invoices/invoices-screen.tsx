@@ -31,15 +31,15 @@ export function InvoicesScreen() {
       const data = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
       setPending(data);
       setPendingFetchedAt(Date.now());
-    } catch (err: unknown) {
-      const res = (err as { response?: { status?: number; data?: { message?: string } } })?.response;
-      if (res?.status === 401) {
-        localStorage.removeItem(TOKEN_KEY);
-        navigate("/auth", { replace: true });
-        return;
-      }
-      setError(t("invoices.loadError"));
-    } finally {
+      } catch (err: unknown) {
+        const res = (err as { response?: { status?: number; data?: { message?: string } } })?.response;
+        if (res?.status === 401) {
+          sessionStorage.removeItem(TOKEN_KEY);
+          navigate("/auth", { replace: true });
+          return;
+        }
+        setError(t("invoices.loadError"));
+      } finally {
       setLoading(false);
     }
   }, [navigate, t]);

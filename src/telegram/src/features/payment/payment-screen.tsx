@@ -12,7 +12,8 @@ export function PaymentScreen() {
   const navigate = useNavigate();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [amount, setAmount] = useState("");
-  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10));
+  // Temporarily hide payment date; backend will use today's date.
+  // const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10));
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState("");
@@ -47,8 +48,10 @@ export function PaymentScreen() {
     try {
       const formData = new FormData();
       formData.append("invoice_id", String(invoice.id));
+      // Amount is fixed to full invoice amount for now (disabled field).
       formData.append("amount", amount);
-      formData.append("payment_date", paymentDate);
+      // Temporarily let backend use current date for payment_date.
+      // formData.append("payment_date", paymentDate);
       formData.append("screenshot", screenshot);
       await api.post("/payments/telegram", formData);
       setSuccess(true);
@@ -64,6 +67,24 @@ export function PaymentScreen() {
   };
 
   const invoiceMonths = invoice ? getInvoiceMonths(invoice) : [];
+
+  const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) {
+      setScreenshot(null);
+      return;
+    }
+    const ONE_MB = 1024 * 1024;
+    if (file.size > ONE_MB) {
+      // Enforce 1 MB limit on client to match backend/OCR.space free tier.
+      setSubmitError(t("payment.errorScreenshot") + " (max 1 MB).");
+      e.target.value = "";
+      setScreenshot(null);
+      return;
+    }
+    setSubmitError("");
+    setScreenshot(file);
+  };
 
   if (fetchError) {
     return (
@@ -164,11 +185,14 @@ export function PaymentScreen() {
           type="number"
           step="0.01"
           value={amount}
+          // Temporarily lock amount to full invoice amount; remove disabled to allow editing again.
+          disabled
           onChange={(e) => setAmount(e.target.value)}
           required
           aria-required="true"
         />
 
+        {/* Temporarily remove payment date field; backend uses today's date.
         <label htmlFor="paymentDate">{t("payment.paymentDateLabel")}</label>
         <input
           id="paymentDate"
@@ -178,13 +202,14 @@ export function PaymentScreen() {
           required
           aria-required="true"
         />
+        */}
 
         <label htmlFor="screenshot">{t("payment.screenshotLabel")}</label>
         <input
           id="screenshot"
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          onChange={(e) => setScreenshot(e.target.files?.[0] ?? null)}
+          onChange={handleScreenshotChange}
           required
           aria-required="true"
         />

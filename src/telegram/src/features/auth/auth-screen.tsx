@@ -35,7 +35,9 @@ export function AuthScreen() {
         ...(phone.trim() ? { phone: phone.trim() } : {}),
       });
       if (status === 200 && data?.token) {
-        localStorage.setItem(TOKEN_KEY, data.token);
+        // For Telegram Mini App we keep the token only for the current session.
+        // Closing the app/webview clears sessionStorage, so every open is a fresh auth.
+        sessionStorage.setItem(TOKEN_KEY, data.token);
         navigate("/invoices", { replace: true });
         return "ok";
       }

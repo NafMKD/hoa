@@ -3,11 +3,11 @@
     "loading": "በመፈለግ ላይ...",
     "back": "ተመለስ",
     "signOut": "ውጣ",
-    "appName": "ኖዋ ጋርድን",
+    "appName": "ኖህ ጋርድን",
     "language": "ቋንቋ"
   },
   "auth": {
-    "title": "ኖዋ ጋርደን",
+    "title": "ኖህ ጋርደን",
     "subtitle": "የክፍያ ቢሎችን ለማየት እና ክፍያ ለመፈጸም በስልክ ቁጥርዎ ይግቡ።",
     "phoneLabel": "ስልክ ቁጥር",
     "phonePlaceholder": "09 XX XXX XXXX",

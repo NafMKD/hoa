@@ -20,6 +20,9 @@ use Illuminate\Validation\ValidationException;
 
 class PaymentController extends Controller
 {
+    /** Max payment screenshot size in KB (1 MB – OCR.space free tier limit). */
+    protected const _MAX_SCREENSHOT_SIZE_KB = 1024;
+
     protected PaymentRepository $payments;
     protected DocumentRepository $documents;
 
@@ -81,8 +84,9 @@ class PaymentController extends Controller
             $validated = $request->validate([
                 'invoice_id'    => ['required', 'integer', 'exists:invoices,id'],
                 'amount'        => ['required', 'numeric', 'min:0'],
-                'payment_date'  => ['required', 'date'],
-                'screenshot'    => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:' . self::_MAX_FILE_SIZE],
+                // Temporarily let backend set payment date automatically for Telegram payments.
+                'payment_date'  => ['nullable', 'date'],
+                'screenshot'    => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:' . self::_MAX_SCREENSHOT_SIZE_KB],
             ]);
 
             $invoice = Invoice::findOrFail($validated['invoice_id']);
@@ -113,7 +117,8 @@ class PaymentController extends Controller
             $payment = $this->payments->createFromTelegram([
                 'invoice_id'              => $validated['invoice_id'],
                 'amount'                  => $validated['amount'],
-                'payment_date'            => $validated['payment_date'],
+                // If no payment_date is provided, default to today's date.
+                'payment_date'            => $validated['payment_date'] ?? now()->toDateString(),
                 'payment_screen_shoot_id' => $document->id,
             ]);
 

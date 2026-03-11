@@ -7,10 +7,11 @@ return [
     | OCR Provider
     |--------------------------------------------------------------------------
     |
-    | Supported: "tesseract"
+    | Supported: "ocr_space" (cloud API, no install), "tesseract" (local).
+    | Use ocr_space on shared hosting. Get free API key at https://ocr.space/OCRAPI
     |
     */
-    'provider' => env('OCR_PROVIDER', 'tesseract'),
+    'provider' => env('OCR_PROVIDER', 'ocr_space'),
 
     /*
     |--------------------------------------------------------------------------
@@ -24,22 +25,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Tesseract Executable Path
+    | OCR.space API (free tier: 1 MB max file, 25k req/month)
     |--------------------------------------------------------------------------
-    |
-    | Path to tesseract binary. Leave null for auto-detect.
-    |
     */
-    'tesseract_path' => env('TESSERACT_PATH'),
+    'ocr_space' => [
+        'api_key'  => env('OCR_SPACE_API_KEY'),
+        'language' => env('OCR_SPACE_LANGUAGE', 'eng'), // 3-letter code: eng, ara, etc.
+    ],
 
     /*
     |--------------------------------------------------------------------------
-    | Tesseract Languages
+    | Tesseract (local, optional)
     |--------------------------------------------------------------------------
-    |
-    | Languages for OCR (e.g. eng, amh for Amharic).
-    |
     */
+    'tesseract_path' => env('TESSERACT_PATH'),
     'tesseract_lang' => env('TESSERACT_LANG', 'eng'),
 
 ];

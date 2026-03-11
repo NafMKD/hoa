@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { isTelegramEnv, openLink } from "@/lib/telegram.ts";
 
-const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || "NoahGardenBot";
+const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || "noah_garden_bot";
 
 /**
  * When the app is not opened inside Telegram (and not in dev mode), show a full-screen message

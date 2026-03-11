@@ -45,7 +45,8 @@ export function AuthScreen() {
     } catch (err: unknown) {
       const res = (err as { response?: { status?: number; data?: { code?: string } } })?.response;
       if (res?.status === 401 && res?.data?.code === "need_phone") return "need_phone";
-      if (res?.status === 401) return "invalid";
+      // Any other 401 (e.g. expired/invalid) should fall back to phone-link flow instead of blocking with an error.
+      if (res?.status === 401) return "need_phone";
       if (res?.status === 404) {
         setError(t("auth.errorNotFound"));
         return "other";
@@ -75,7 +76,6 @@ export function AuthScreen() {
       if (cancelled) return;
       setLoading(false);
       if (result === "need_phone") setNeedPhone(true);
-      if (result === "invalid") setError(t("auth.errorInvalid"));
     })();
     return () => { cancelled = true; };
   }, []);
@@ -96,7 +96,7 @@ export function AuthScreen() {
       if (result === "ok") return;
       if (result !== "need_phone") {
         setLoading(false);
-        if (result === "invalid") setError(t("auth.errorInvalid"));
+        if (result === "other" && !error) setError(t("auth.errorGeneric"));
         return;
       }
     }

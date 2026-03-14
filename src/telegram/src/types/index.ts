@@ -3,6 +3,7 @@ export interface Payment {
   amount: number;
   method: string;
   status: string;
+  receipt_number?: string | null;
   payment_date?: string;
   created_at?: string;
   updated_at?: string;

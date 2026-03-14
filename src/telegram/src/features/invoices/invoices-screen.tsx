@@ -125,10 +125,27 @@ export function InvoicesScreen() {
           {list.map((inv) => {
             const isPendingPayment = tab === "pending" && hasPendingPayment(inv);
             const canPay = tab === "pending" && (inv.is_mine ?? true);
+            const receiptNumbers =
+              tab === "history" && Array.isArray(inv.payments)
+                ? inv.payments
+                    .map((p) => p.receipt_number)
+                    .filter((r): r is string => Boolean(r?.trim()))
+                : [];
+            const primaryLabel =
+              tab === "history" && receiptNumbers.length > 0
+                ? receiptNumbers.join(" & ")
+                : inv.invoice_number;
             return (
               <div key={inv.id} className="invoice-card">
                 <div className="invoice-row">
-                  <span className="invoice-number">{inv.invoice_number}</span>
+                  <div className="invoice-row-left">
+                    <span className="invoice-number">{receiptNumbers.length > 0 ? "Receipt #: ": 'Invoice #: '}{primaryLabel}</span>
+                    {tab === "history" && receiptNumbers.length > 0 && (
+                      <span className="invoice-number-secondary">
+                        {inv.invoice_number}
+                      </span>
+                    )}
+                  </div>
                   <span className="invoice-amount">
                     {inv.status === "paid" ? inv.amount_paid?.toLocaleString?.() ?? inv.amount_paid : inv.final_amount_due?.toLocaleString?.() ?? inv.final_amount_due } ETB
                   </span>
@@ -231,11 +248,21 @@ export function InvoicesScreen() {
           align-items: flex-start;
           margin-bottom: 8px;
         }
+        .invoice-row-left {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
         .invoice-number {
           font-family: "Baloo 2", sans-serif;
           font-weight: 600;
           font-size: 17px;
           color: var(--color-text);
+        }
+        .invoice-number-secondary {
+          font-size: 14px;
+          font-weight: 500;
+          color: var(--color-text-muted);
         }
         .invoice-amount {
           font-weight: 700;

@@ -88,6 +88,7 @@ export function PaymentDetail() {
     "confirm" | "fail" | "refund" | null
   >(null);
   const [receiptOpen, setReceiptOpen] = useState(false);
+  const [receiptDialogMode, setReceiptDialogMode] = useState<'add' | 'edit'>('add');
   const [receiptNumber, setReceiptNumber] = useState("");
   const [previewFile, setPreviewFile] = useState<PreviewFile | null>(null)
 
@@ -220,7 +221,7 @@ export function PaymentDetail() {
       setReceiptOpen(false);
       setReceiptNumber("");
 
-      toast.success("Receipt number added");
+      toast.success(receiptDialogMode === "edit" ? "Receipt number updated" : "Receipt number added");
     } catch (error) {
       const err = error as ApiError;
       toast.error(err.data?.message || "Failed to add receipt number");
@@ -297,7 +298,11 @@ export function PaymentDetail() {
             {payment.status === "confirmed" && !payment.receipt_number && (
               <Button
                 variant="outline"
-                onClick={() => setReceiptOpen(true)}
+                onClick={() => {
+                  setReceiptDialogMode("add");
+                  setReceiptNumber("");
+                  setReceiptOpen(true);
+                }}
                 disabled={isProcessing}
               >
                 <IconFileInvoice size={16} className="mr-1" />
@@ -323,13 +328,22 @@ export function PaymentDetail() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-            <AlertDialog open={receiptOpen} onOpenChange={setReceiptOpen}>
+            <AlertDialog
+              open={receiptOpen}
+              onOpenChange={(open) => {
+                setReceiptOpen(open);
+                if (!open) setReceiptNumber("");
+              }}
+            >
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Add Receipt Number</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {receiptDialogMode === "edit" ? "Edit Receipt Number" : "Add Receipt Number"}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Enter the official receipt number for this completed
-                    payment.
+                    {receiptDialogMode === "edit"
+                      ? "Update the official receipt number for this payment."
+                      : "Enter the official receipt number for this completed payment."}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
 
@@ -468,13 +482,27 @@ export function PaymentDetail() {
                   <CardTitle className="text-base">
                     Transaction Details
                   </CardTitle>
-                  { payment.receipt_number && (
-                  <div className="text-sm text-muted-foreground">
-                    Receipt # —{" "}
-                    <span className="ml-1 font-mono font-bold text-foreground">
-                      {payment.receipt_number}
-                    </span>
-                  </div>
+                  {payment.receipt_number && (
+                    <div className="text-sm text-muted-foreground">
+                      Receipt # —{" "}
+                      {payment.status === "confirmed" ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReceiptDialogMode("edit");
+                            setReceiptNumber(payment.receipt_number ?? "");
+                            setReceiptOpen(true);
+                          }}
+                          className="ml-1 font-mono font-bold text-foreground underline decoration-dotted underline-offset-2 hover:bg-muted/50 rounded px-0.5 -mx-0.5  cursor-pointer"
+                        >
+                          {payment.receipt_number}
+                        </button>
+                      ) : (
+                        <span className="ml-1 font-mono font-bold text-foreground">
+                          {payment.receipt_number}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </CardHeader>

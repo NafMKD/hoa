@@ -340,18 +340,28 @@ class PaymentController extends Controller
     {
         try {
             $this->authorize('addReceiptNumber', $payment);
-            $paymentNumber = $request->get('receipt_number');
-            
+
+            $validated = $request->validate([
+                'receipt_number' => ['required', 'string', 'max:255'],
+            ]);
+            $paymentNumber = $validated['receipt_number'];
+
             $payment = $this->payments->addReceiptNumber($payment, $paymentNumber);
 
             $payment->load(['invoice', 'invoice.user',  'invoice.unit', 'screenshot']);
 
             return response()->json(new PaymentResource($payment));
-        }catch (AuthorizationException) {
+        } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNAUTHORIZED,
             ], 403);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
         } catch (RepositoryException $e) {
             return response()->json([
                 'status' => self::_ERROR,

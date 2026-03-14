@@ -472,11 +472,12 @@ export function PaymentDetail() {
                     <p className="font-semibold text-lg">
                       {payment.invoice?.user ? (
                         <Link
-                          to={`/admin/users/$userId`}
+                          to="/admin/users/$userId"
                           params={{
                             userId: payment.invoice.user.id.toString(),
                           }}
                           target="_blank"
+                          rel="noopener noreferrer"
                           className="hover:underline"
                         >
                           {payment.invoice.user.full_name}
@@ -485,6 +486,22 @@ export function PaymentDetail() {
                         "Unknown Payer"
                       )}
                     </p>
+                    {payment.invoice?.unit && (
+                      <p className="text-base text-muted-foreground">
+                        Unit:{" "}
+                        <Link
+                          to="/admin/units/$unitId"
+                          params={{
+                            unitId: payment.invoice.unit.id.toString(),
+                          }}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline text-primary"
+                        >
+                          {payment.invoice.unit.name}
+                        </Link>
+                      </p>
+                    )}
                     <p className="text-sm text-muted-foreground">
                       {payment.invoice?.user?.email}
                     </p>
@@ -504,8 +521,10 @@ export function PaymentDetail() {
                     <p className="font-semibold text-lg">
                       {payment.invoice ? (
                         <Link
-                          to={`/admin/financials/invoices/$invoiceId`}
+                          to="/admin/financials/invoices/$invoiceId"
                           params={{ invoiceId: payment.invoice.id.toString() }}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="hover:underline text-primary"
                         >
                           {payment.invoice.invoice_number}

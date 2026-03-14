@@ -52,6 +52,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type PreviewFile = {
   title: string
@@ -73,6 +78,56 @@ function getFileType(url?: string | null): "image" | "pdf" | "unknown" {
     return "pdf"
   }
   return "unknown"
+}
+
+function ReferenceWithDuplicateTooltip({
+  reference,
+  paymentsWithSameReference,
+  className = "",
+}: {
+  reference: string;
+  paymentsWithSameReference?: { id: number; reference: string }[];
+  className?: string;
+}) {
+  const hasDuplicates = paymentsWithSameReference?.length && paymentsWithSameReference.length > 0;
+  const content = (
+    <span
+      className={
+        hasDuplicates
+          ? `font-mono inline-flex items-center gap-1 rounded border border-amber-400/70 bg-amber-50 px-1.5 py-0.5 dark:bg-amber-950/40 dark:border-amber-500/60 ${className}`
+          : `font-mono ${className}`.trim()
+      }
+    >
+      {reference}
+    </span>
+  );
+  if (hasDuplicates) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="cursor-help">{content}</span>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="max-w-xs">
+          <p className="font-medium mb-1.5">Same reference used by other payments:</p>
+          <ul className="space-y-1">
+            {paymentsWithSameReference.map((p) => (
+              <li key={p.id}>
+                <Link
+                  to="/admin/financials/payments/$paymentId"
+                  target="_blank"
+                  params={{ paymentId: String(p.id) }}
+                  className="text-primary underline hover:no-underline"
+                >
+                  Payment #{p.id}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+  return content;
 }
 
 export function PaymentDetail() {
@@ -237,7 +292,11 @@ export function PaymentDetail() {
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-2xl font-bold tracking-tight flex items-center gap-3">
-                Ref. # - {payment.reference}
+                Ref. # —{" "}
+                <ReferenceWithDuplicateTooltip
+                  reference={payment.reference}
+                  paymentsWithSameReference={payment.payments_with_same_reference}
+                />
                 <Badge
                   variant="outline"
                   className={`text-sm px-2 py-0.5 rounded-full ${getPaymentStatusColor(payment.status)}`}
@@ -521,8 +580,11 @@ export function PaymentDetail() {
                       <TableCell className="pl-6 font-medium text-muted-foreground">
                         Reference / Transaction ID
                       </TableCell>
-                      <TableCell className="font-mono">
-                        {payment.reference}
+                      <TableCell>
+                        <ReferenceWithDuplicateTooltip
+                          reference={payment.reference}
+                          paymentsWithSameReference={payment.payments_with_same_reference}
+                        />
                       </TableCell>
                     </TableRow>
                     {payment.reconciliation_metadata && (

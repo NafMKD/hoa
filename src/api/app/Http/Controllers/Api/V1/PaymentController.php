@@ -211,7 +211,14 @@ class PaymentController extends Controller
             $this->authorize('view', $payment);
             $payment->load(['invoice', 'invoice.user',  'invoice.unit', 'screenshot']);
 
-            return response()->json(new PaymentResource($payment));
+            $data = (new PaymentResource($payment))->toArray(request());
+            $sameReference = Payment::where('reference', $payment->reference)
+                ->where('id', '!=', $payment->id)
+                ->get(['id', 'reference'])
+                ->map(fn ($p) => ['id' => $p->id, 'reference' => $p->reference]);
+            $data['payments_with_same_reference'] = $sameReference;
+
+            return response()->json($data);
         } catch (AuthorizationException) {
             return response()->json([
                 'status' => self::_ERROR,

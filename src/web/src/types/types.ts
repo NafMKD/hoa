@@ -278,6 +278,11 @@ export type InvoiceStatus = 'issued' | 'partial' | 'paid' | 'overdue' | 'cancell
 export type PaymentStatus = 'pending' | 'confirmed' | 'failed' | 'refunded';
 
 
+export interface PaymentWithSameReference {
+  id: number;
+  reference: string;
+}
+
 export interface Payment {
   id: number;
   amount: number;
@@ -286,14 +291,16 @@ export interface Payment {
   status: PaymentStatus;
   type: string;
   processed_by?: string;
-  processed_at: string | null; 
+  processed_at: string | null;
   receipt_number?: string | null;
-  payment_date: string | null; 
+  payment_date: string | null;
   reconciliation_metadata?: Record<string, string> | null;
   invoice: Invoice;
   screenshot?: Document;
-  created_at: string; 
-  updated_at: string; 
+  created_at: string;
+  updated_at: string;
+  /** Other payments sharing this reference (payment detail response only). */
+  payments_with_same_reference?: PaymentWithSameReference[];
 }
 
 export interface PaymentPaginatedResponse {

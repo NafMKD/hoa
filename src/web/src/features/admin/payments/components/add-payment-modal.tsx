@@ -40,7 +40,7 @@ const formSchema = z.object({
   invoice_id: z.number().min(1, "Invoice ID is required"),
   amount: z.number().min(0, "Amount must be positive"),
   method: z.string().min(1, "Payment method is required"),
-  reference: z.string().min(12, "Reference is required, and should be 12 char long.").max(12),
+  reference: z.string().min(1, "Reference is required"),
   payment_date: z.string().min(1, "Payment date is required"),
 });
 

@@ -167,7 +167,7 @@ class PaymentController extends Controller
                 'invoice_id'              => ['required', 'integer', 'exists:invoices,id'],
                 'amount'                  => ['required', 'numeric', 'min:0'],
                 'method'                  => ['required', 'string', 'max:255'],
-                'reference'               => ['required', 'string', 'max:255'],
+                'reference'               => ['required', 'string'],
                 'payment_date'            => ['required', 'date'],
             ]);
 

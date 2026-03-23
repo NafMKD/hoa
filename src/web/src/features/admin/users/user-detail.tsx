@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Main } from "@/components/layout/main";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fetchUserDetail } from "./lib/users";
 import type { User } from "@/types/types";
 import { Link, useParams } from "@tanstack/react-router";
-import { IconArrowLeft, IconArrowLeftCircle } from "@tabler/icons-react";
+import { IconArrowLeft, IconArrowLeftCircle, IconEdit } from "@tabler/icons-react";
 import {
   Table,
   TableBody,
@@ -24,23 +24,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { EditUserForm } from "./components/edit-user-form";
 
 export function UserDetail() {
   const { userId } = useParams({ from: "/_authenticated/admin/users/$userId" });
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const loadUser = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchUserDetail(userId as string);
+      setUser(data);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
 
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const data = await fetchUserDetail(userId as string);
-        setUser(data);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadUser();
-  }, [userId]);
+  }, [loadUser]);
 
   if (isLoading) {
     return (
@@ -135,15 +146,41 @@ export function UserDetail() {
 
   return (
     <Main className="container mx-auto px-4 py-6 space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold tracking-tight">User Details</h1>
-        <Button variant="outline" asChild>
-          <Link to="/admin/users">
-            <IconArrowLeft size={16} className="mr-1" />
-            Back
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/admin/users">
+              <IconArrowLeft size={16} className="mr-1" />
+              Back
+            </Link>
+          </Button>
+          <Button onClick={() => setIsEditOpen(true)} className="gap-2">
+            <IconEdit size={16} />
+            Edit User
+          </Button>
+        </div>
       </div>
+
+      <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-auto">
+          <SheetHeader>
+            <SheetTitle className="text-center">Edit User</SheetTitle>
+            <SheetDescription className="text-center">
+              Update the user information below.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-6 pb-10">
+            <EditUserForm
+              user={user}
+              onSuccess={() => {
+                setIsEditOpen(false);
+                loadUser();
+              }}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <Card className="border-muted shadow-sm">
         <CardHeader className="space-y-4">

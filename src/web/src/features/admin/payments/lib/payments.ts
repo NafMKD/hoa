@@ -4,10 +4,18 @@ import type { Payment, PaymentPaginatedResponse } from "@/types/types";
 export const fetchPayments = async (
   page: string,
   perPage: string,
-  search = ""
+  search = "",
+  status = "all"
 ): Promise<PaymentPaginatedResponse> => {
+  const query = new URLSearchParams({
+    page,
+    per_page: perPage,
+    ...(search && { search }),
+    ...(status !== "all" && { status }),
+  }).toString();
+
   return handleApi<PaymentPaginatedResponse>(
-    api.get(`/v1/payments?page=${page}&per_page=${perPage}&search=${search}`)
+    api.get(`/v1/payments?${query}`)
   );
 };
 

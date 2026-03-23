@@ -37,8 +37,15 @@ class PaymentRepository
         if (!empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('reference', 'like', "%{$search}%");
+                $q->where('reference', 'like', "%{$search}%")
+                  ->orWhereHas('invoice.unit', function ($q2) use ($search) {
+                      $q2->where('name', 'like', "%{$search}%");
+                  });
             });
+        }
+
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            $query->where('status', $filters['status']);
         }
 
         $query->orderBy('created_at', 'desc');

@@ -16,17 +16,19 @@ interface DataTableProps<TData> {
   table: TanstackTable<TData>;
   onChange?: (value: string) => void;
   searchValue: string;
+  filterSlot?: React.ReactNode;
 }
 
 export function DataTable<TData>({
   table,
   onChange,
-  searchValue
+  searchValue,
+  filterSlot
 }: DataTableProps<TData>) {
   const { isLoading } = table.options.meta as { isLoading: boolean };
   return (
     <div className="flex w-full flex-col gap-2.5 overflow-auto">
-      <div className="flex items-center py-4">
+      <div className="flex items-center gap-2 py-4 flex-wrap">
         <Input
           type="text"
           placeholder="Search here..."
@@ -36,7 +38,10 @@ export function DataTable<TData>({
           }}
           className="max-w-sm"
         />
-        <DataTableViewOptions table={table} />
+        {filterSlot && filterSlot}
+        <div className="ml-auto flex items-center gap-2">
+          <DataTableViewOptions table={table} />
+        </div>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

@@ -8,6 +8,13 @@ import { useReactTable, getCoreRowModel, getPaginationRowModel, type PaginationS
 import { useDebounce } from "use-debounce";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import type { Payment } from "@/types/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function Payments() {
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
@@ -16,12 +23,13 @@ export function Payments() {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<Payment[]>([]);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [debouncedSearch] = useDebounce(search, 600);
 
   const refreshData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetchPayments((pagination.pageIndex + 1).toString(), pagination.pageSize.toString(), debouncedSearch);
+      const res = await fetchPayments((pagination.pageIndex + 1).toString(), pagination.pageSize.toString(), debouncedSearch, statusFilter);
       setData(res.data);
       setPageCount(res.meta.last_page);
     } catch (error) {
@@ -30,7 +38,7 @@ export function Payments() {
       setIsLoading(false);
       setIsInitialLoading(false);
     }
-  }, [pagination.pageIndex, pagination.pageSize, debouncedSearch]);
+  }, [pagination.pageIndex, pagination.pageSize, debouncedSearch, statusFilter]);
 
   useEffect(() => { refreshData(); }, [refreshData]);
 
@@ -56,7 +64,25 @@ export function Payments() {
         {isInitialLoading ? (
           <DataTableSkeleton columnCount={6} shrinkZero />
         ) : (
-          <DataTable table={table} onChange={setSearch} searchValue={search} />
+          <DataTable 
+            table={table} 
+            onChange={setSearch} 
+            searchValue={search} 
+            filterSlot={
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                  <SelectItem value="refunded">Refunded</SelectItem>
+                </SelectContent>
+              </Select>
+            }
+          />
         )}
       </div>
     </Main>

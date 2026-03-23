@@ -45,8 +45,9 @@ class PaymentController extends Controller
 
             $perPage = (int) ($request->query('per_page', self::_DEFAULT_PAGINATION));
             $search = $request->query('search');
+            $status = $request->query('status');
 
-            $filters = compact('search');
+            $filters = compact('search', 'status');
 
             $payments = $this->payments->all($perPage, $filters);
 

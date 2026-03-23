@@ -214,12 +214,9 @@ class InvoiceRepository
     {
         $appliedPenalties = [];
         $totalPenalty = 0.0;
-        DB::transaction(function () use ($invoice, $penalties, $totalPenalty): void {
+        DB::transaction(function () use ($invoice, $penalties, &$totalPenalty, &$appliedPenalties): void {
             foreach ($penalties as $penalty) {
-                // check if penalty already exists for this invoice on the same date
-                $existingPenalty = $invoice->penalties()->where('applied_date', $penalty['applied_date'])->where('reason', $penalty['reason'])->first();
-                if ($existingPenalty) continue;
-
+                // allow multiple manual penalties of the same type by removing the existingPenalty block
                 $appliedPenalties[] = $penalty;
                 $invoice->penalties()->create([
                     'amount' => $penalty['amount'],

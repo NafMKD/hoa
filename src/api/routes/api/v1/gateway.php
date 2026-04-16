@@ -68,3 +68,6 @@ Route::prefix('payroll-tax-brackets')->middleware('auth:sanctum')->name('api.v1.
 Route::prefix('payroll-settings')->middleware('auth:sanctum')->name('api.v1.payroll_settings.')->group(function () {
     require __DIR__.'/payroll_settings.php';
 });
+Route::prefix('financial-reports')->middleware('auth:sanctum')->name('api.v1.financial_reports.')->group(function () {
+    require __DIR__.'/financial_report.php';
+});

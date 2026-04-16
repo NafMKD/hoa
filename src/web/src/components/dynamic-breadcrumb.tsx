@@ -24,6 +24,7 @@ const PATH_LABELS: Record<string, string> = {
     'units': 'Units',
     'users': 'Users',
     'financials': 'Financials',
+    'reports': 'Reports',
     'templates': 'Templates',
     'fees': 'Fees',
     'invoices': 'Invoices',

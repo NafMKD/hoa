@@ -90,6 +90,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Payment::class, PaymentPolicy::class);
         Gate::policy(Vehicle::class, VehiclePolicy::class);
 
+        Gate::define('viewFinancialReports', function (User $user): bool {
+            return $user->hasRole(['admin', 'accountant', 'secretary', 'representative']);
+        });
+
         // Observers
         User::observe(AuditLogObserver::class);
         Building::observe(AuditLogObserver::class);

@@ -31,6 +31,7 @@ import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/admin/templates/$templateId'
 import { Route as AuthenticatedAdminBuildingsBuildingIdRouteImport } from './routes/_authenticated/admin/buildings/$buildingId'
 import { Route as AuthenticatedAdminUnitsUnitIdIndexRouteImport } from './routes/_authenticated/admin/units/$unitId/index'
+import { Route as AuthenticatedAdminFinancialsReportsIndexRouteImport } from './routes/_authenticated/admin/financials/reports/index'
 import { Route as AuthenticatedAdminFinancialsReconciliationIndexRouteImport } from './routes/_authenticated/admin/financials/reconciliation/index'
 import { Route as AuthenticatedAdminFinancialsPayrollIndexRouteImport } from './routes/_authenticated/admin/financials/payroll/index'
 import { Route as AuthenticatedAdminFinancialsPaymentsIndexRouteImport } from './routes/_authenticated/admin/financials/payments/index'
@@ -167,6 +168,12 @@ const AuthenticatedAdminUnitsUnitIdIndexRoute =
     path: '/units/$unitId/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminFinancialsReportsIndexRoute =
+  AuthenticatedAdminFinancialsReportsIndexRouteImport.update({
+    id: '/financials/reports/',
+    path: '/financials/reports/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminFinancialsReconciliationIndexRoute =
   AuthenticatedAdminFinancialsReconciliationIndexRouteImport.update({
     id: '/financials/reconciliation/',
@@ -272,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/admin/financials/payments': typeof AuthenticatedAdminFinancialsPaymentsIndexRoute
   '/admin/financials/payroll': typeof AuthenticatedAdminFinancialsPayrollIndexRoute
   '/admin/financials/reconciliation': typeof AuthenticatedAdminFinancialsReconciliationIndexRoute
+  '/admin/financials/reports': typeof AuthenticatedAdminFinancialsReportsIndexRoute
   '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdIndexRoute
   '/admin/units/$unitId/leases': typeof AuthenticatedAdminUnitsUnitIdLeasesIndexRoute
   '/admin/units/$unitId/leases/$leaseId': typeof AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute
@@ -307,6 +315,7 @@ export interface FileRoutesByTo {
   '/admin/financials/payments': typeof AuthenticatedAdminFinancialsPaymentsIndexRoute
   '/admin/financials/payroll': typeof AuthenticatedAdminFinancialsPayrollIndexRoute
   '/admin/financials/reconciliation': typeof AuthenticatedAdminFinancialsReconciliationIndexRoute
+  '/admin/financials/reports': typeof AuthenticatedAdminFinancialsReportsIndexRoute
   '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdIndexRoute
   '/admin/units/$unitId/leases': typeof AuthenticatedAdminUnitsUnitIdLeasesIndexRoute
   '/admin/units/$unitId/leases/$leaseId': typeof AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute
@@ -344,6 +353,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/financials/payments/': typeof AuthenticatedAdminFinancialsPaymentsIndexRoute
   '/_authenticated/admin/financials/payroll/': typeof AuthenticatedAdminFinancialsPayrollIndexRoute
   '/_authenticated/admin/financials/reconciliation/': typeof AuthenticatedAdminFinancialsReconciliationIndexRoute
+  '/_authenticated/admin/financials/reports/': typeof AuthenticatedAdminFinancialsReportsIndexRoute
   '/_authenticated/admin/units/$unitId/': typeof AuthenticatedAdminUnitsUnitIdIndexRoute
   '/_authenticated/admin/units/$unitId/leases/': typeof AuthenticatedAdminUnitsUnitIdLeasesIndexRoute
   '/_authenticated/admin/units/$unitId/leases/$leaseId/': typeof AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute
@@ -382,6 +392,7 @@ export interface FileRouteTypes {
     | '/admin/financials/payments'
     | '/admin/financials/payroll'
     | '/admin/financials/reconciliation'
+    | '/admin/financials/reports'
     | '/admin/units/$unitId'
     | '/admin/units/$unitId/leases'
     | '/admin/units/$unitId/leases/$leaseId'
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | '/admin/financials/payments'
     | '/admin/financials/payroll'
     | '/admin/financials/reconciliation'
+    | '/admin/financials/reports'
     | '/admin/units/$unitId'
     | '/admin/units/$unitId/leases'
     | '/admin/units/$unitId/leases/$leaseId'
@@ -453,6 +465,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financials/payments/'
     | '/_authenticated/admin/financials/payroll/'
     | '/_authenticated/admin/financials/reconciliation/'
+    | '/_authenticated/admin/financials/reports/'
     | '/_authenticated/admin/units/$unitId/'
     | '/_authenticated/admin/units/$unitId/leases/'
     | '/_authenticated/admin/units/$unitId/leases/$leaseId/'
@@ -625,6 +638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/financials/reports/': {
+      id: '/_authenticated/admin/financials/reports/'
+      path: '/financials/reports'
+      fullPath: '/admin/financials/reports'
+      preLoaderRoute: typeof AuthenticatedAdminFinancialsReportsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/financials/reconciliation/': {
       id: '/_authenticated/admin/financials/reconciliation/'
       path: '/financials/reconciliation'
@@ -736,6 +756,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminFinancialsPaymentsIndexRoute: typeof AuthenticatedAdminFinancialsPaymentsIndexRoute
   AuthenticatedAdminFinancialsPayrollIndexRoute: typeof AuthenticatedAdminFinancialsPayrollIndexRoute
   AuthenticatedAdminFinancialsReconciliationIndexRoute: typeof AuthenticatedAdminFinancialsReconciliationIndexRoute
+  AuthenticatedAdminFinancialsReportsIndexRoute: typeof AuthenticatedAdminFinancialsReportsIndexRoute
   AuthenticatedAdminUnitsUnitIdIndexRoute: typeof AuthenticatedAdminUnitsUnitIdIndexRoute
   AuthenticatedAdminUnitsUnitIdLeasesIndexRoute: typeof AuthenticatedAdminUnitsUnitIdLeasesIndexRoute
   AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute: typeof AuthenticatedAdminUnitsUnitIdLeasesLeaseIdIndexRoute
@@ -783,6 +804,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminFinancialsPayrollIndexRoute,
     AuthenticatedAdminFinancialsReconciliationIndexRoute:
       AuthenticatedAdminFinancialsReconciliationIndexRoute,
+    AuthenticatedAdminFinancialsReportsIndexRoute:
+      AuthenticatedAdminFinancialsReportsIndexRoute,
     AuthenticatedAdminUnitsUnitIdIndexRoute:
       AuthenticatedAdminUnitsUnitIdIndexRoute,
     AuthenticatedAdminUnitsUnitIdLeasesIndexRoute:

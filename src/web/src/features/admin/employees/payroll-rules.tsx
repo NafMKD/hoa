@@ -8,7 +8,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import type { ApiError } from "@/types/api-error";
 import type { PayrollTaxBracket } from "@/types/types";
-import { useAuthStore } from "@/stores/auth-store";
 import {
   createPayrollTaxBracket,
   deletePayrollTaxBracket,
@@ -25,32 +24,31 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+function apiErrorMessage(err: unknown): string {
+  const e = err as ApiError;
+  const d = e.data as
+    | { message?: string; errors?: Record<string, string[] | string> }
+    | undefined;
+  if (d?.errors && typeof d.errors === "object") {
+    const first = Object.values(d.errors)[0];
+    if (Array.isArray(first) && first[0]) return String(first[0]);
+    if (typeof first === "string") return first;
+  }
+  if (d?.message) return d.message;
+  return e.message ?? "Request failed";
+}
 
 export function PayrollRulesPage() {
-  const role = useAuthStore((s) => s.user?.role);
-  const isAdmin = role === "admin";
-
-  if (!isAdmin) {
-    return (
-      <Main>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold tracking-tight">Payroll rules</h2>
-          <p className="text-muted-foreground mt-2">
-            Only administrators can edit tax brackets and payroll deduction settings.
-          </p>
-        </div>
-      </Main>
-    );
-  }
-
   return (
     <Main>
       <div className="mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Payroll rules</h2>
         <p className="text-muted-foreground">
-          Progressive tax brackets and other deductions used for new payroll calculations.
-          Snapshots are stored on each payroll row so past months stay correct if you change
-          these values later.
+          Configure progressive income tax bands and non-tax payroll deductions. When you
+          generate payroll, the app saves a snapshot on each row so history stays correct if
+          you change these numbers later.
         </p>
       </div>
       <PayrollRulesAdmin />
@@ -66,8 +64,8 @@ function PayrollRulesAdmin() {
 
   const [brackets, setBrackets] = useState<PayrollTaxBracket[]>([]);
   const [bracketsLoading, setBracketsLoading] = useState(true);
-  const [editing, setEditing] = useState<PayrollTaxBracket | null>(null);
-  const [creating, setCreating] = useState(false);
+  const [bracketDialogOpen, setBracketDialogOpen] = useState(false);
+  const [editingBracket, setEditingBracket] = useState<PayrollTaxBracket | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
 
@@ -78,7 +76,7 @@ function PayrollRulesAdmin() {
         setDedFixed(String(s.deduction_fixed));
         setDedPct(String(s.deduction_percent_of_gross));
       })
-      .catch(() => toast.error("Could not load settings"))
+      .catch((err) => toast.error(apiErrorMessage(err)))
       .finally(() => setSettingsLoading(false));
   }, []);
 
@@ -86,7 +84,7 @@ function PayrollRulesAdmin() {
     setBracketsLoading(true);
     fetchPayrollTaxBrackets()
       .then(setBrackets)
-      .catch(() => toast.error("Could not load tax brackets"))
+      .catch((err) => toast.error(apiErrorMessage(err)))
       .finally(() => setBracketsLoading(false));
   }, []);
 
@@ -106,10 +104,7 @@ function PayrollRulesAdmin() {
       toast.success("Settings saved");
       loadSettings();
     } catch (err) {
-      const e = err as ApiError;
-      toast.error(
-        (e.data as { message?: string })?.message ?? "Could not save settings"
-      );
+      toast.error(apiErrorMessage(err));
     } finally {
       setSettingsSaving(false);
     }
@@ -124,17 +119,56 @@ function PayrollRulesAdmin() {
       setDeleteId(null);
       loadBrackets();
     } catch (err) {
-      const e = err as ApiError;
-      toast.error(
-        (e.data as { message?: string })?.message ?? "Could not delete"
-      );
+      toast.error(apiErrorMessage(err));
     } finally {
       setDeleteBusy(false);
     }
   };
 
+  const openCreateBracket = () => {
+    setEditingBracket(null);
+    setBracketDialogOpen(true);
+  };
+
+  const openEditBracket = (b: PayrollTaxBracket) => {
+    setEditingBracket(b);
+    setBracketDialogOpen(true);
+  };
+
   return (
     <div className="space-y-8 max-w-3xl">
+      <Alert>
+        <AlertTitle>Other deductions (not income tax)</AlertTitle>
+        <AlertDescription className="text-muted-foreground space-y-2">
+          <p>
+            These are amounts taken out of pay <strong>after</strong> income tax is
+            calculated from your brackets. Together they form the &quot;deductions&quot; line
+            on payroll (alongside taxes).
+          </p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <strong>Fixed deduction (ETB)</strong> — the same flat amount for every employee
+              each run (e.g. fixed pension fee, union, or recurring charge).
+            </li>
+            <li>
+              <strong>Percent of gross (%)</strong> — an extra amount equal to gross salary ×
+              (percent ÷ 100), e.g. 5% of gross for a pension scheme.
+            </li>
+          </ul>
+          <p className="text-sm">
+            Formula used:{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+              other_deductions = fixed + (gross × percent ÷ 100)
+            </code>
+            . Then{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+              net = gross − taxes − other_deductions
+            </code>
+            .
+          </p>
+        </AlertDescription>
+      </Alert>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Other deductions</CardTitle>
@@ -180,11 +214,18 @@ function PayrollRulesAdmin() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-lg">Progressive tax brackets</CardTitle>
-          <Button type="button" size="sm" onClick={() => setCreating(true)}>
+          <Button type="button" size="sm" onClick={openCreateBracket}>
             Add bracket
           </Button>
         </CardHeader>
         <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Define bands on <strong>gross salary</strong>. Each row is a slice: from{" "}
+            <strong>min</strong> up to <strong>max</strong> (leave max empty for no upper
+            limit). The <strong>rate %</strong> applies to the portion of gross that falls
+            inside that slice. Existing payroll rows keep a stored snapshot of the rules used
+            when they were calculated.
+          </p>
           {bracketsLoading ? (
             <Spinner className="h-6 w-6" />
           ) : brackets.length === 0 ? (
@@ -210,7 +251,7 @@ function PayrollRulesAdmin() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => setEditing(b)}
+                      onClick={() => openEditBracket(b)}
                     >
                       Edit
                     </Button>
@@ -232,19 +273,15 @@ function PayrollRulesAdmin() {
       </Card>
 
       <BracketDialog
-        open={creating}
-        onOpenChange={setCreating}
-        onSaved={() => {
-          setCreating(false);
-          loadBrackets();
+        open={bracketDialogOpen}
+        onOpenChange={(open) => {
+          setBracketDialogOpen(open);
+          if (!open) setEditingBracket(null);
         }}
-      />
-      <BracketDialog
-        bracket={editing ?? undefined}
-        open={!!editing}
-        onOpenChange={(o) => !o && setEditing(null)}
+        bracket={editingBracket}
         onSaved={() => {
-          setEditing(null);
+          setBracketDialogOpen(false);
+          setEditingBracket(null);
           loadBrackets();
         }}
       />
@@ -269,7 +306,7 @@ function BracketDialog({
   onOpenChange,
   onSaved,
 }: {
-  bracket?: PayrollTaxBracket;
+  bracket: PayrollTaxBracket | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved: () => void;
@@ -296,18 +333,25 @@ function BracketDialog({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true);
-    try {
-      const min_inclusive = parseFloat(minV);
-      const rate_percent = parseFloat(rateV);
-      if (Number.isNaN(min_inclusive) || Number.isNaN(rate_percent)) {
-        toast.error("Min and rate are required");
+    const min_inclusive = parseFloat(minV);
+    const rate_percent = parseFloat(rateV);
+    if (Number.isNaN(min_inclusive) || Number.isNaN(rate_percent)) {
+      toast.error("Min and rate are required and must be numbers.");
+      return;
+    }
+    const maxRaw = maxV.trim();
+    let max_inclusive: number | null = null;
+    if (maxRaw !== "") {
+      const m = parseFloat(maxRaw);
+      if (Number.isNaN(m)) {
+        toast.error("Max must be a number or left empty for no upper limit.");
         return;
       }
-      const maxRaw = maxV.trim();
-      const max_inclusive =
-        maxRaw === "" ? null : parseFloat(maxRaw);
+      max_inclusive = m;
+    }
 
+    setBusy(true);
+    try {
       if (bracket) {
         await updatePayrollTaxBracket(bracket.id, {
           min_inclusive,
@@ -325,10 +369,7 @@ function BracketDialog({
       }
       onSaved();
     } catch (err) {
-      const er = err as ApiError;
-      toast.error(
-        (er.data as { message?: string })?.message ?? "Could not save bracket"
-      );
+      toast.error(apiErrorMessage(err));
     } finally {
       setBusy(false);
     }
@@ -375,6 +416,9 @@ function BracketDialog({
             />
           </div>
           <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={busy}>
               {busy ? <Spinner className="h-4 w-4" /> : "Save"}
             </Button>

@@ -16,6 +16,22 @@ export interface User {
     | "representative";
 }
 
+const ALLOWED_ROLES: User["role"][] = [
+  "admin",
+  "accountant",
+  "secretary",
+  "homeowner",
+  "tenant",
+  "representative",
+];
+
+/** API may return role with different casing; admin layout checks use exact lowercase. */
+export function normalizeUserRole(role: unknown): User["role"] {
+  if (typeof role !== "string") return "tenant";
+  const r = role.trim().toLowerCase() as User["role"];
+  return ALLOWED_ROLES.includes(r) ? r : "tenant";
+}
+
 interface AuthState {
   user: User | null;
   token?: string;
@@ -48,7 +64,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         id: data.user.id,
         name: `${data.user.first_name} ${data.user.last_name}`,
         phone: data.user.phone,
-        role: data.user.role,
+        role: normalizeUserRole(data.user.role),
       };
       set({ user, token });
       if (redirect) {

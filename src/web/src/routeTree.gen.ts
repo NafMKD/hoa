@@ -22,8 +22,10 @@ import { Route as AuthenticatedAdminVehiclesIndexRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminUsersIndexRouteImport } from './routes/_authenticated/admin/users/index'
 import { Route as AuthenticatedAdminUnitsIndexRouteImport } from './routes/_authenticated/admin/units/index'
 import { Route as AuthenticatedAdminTemplatesIndexRouteImport } from './routes/_authenticated/admin/templates/index'
+import { Route as AuthenticatedAdminPayrollRulesIndexRouteImport } from './routes/_authenticated/admin/payroll-rules/index'
 import { Route as AuthenticatedAdminEmployeesIndexRouteImport } from './routes/_authenticated/admin/employees/index'
 import { Route as AuthenticatedAdminBuildingsIndexRouteImport } from './routes/_authenticated/admin/buildings/index'
+import { Route as AuthenticatedAdminAgenciesIndexRouteImport } from './routes/_authenticated/admin/agencies/index'
 import { Route as AuthenticatedAdminVehiclesVehicleIdRouteImport } from './routes/_authenticated/admin/vehicles/$vehicleId'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin/users/$userId'
 import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/admin/templates/$templateId'
@@ -35,8 +37,6 @@ import { Route as AuthenticatedAdminFinancialsPaymentsIndexRouteImport } from '.
 import { Route as AuthenticatedAdminFinancialsInvoicesIndexRouteImport } from './routes/_authenticated/admin/financials/invoices/index'
 import { Route as AuthenticatedAdminFinancialsFeesIndexRouteImport } from './routes/_authenticated/admin/financials/fees/index'
 import { Route as AuthenticatedAdminFinancialsExpensesIndexRouteImport } from './routes/_authenticated/admin/financials/expenses/index'
-import { Route as AuthenticatedAdminEmployeesPayrollRulesIndexRouteImport } from './routes/_authenticated/admin/employees/payroll-rules/index'
-import { Route as AuthenticatedAdminEmployeesAgenciesIndexRouteImport } from './routes/_authenticated/admin/employees/agencies/index'
 import { Route as AuthenticatedAdminFinancialsReconciliationBatchIdRouteImport } from './routes/_authenticated/admin/financials/reconciliation/$batchId'
 import { Route as AuthenticatedAdminFinancialsPaymentsPaymentIdRouteImport } from './routes/_authenticated/admin/financials/payments/$paymentId'
 import { Route as AuthenticatedAdminFinancialsInvoicesInvoiceIdRouteImport } from './routes/_authenticated/admin/financials/invoices/$invoiceId'
@@ -113,6 +113,12 @@ const AuthenticatedAdminTemplatesIndexRoute =
     path: '/templates/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminPayrollRulesIndexRoute =
+  AuthenticatedAdminPayrollRulesIndexRouteImport.update({
+    id: '/payroll-rules/',
+    path: '/payroll-rules/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminEmployeesIndexRoute =
   AuthenticatedAdminEmployeesIndexRouteImport.update({
     id: '/employees/',
@@ -123,6 +129,12 @@ const AuthenticatedAdminBuildingsIndexRoute =
   AuthenticatedAdminBuildingsIndexRouteImport.update({
     id: '/buildings/',
     path: '/buildings/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminAgenciesIndexRoute =
+  AuthenticatedAdminAgenciesIndexRouteImport.update({
+    id: '/agencies/',
+    path: '/agencies/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminVehiclesVehicleIdRoute =
@@ -191,18 +203,6 @@ const AuthenticatedAdminFinancialsExpensesIndexRoute =
     path: '/financials/expenses/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
-const AuthenticatedAdminEmployeesPayrollRulesIndexRoute =
-  AuthenticatedAdminEmployeesPayrollRulesIndexRouteImport.update({
-    id: '/employees/payroll-rules/',
-    path: '/employees/payroll-rules/',
-    getParentRoute: () => AuthenticatedAdminRouteRoute,
-  } as any)
-const AuthenticatedAdminEmployeesAgenciesIndexRoute =
-  AuthenticatedAdminEmployeesAgenciesIndexRouteImport.update({
-    id: '/employees/agencies/',
-    path: '/employees/agencies/',
-    getParentRoute: () => AuthenticatedAdminRouteRoute,
-  } as any)
 const AuthenticatedAdminFinancialsReconciliationBatchIdRoute =
   AuthenticatedAdminFinancialsReconciliationBatchIdRouteImport.update({
     id: '/financials/reconciliation/$batchId',
@@ -254,8 +254,10 @@ export interface FileRoutesByFullPath {
   '/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
+  '/admin/agencies': typeof AuthenticatedAdminAgenciesIndexRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesIndexRoute
+  '/admin/payroll-rules': typeof AuthenticatedAdminPayrollRulesIndexRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
@@ -264,8 +266,6 @@ export interface FileRoutesByFullPath {
   '/admin/financials/invoices/$invoiceId': typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   '/admin/financials/payments/$paymentId': typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
   '/admin/financials/reconciliation/$batchId': typeof AuthenticatedAdminFinancialsReconciliationBatchIdRoute
-  '/admin/employees/agencies': typeof AuthenticatedAdminEmployeesAgenciesIndexRoute
-  '/admin/employees/payroll-rules': typeof AuthenticatedAdminEmployeesPayrollRulesIndexRoute
   '/admin/financials/expenses': typeof AuthenticatedAdminFinancialsExpensesIndexRoute
   '/admin/financials/fees': typeof AuthenticatedAdminFinancialsFeesIndexRoute
   '/admin/financials/invoices': typeof AuthenticatedAdminFinancialsInvoicesIndexRoute
@@ -289,8 +289,10 @@ export interface FileRoutesByTo {
   '/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
+  '/admin/agencies': typeof AuthenticatedAdminAgenciesIndexRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesIndexRoute
+  '/admin/payroll-rules': typeof AuthenticatedAdminPayrollRulesIndexRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
@@ -299,8 +301,6 @@ export interface FileRoutesByTo {
   '/admin/financials/invoices/$invoiceId': typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   '/admin/financials/payments/$paymentId': typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
   '/admin/financials/reconciliation/$batchId': typeof AuthenticatedAdminFinancialsReconciliationBatchIdRoute
-  '/admin/employees/agencies': typeof AuthenticatedAdminEmployeesAgenciesIndexRoute
-  '/admin/employees/payroll-rules': typeof AuthenticatedAdminEmployeesPayrollRulesIndexRoute
   '/admin/financials/expenses': typeof AuthenticatedAdminFinancialsExpensesIndexRoute
   '/admin/financials/fees': typeof AuthenticatedAdminFinancialsFeesIndexRoute
   '/admin/financials/invoices': typeof AuthenticatedAdminFinancialsInvoicesIndexRoute
@@ -326,8 +326,10 @@ export interface FileRoutesById {
   '/_authenticated/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/_authenticated/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/_authenticated/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
+  '/_authenticated/admin/agencies/': typeof AuthenticatedAdminAgenciesIndexRoute
   '/_authenticated/admin/buildings/': typeof AuthenticatedAdminBuildingsIndexRoute
   '/_authenticated/admin/employees/': typeof AuthenticatedAdminEmployeesIndexRoute
+  '/_authenticated/admin/payroll-rules/': typeof AuthenticatedAdminPayrollRulesIndexRoute
   '/_authenticated/admin/templates/': typeof AuthenticatedAdminTemplatesIndexRoute
   '/_authenticated/admin/units/': typeof AuthenticatedAdminUnitsIndexRoute
   '/_authenticated/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
@@ -336,8 +338,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/financials/invoices/$invoiceId': typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   '/_authenticated/admin/financials/payments/$paymentId': typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
   '/_authenticated/admin/financials/reconciliation/$batchId': typeof AuthenticatedAdminFinancialsReconciliationBatchIdRoute
-  '/_authenticated/admin/employees/agencies/': typeof AuthenticatedAdminEmployeesAgenciesIndexRoute
-  '/_authenticated/admin/employees/payroll-rules/': typeof AuthenticatedAdminEmployeesPayrollRulesIndexRoute
   '/_authenticated/admin/financials/expenses/': typeof AuthenticatedAdminFinancialsExpensesIndexRoute
   '/_authenticated/admin/financials/fees/': typeof AuthenticatedAdminFinancialsFeesIndexRoute
   '/_authenticated/admin/financials/invoices/': typeof AuthenticatedAdminFinancialsInvoicesIndexRoute
@@ -364,8 +364,10 @@ export interface FileRouteTypes {
     | '/admin/templates/$templateId'
     | '/admin/users/$userId'
     | '/admin/vehicles/$vehicleId'
+    | '/admin/agencies'
     | '/admin/buildings'
     | '/admin/employees'
+    | '/admin/payroll-rules'
     | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
@@ -374,8 +376,6 @@ export interface FileRouteTypes {
     | '/admin/financials/invoices/$invoiceId'
     | '/admin/financials/payments/$paymentId'
     | '/admin/financials/reconciliation/$batchId'
-    | '/admin/employees/agencies'
-    | '/admin/employees/payroll-rules'
     | '/admin/financials/expenses'
     | '/admin/financials/fees'
     | '/admin/financials/invoices'
@@ -399,8 +399,10 @@ export interface FileRouteTypes {
     | '/admin/templates/$templateId'
     | '/admin/users/$userId'
     | '/admin/vehicles/$vehicleId'
+    | '/admin/agencies'
     | '/admin/buildings'
     | '/admin/employees'
+    | '/admin/payroll-rules'
     | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
@@ -409,8 +411,6 @@ export interface FileRouteTypes {
     | '/admin/financials/invoices/$invoiceId'
     | '/admin/financials/payments/$paymentId'
     | '/admin/financials/reconciliation/$batchId'
-    | '/admin/employees/agencies'
-    | '/admin/employees/payroll-rules'
     | '/admin/financials/expenses'
     | '/admin/financials/fees'
     | '/admin/financials/invoices'
@@ -435,8 +435,10 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/templates/$templateId'
     | '/_authenticated/admin/users/$userId'
     | '/_authenticated/admin/vehicles/$vehicleId'
+    | '/_authenticated/admin/agencies/'
     | '/_authenticated/admin/buildings/'
     | '/_authenticated/admin/employees/'
+    | '/_authenticated/admin/payroll-rules/'
     | '/_authenticated/admin/templates/'
     | '/_authenticated/admin/units/'
     | '/_authenticated/admin/users/'
@@ -445,8 +447,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financials/invoices/$invoiceId'
     | '/_authenticated/admin/financials/payments/$paymentId'
     | '/_authenticated/admin/financials/reconciliation/$batchId'
-    | '/_authenticated/admin/employees/agencies/'
-    | '/_authenticated/admin/employees/payroll-rules/'
     | '/_authenticated/admin/financials/expenses/'
     | '/_authenticated/admin/financials/fees/'
     | '/_authenticated/admin/financials/invoices/'
@@ -562,6 +562,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTemplatesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/payroll-rules/': {
+      id: '/_authenticated/admin/payroll-rules/'
+      path: '/payroll-rules'
+      fullPath: '/admin/payroll-rules'
+      preLoaderRoute: typeof AuthenticatedAdminPayrollRulesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/employees/': {
       id: '/_authenticated/admin/employees/'
       path: '/employees'
@@ -574,6 +581,13 @@ declare module '@tanstack/react-router' {
       path: '/buildings'
       fullPath: '/admin/buildings'
       preLoaderRoute: typeof AuthenticatedAdminBuildingsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/agencies/': {
+      id: '/_authenticated/admin/agencies/'
+      path: '/agencies'
+      fullPath: '/admin/agencies'
+      preLoaderRoute: typeof AuthenticatedAdminAgenciesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/vehicles/$vehicleId': {
@@ -653,20 +667,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinancialsExpensesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/admin/employees/payroll-rules/': {
-      id: '/_authenticated/admin/employees/payroll-rules/'
-      path: '/employees/payroll-rules'
-      fullPath: '/admin/employees/payroll-rules'
-      preLoaderRoute: typeof AuthenticatedAdminEmployeesPayrollRulesIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRouteRoute
-    }
-    '/_authenticated/admin/employees/agencies/': {
-      id: '/_authenticated/admin/employees/agencies/'
-      path: '/employees/agencies'
-      fullPath: '/admin/employees/agencies'
-      preLoaderRoute: typeof AuthenticatedAdminEmployeesAgenciesIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRouteRoute
-    }
     '/_authenticated/admin/financials/reconciliation/$batchId': {
       id: '/_authenticated/admin/financials/reconciliation/$batchId'
       path: '/financials/reconciliation/$batchId'
@@ -718,8 +718,10 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminTemplatesTemplateIdRoute: typeof AuthenticatedAdminTemplatesTemplateIdRoute
   AuthenticatedAdminUsersUserIdRoute: typeof AuthenticatedAdminUsersUserIdRoute
   AuthenticatedAdminVehiclesVehicleIdRoute: typeof AuthenticatedAdminVehiclesVehicleIdRoute
+  AuthenticatedAdminAgenciesIndexRoute: typeof AuthenticatedAdminAgenciesIndexRoute
   AuthenticatedAdminBuildingsIndexRoute: typeof AuthenticatedAdminBuildingsIndexRoute
   AuthenticatedAdminEmployeesIndexRoute: typeof AuthenticatedAdminEmployeesIndexRoute
+  AuthenticatedAdminPayrollRulesIndexRoute: typeof AuthenticatedAdminPayrollRulesIndexRoute
   AuthenticatedAdminTemplatesIndexRoute: typeof AuthenticatedAdminTemplatesIndexRoute
   AuthenticatedAdminUnitsIndexRoute: typeof AuthenticatedAdminUnitsIndexRoute
   AuthenticatedAdminUsersIndexRoute: typeof AuthenticatedAdminUsersIndexRoute
@@ -728,8 +730,6 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute: typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   AuthenticatedAdminFinancialsPaymentsPaymentIdRoute: typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
   AuthenticatedAdminFinancialsReconciliationBatchIdRoute: typeof AuthenticatedAdminFinancialsReconciliationBatchIdRoute
-  AuthenticatedAdminEmployeesAgenciesIndexRoute: typeof AuthenticatedAdminEmployeesAgenciesIndexRoute
-  AuthenticatedAdminEmployeesPayrollRulesIndexRoute: typeof AuthenticatedAdminEmployeesPayrollRulesIndexRoute
   AuthenticatedAdminFinancialsExpensesIndexRoute: typeof AuthenticatedAdminFinancialsExpensesIndexRoute
   AuthenticatedAdminFinancialsFeesIndexRoute: typeof AuthenticatedAdminFinancialsFeesIndexRoute
   AuthenticatedAdminFinancialsInvoicesIndexRoute: typeof AuthenticatedAdminFinancialsInvoicesIndexRoute
@@ -751,10 +751,13 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminUsersUserIdRoute: AuthenticatedAdminUsersUserIdRoute,
     AuthenticatedAdminVehiclesVehicleIdRoute:
       AuthenticatedAdminVehiclesVehicleIdRoute,
+    AuthenticatedAdminAgenciesIndexRoute: AuthenticatedAdminAgenciesIndexRoute,
     AuthenticatedAdminBuildingsIndexRoute:
       AuthenticatedAdminBuildingsIndexRoute,
     AuthenticatedAdminEmployeesIndexRoute:
       AuthenticatedAdminEmployeesIndexRoute,
+    AuthenticatedAdminPayrollRulesIndexRoute:
+      AuthenticatedAdminPayrollRulesIndexRoute,
     AuthenticatedAdminTemplatesIndexRoute:
       AuthenticatedAdminTemplatesIndexRoute,
     AuthenticatedAdminUnitsIndexRoute: AuthenticatedAdminUnitsIndexRoute,
@@ -768,10 +771,6 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminFinancialsPaymentsPaymentIdRoute,
     AuthenticatedAdminFinancialsReconciliationBatchIdRoute:
       AuthenticatedAdminFinancialsReconciliationBatchIdRoute,
-    AuthenticatedAdminEmployeesAgenciesIndexRoute:
-      AuthenticatedAdminEmployeesAgenciesIndexRoute,
-    AuthenticatedAdminEmployeesPayrollRulesIndexRoute:
-      AuthenticatedAdminEmployeesPayrollRulesIndexRoute,
     AuthenticatedAdminFinancialsExpensesIndexRoute:
       AuthenticatedAdminFinancialsExpensesIndexRoute,
     AuthenticatedAdminFinancialsFeesIndexRoute:

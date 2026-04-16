@@ -15,7 +15,11 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
 import { Spinner } from "@/components/ui/spinner";
 import api from "@/lib/api";
-import { useAuthStore, type User } from "@/stores/auth-store";
+import {
+  useAuthStore,
+  type User,
+  normalizeUserRole,
+} from "@/stores/auth-store";
 import { router } from "@/QueryClient";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
@@ -53,7 +57,7 @@ export function UserAuthForm() {
         id: res.data.user.id,
         name: `${res.data.user.first_name} ${res.data.user.last_name}`,
         phone: res.data.user.phone,
-        role: res.data.user.role,
+        role: normalizeUserRole(res.data.user.role),
       };
 
       useAuthStore.getState().setAuth(user, res.data.token);

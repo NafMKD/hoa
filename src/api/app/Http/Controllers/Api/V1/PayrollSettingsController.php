@@ -7,7 +7,6 @@ use App\Models\PayrollSetting;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class PayrollSettingsController extends Controller
@@ -23,10 +22,8 @@ class PayrollSettingsController extends Controller
             ]);
         } catch (AuthorizationException) {
             return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);
-        } catch (\Exception $e) {
-            Log::error('Error reading payroll settings: '.$e->getMessage());
-
-            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        } catch (\Throwable $e) {
+            return $this->jsonServerError($e, 'Error reading payroll settings');
         }
     }
 
@@ -55,10 +52,8 @@ class PayrollSettingsController extends Controller
                 'message' => 'Validation failed',
                 'errors' => $e->errors(),
             ], 422);
-        } catch (\Exception $e) {
-            Log::error('Error updating payroll settings: '.$e->getMessage());
-
-            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        } catch (\Throwable $e) {
+            return $this->jsonServerError($e, 'Error updating payroll settings');
         }
     }
 }

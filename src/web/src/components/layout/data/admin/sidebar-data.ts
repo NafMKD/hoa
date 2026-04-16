@@ -63,12 +63,12 @@ export const sidebarData: SidebarData = {
         },
         {
           title: "Agencies",
-          url: "/admin/employees/agencies",
+          url: "/admin/agencies",
           icon: Briefcase,
         },
         {
           title: "Payroll rules",
-          url: "/admin/employees/payroll-rules",
+          url: "/admin/payroll-rules",
           icon: FileSignature,
         },
       ],

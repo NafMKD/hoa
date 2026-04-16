@@ -8,7 +8,6 @@ use App\Models\PayrollTaxBracket;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class PayrollTaxBracketController extends Controller
@@ -23,10 +22,8 @@ class PayrollTaxBracketController extends Controller
             return response()->json(PayrollTaxBracketResource::collection($rows));
         } catch (AuthorizationException) {
             return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);
-        } catch (\Exception $e) {
-            Log::error('Error listing tax brackets: '.$e->getMessage());
-
-            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        } catch (\Throwable $e) {
+            return $this->jsonServerError($e, 'Error listing tax brackets');
         }
     }
 
@@ -53,10 +50,8 @@ class PayrollTaxBracketController extends Controller
                 'message' => 'Validation failed',
                 'errors' => $e->errors(),
             ], 422);
-        } catch (\Exception $e) {
-            Log::error('Error creating tax bracket: '.$e->getMessage());
-
-            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        } catch (\Throwable $e) {
+            return $this->jsonServerError($e, 'Error creating tax bracket');
         }
     }
 
@@ -83,10 +78,8 @@ class PayrollTaxBracketController extends Controller
                 'message' => 'Validation failed',
                 'errors' => $e->errors(),
             ], 422);
-        } catch (\Exception $e) {
-            Log::error('Error updating tax bracket: '.$e->getMessage());
-
-            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        } catch (\Throwable $e) {
+            return $this->jsonServerError($e, 'Error updating tax bracket');
         }
     }
 
@@ -99,10 +92,8 @@ class PayrollTaxBracketController extends Controller
             return response()->json(['status' => self::_SUCCESS, 'message' => 'Tax bracket deleted.']);
         } catch (AuthorizationException) {
             return response()->json(['status' => self::_ERROR, 'message' => self::_UNAUTHORIZED], 403);
-        } catch (\Exception $e) {
-            Log::error('Error deleting tax bracket: '.$e->getMessage());
-
-            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        } catch (\Throwable $e) {
+            return $this->jsonServerError($e, 'Error deleting tax bracket');
         }
     }
 }

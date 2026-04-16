@@ -37,6 +37,8 @@ use App\Policies\Api\V1\ExpenseCategoryPolicy;
 use App\Policies\Api\V1\ExpensePolicy;
 use App\Policies\Api\V1\FeePolicy;
 use App\Policies\Api\V1\PayrollPolicy;
+use App\Policies\Api\V1\PayrollSettingPolicy;
+use App\Policies\Api\V1\PayrollTaxBracketPolicy;
 use App\Policies\Api\V1\InvoicePolicy;
 use App\Policies\Api\V1\ReconciliationEscalationPolicy;
 use App\Policies\Api\V1\PaymentPolicy;

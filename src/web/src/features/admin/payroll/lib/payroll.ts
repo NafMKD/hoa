@@ -29,6 +29,28 @@ function unwrapResource<T>(body: unknown): T {
   return body as T;
 }
 
+/**
+ * Laravel collection / Resource::collection: `{ data: T[] }`, or a raw array.
+ * Some stacks nest pagination as `{ data: { data: T[] } }`.
+ */
+export function parseJsonList<T>(raw: unknown): T[] {
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === "object") {
+    const o = raw as Record<string, unknown>;
+    if (Array.isArray(o.data)) return o.data as T[];
+    const inner = o.data;
+    if (
+      inner &&
+      typeof inner === "object" &&
+      !Array.isArray(inner) &&
+      Array.isArray((inner as Record<string, unknown>).data)
+    ) {
+      return (inner as { data: T[] }).data;
+    }
+  }
+  return [];
+}
+
 const paginatedShape = async <T>(
   promise: ReturnType<typeof api.get>,
   perPage: string
@@ -226,8 +248,7 @@ export const updatePayrollSettings = (payload: {
 
 export const fetchPayrollTaxBrackets = async (): Promise<PayrollTaxBracket[]> => {
   const raw = await handleApi(api.get("/v1/payroll-tax-brackets"));
-  const res = raw as { data?: PayrollTaxBracket[] };
-  return Array.isArray(res.data) ? res.data : [];
+  return parseJsonList<PayrollTaxBracket>(raw);
 };
 
 export const createPayrollTaxBracket = async (payload: {

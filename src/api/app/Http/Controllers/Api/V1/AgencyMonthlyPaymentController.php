@@ -51,10 +51,8 @@ class AgencyMonthlyPaymentController extends Controller
             ], 422);
         } catch (RepositoryException $e) {
             return response()->json(['status' => self::_ERROR, 'message' => $e->getMessage()], 400);
-        } catch (\Exception $e) {
-            Log::error('Error generating agency monthly payments: '.$e->getMessage());
-
-            return response()->json(['status' => self::_ERROR, 'message' => self::_UNKNOWN_ERROR], 400);
+        } catch (\Throwable $e) {
+            return $this->jsonServerError($e, 'Error generating agency monthly payments');
         }
     }
 

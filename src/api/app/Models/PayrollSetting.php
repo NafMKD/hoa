@@ -38,7 +38,11 @@ class PayrollSetting extends Model
             return $default;
         }
 
-        $v = $row->value;
+        try {
+            $v = $row->value;
+        } catch (\Throwable) {
+            return $default;
+        }
 
         if (is_array($v)) {
             return (float) ($v['amount'] ?? $default);

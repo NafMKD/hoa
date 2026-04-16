@@ -22,9 +22,10 @@ class PayrollTaxBracket extends Model
     protected function casts(): array
     {
         return [
-            'min_inclusive' => 'float',
-            'max_inclusive' => 'float',
-            'rate_percent' => 'float',
+            // Laravel expects `decimal:N` where N is scale (decimal places), not MySQL-style precision,scale.
+            'min_inclusive' => 'decimal:2',
+            'max_inclusive' => 'decimal:2',
+            'rate_percent' => 'decimal:4',
             'sort_order' => 'integer',
         ];
     }

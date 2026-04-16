@@ -9,8 +9,8 @@ export function Payroll() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Payroll</h2>
         <p className="text-muted-foreground">
-          Generate and approve direct employee payroll and agency monthly payouts. Employee
-          records and agencies are under Employees in the sidebar.
+          Generate and approve direct employee payroll and agency monthly payouts. Employees,
+          agencies, and payroll rules are linked from the sidebar under this admin area.
         </p>
       </div>
 

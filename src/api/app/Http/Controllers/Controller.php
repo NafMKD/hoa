@@ -2,11 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 abstract class Controller
 {
     use AuthorizesRequests;
+
+    /**
+     * JSON error for unexpected failures (DB, encoding, etc.). Prefer 500 — not 400 — for server errors.
+     */
+    protected function jsonServerError(Throwable $e, string $logContext): JsonResponse
+    {
+        Log::error($logContext.': '.$e->getMessage(), ['exception' => $e]);
+
+        $message = self::_UNKNOWN_ERROR;
+        if (config('app.debug')) {
+            $message = $e->getMessage();
+        } elseif ($e instanceof QueryException) {
+            $message = 'Database error. Ensure migrations have been applied (php artisan migrate).';
+        }
+
+        return response()->json(['status' => self::_ERROR, 'message' => $message], 500);
+    }
     const _SUCCESS = 'success';
     const _ERROR = 'error';
     const _UNKNOWN_ERROR = 'An unknown error occurred. Please try again.';

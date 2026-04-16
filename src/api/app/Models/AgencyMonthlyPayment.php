@@ -39,6 +39,8 @@ class AgencyMonthlyPayment extends Model
             'calendar_month' => 'date',
             'amount_paid' => 'float',
             'pay_date' => 'date',
+            'generation_metadata' => 'array',
+            'approved_at' => 'datetime',
         ];
     }
 

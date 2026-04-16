@@ -6,6 +6,7 @@ use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Models\AgencyMonthlyPayment;
+use App\Models\AgencyPlacement;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -63,74 +64,84 @@ class AgencyMonthlyPaymentRepository
     }
 
     /**
-     * Draft rows for each agency with defaults and an active placement for the month (one per agency).
+     * Draft rows for each agency that has default monthly amount and worker count configured.
+     * Worker headcount is the sum of {@see AgencyPlacement::workers_count} across all placements
+     * active in the calendar month; when none exist, {@see Agency::$default_worker_count} is used.
+     * {@see AgencyMonthlyPayment::$placement_id} is set only when exactly one such placement exists.
      *
      * @return Collection<int, AgencyMonthlyPayment>
      */
     public function generateDraftForMonth(string $calendarMonthFirstDayYmd, int $createdBy): Collection
     {
         $monthStart = Carbon::parse($calendarMonthFirstDayYmd)->startOfMonth();
-        $placements = $this->placements->activeForCalendarMonth($monthStart->toDateString());
+        $monthDateStr = $monthStart->toDateString();
 
-        return DB::transaction(function () use ($placements, $monthStart, $createdBy) {
+        $placements = $this->placements->activeForCalendarMonth($monthDateStr);
+        /** @var array<int, list<AgencyPlacement>> $placementsByAgencyId */
+        $placementsByAgencyId = [];
+        foreach ($placements as $placement) {
+            $placementsByAgencyId[$placement->agency_id][] = $placement;
+        }
+
+        return DB::transaction(function () use ($placementsByAgencyId, $monthDateStr, $createdBy) {
             $out = new Collection;
-            $seenAgency = [];
 
-            foreach ($placements as $placement) {
-                $agency = $placement->agency;
-                if (! $agency instanceof Agency) {
-                    continue;
-                }
+            $agencies = Agency::query()
+                ->whereNotNull('default_monthly_amount')
+                ->where('default_monthly_amount', '>', 0)
+                ->whereNotNull('default_worker_count')
+                ->where('default_worker_count', '>=', 1)
+                ->orderBy('id')
+                ->get();
 
-                if (isset($seenAgency[$agency->id])) {
-                    continue;
-                }
-
-                if ($agency->default_monthly_amount === null || (float) $agency->default_monthly_amount <= 0) {
-                    continue;
-                }
-
-                if ($agency->default_worker_count === null || (int) $agency->default_worker_count < 1) {
-                    continue;
-                }
-
+            foreach ($agencies as $agency) {
                 $duplicate = AgencyMonthlyPayment::query()
                     ->where('agency_id', $agency->id)
-                    ->whereDate('calendar_month', $monthStart->toDateString())
+                    ->whereDate('calendar_month', $monthDateStr)
                     ->exists();
 
                 if ($duplicate) {
-                    $seenAgency[$agency->id] = true;
-
                     continue;
+                }
+
+                $agencyPlacements = $placementsByAgencyId[$agency->id] ?? [];
+                $placementIds = array_map(static fn ($p) => $p->id, $agencyPlacements);
+                $placementWorkerSum = array_sum(array_map(static fn ($p) => (int) $p->workers_count, $agencyPlacements));
+
+                if (count($agencyPlacements) === 1) {
+                    $placementId = $agencyPlacements[0]->id;
+                } else {
+                    $placementId = null;
+                }
+
+                if (count($agencyPlacements) > 0) {
+                    $workerCount = $placementWorkerSum;
+                } else {
+                    $workerCount = (int) $agency->default_worker_count;
                 }
 
                 $metadata = [
                     'default_monthly_amount' => (float) $agency->default_monthly_amount,
                     'default_worker_count' => (int) $agency->default_worker_count,
-                    'placement_id' => $placement->id,
+                    'workers_from_placements' => $placementWorkerSum,
+                    'placement_ids' => $placementIds,
+                    'placement_id' => $placementId,
+                    'workers_count_source' => count($agencyPlacements) > 0 ? 'placements' : 'agency_default',
                     'captured_at' => now()->toIso8601String(),
                 ];
 
                 $row = AgencyMonthlyPayment::create([
                     'agency_id' => $agency->id,
-                    'calendar_month' => $monthStart->toDateString(),
+                    'calendar_month' => $monthDateStr,
                     'amount_paid' => (float) $agency->default_monthly_amount,
-                    'worker_count' => (int) $agency->default_worker_count,
-                    'placement_id' => $placement->id,
+                    'worker_count' => $workerCount,
+                    'placement_id' => $placementId,
                     'status' => Controller::_AGENCY_MONTHLY_PAYMENT_STATUSES[0],
                     'generation_metadata' => $metadata,
                     'created_by' => $createdBy,
                 ]);
 
-                $seenAgency[$agency->id] = true;
                 $out->push($row->load(['agency', 'placement', 'expense', 'creator', 'approver']));
-            }
-
-            if ($out->isEmpty()) {
-                throw new RepositoryException(
-                    'No agency monthly payments were created. Ensure agencies have default amount and worker count, and an active placement for this month.'
-                );
             }
 
             return $out;

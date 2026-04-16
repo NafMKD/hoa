@@ -433,3 +433,74 @@ export interface EscalationPaginatedResponse {
     last_page: number;
   };
 }
+
+export type ExpenseStatus = "unpaid" | "partially_paid" | "paid";
+
+export interface ExpenseCategory {
+  id: number;
+  name: string;
+  code: string;
+  parent_id: number | null;
+  sort_order: number;
+  is_system: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExpenseVendor {
+  id: number;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Expense {
+  id: number;
+  expense_category_id: number;
+  vendor_id: number | null;
+  description: string;
+  amount: number;
+  invoice_number: string | null;
+  status: ExpenseStatus;
+  expense_date: string;
+  created_by: number | null;
+  category?: ExpenseCategory;
+  vendor?: ExpenseVendor | null;
+  creator?: User;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExpensePaginatedResponse {
+  data: Expense[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export interface ExpenseCategoryPaginatedResponse {
+  data: ExpenseCategory[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export interface VendorPaginatedResponse {
+  data: ExpenseVendor[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}

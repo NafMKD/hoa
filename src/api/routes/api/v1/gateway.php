@@ -41,3 +41,12 @@ Route::prefix('import')->middleware('auth:sanctum')->name('api.v1.import.')->gro
 Route::prefix('reconciliation')->middleware('auth:sanctum')->name('api.v1.reconciliation.')->group(function () { 
     require __DIR__.'/reconciliation.php';
 });
+Route::prefix('expense-categories')->middleware('auth:sanctum')->name('api.v1.expense_categories.')->group(function () { 
+    require __DIR__.'/expense_category.php';
+});
+Route::prefix('vendors')->middleware('auth:sanctum')->name('api.v1.vendors.')->group(function () { 
+    require __DIR__.'/vendor.php';
+});
+Route::prefix('expenses')->middleware('auth:sanctum')->name('api.v1.expenses.')->group(function () { 
+    require __DIR__.'/expense.php';
+});

@@ -16,10 +16,10 @@ class Expense extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'expense_category_id',
         'vendor_id',
         'description',
         'amount',
-        'category',
         'invoice_number',
         'status',
         'expense_date',
@@ -47,6 +47,11 @@ class Expense extends Model
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
     }
 
     /**

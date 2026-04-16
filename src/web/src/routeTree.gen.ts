@@ -32,6 +32,7 @@ import { Route as AuthenticatedAdminFinancialsReconciliationIndexRouteImport } f
 import { Route as AuthenticatedAdminFinancialsPaymentsIndexRouteImport } from './routes/_authenticated/admin/financials/payments/index'
 import { Route as AuthenticatedAdminFinancialsInvoicesIndexRouteImport } from './routes/_authenticated/admin/financials/invoices/index'
 import { Route as AuthenticatedAdminFinancialsFeesIndexRouteImport } from './routes/_authenticated/admin/financials/fees/index'
+import { Route as AuthenticatedAdminFinancialsExpensesIndexRouteImport } from './routes/_authenticated/admin/financials/expenses/index'
 import { Route as AuthenticatedAdminFinancialsReconciliationBatchIdRouteImport } from './routes/_authenticated/admin/financials/reconciliation/$batchId'
 import { Route as AuthenticatedAdminFinancialsPaymentsPaymentIdRouteImport } from './routes/_authenticated/admin/financials/payments/$paymentId'
 import { Route as AuthenticatedAdminFinancialsInvoicesInvoiceIdRouteImport } from './routes/_authenticated/admin/financials/invoices/$invoiceId'
@@ -168,6 +169,12 @@ const AuthenticatedAdminFinancialsFeesIndexRoute =
     path: '/financials/fees/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminFinancialsExpensesIndexRoute =
+  AuthenticatedAdminFinancialsExpensesIndexRouteImport.update({
+    id: '/financials/expenses/',
+    path: '/financials/expenses/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminFinancialsReconciliationBatchIdRoute =
   AuthenticatedAdminFinancialsReconciliationBatchIdRouteImport.update({
     id: '/financials/reconciliation/$batchId',
@@ -228,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/admin/financials/invoices/$invoiceId': typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   '/admin/financials/payments/$paymentId': typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
   '/admin/financials/reconciliation/$batchId': typeof AuthenticatedAdminFinancialsReconciliationBatchIdRoute
+  '/admin/financials/expenses': typeof AuthenticatedAdminFinancialsExpensesIndexRoute
   '/admin/financials/fees': typeof AuthenticatedAdminFinancialsFeesIndexRoute
   '/admin/financials/invoices': typeof AuthenticatedAdminFinancialsInvoicesIndexRoute
   '/admin/financials/payments': typeof AuthenticatedAdminFinancialsPaymentsIndexRoute
@@ -258,6 +266,7 @@ export interface FileRoutesByTo {
   '/admin/financials/invoices/$invoiceId': typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   '/admin/financials/payments/$paymentId': typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
   '/admin/financials/reconciliation/$batchId': typeof AuthenticatedAdminFinancialsReconciliationBatchIdRoute
+  '/admin/financials/expenses': typeof AuthenticatedAdminFinancialsExpensesIndexRoute
   '/admin/financials/fees': typeof AuthenticatedAdminFinancialsFeesIndexRoute
   '/admin/financials/invoices': typeof AuthenticatedAdminFinancialsInvoicesIndexRoute
   '/admin/financials/payments': typeof AuthenticatedAdminFinancialsPaymentsIndexRoute
@@ -290,6 +299,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/financials/invoices/$invoiceId': typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   '/_authenticated/admin/financials/payments/$paymentId': typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
   '/_authenticated/admin/financials/reconciliation/$batchId': typeof AuthenticatedAdminFinancialsReconciliationBatchIdRoute
+  '/_authenticated/admin/financials/expenses/': typeof AuthenticatedAdminFinancialsExpensesIndexRoute
   '/_authenticated/admin/financials/fees/': typeof AuthenticatedAdminFinancialsFeesIndexRoute
   '/_authenticated/admin/financials/invoices/': typeof AuthenticatedAdminFinancialsInvoicesIndexRoute
   '/_authenticated/admin/financials/payments/': typeof AuthenticatedAdminFinancialsPaymentsIndexRoute
@@ -323,6 +333,7 @@ export interface FileRouteTypes {
     | '/admin/financials/invoices/$invoiceId'
     | '/admin/financials/payments/$paymentId'
     | '/admin/financials/reconciliation/$batchId'
+    | '/admin/financials/expenses'
     | '/admin/financials/fees'
     | '/admin/financials/invoices'
     | '/admin/financials/payments'
@@ -353,6 +364,7 @@ export interface FileRouteTypes {
     | '/admin/financials/invoices/$invoiceId'
     | '/admin/financials/payments/$paymentId'
     | '/admin/financials/reconciliation/$batchId'
+    | '/admin/financials/expenses'
     | '/admin/financials/fees'
     | '/admin/financials/invoices'
     | '/admin/financials/payments'
@@ -384,6 +396,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financials/invoices/$invoiceId'
     | '/_authenticated/admin/financials/payments/$paymentId'
     | '/_authenticated/admin/financials/reconciliation/$batchId'
+    | '/_authenticated/admin/financials/expenses/'
     | '/_authenticated/admin/financials/fees/'
     | '/_authenticated/admin/financials/invoices/'
     | '/_authenticated/admin/financials/payments/'
@@ -567,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinancialsFeesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/financials/expenses/': {
+      id: '/_authenticated/admin/financials/expenses/'
+      path: '/financials/expenses'
+      fullPath: '/admin/financials/expenses'
+      preLoaderRoute: typeof AuthenticatedAdminFinancialsExpensesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/financials/reconciliation/$batchId': {
       id: '/_authenticated/admin/financials/reconciliation/$batchId'
       path: '/financials/reconciliation/$batchId'
@@ -627,6 +647,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute: typeof AuthenticatedAdminFinancialsInvoicesInvoiceIdRoute
   AuthenticatedAdminFinancialsPaymentsPaymentIdRoute: typeof AuthenticatedAdminFinancialsPaymentsPaymentIdRoute
   AuthenticatedAdminFinancialsReconciliationBatchIdRoute: typeof AuthenticatedAdminFinancialsReconciliationBatchIdRoute
+  AuthenticatedAdminFinancialsExpensesIndexRoute: typeof AuthenticatedAdminFinancialsExpensesIndexRoute
   AuthenticatedAdminFinancialsFeesIndexRoute: typeof AuthenticatedAdminFinancialsFeesIndexRoute
   AuthenticatedAdminFinancialsInvoicesIndexRoute: typeof AuthenticatedAdminFinancialsInvoicesIndexRoute
   AuthenticatedAdminFinancialsPaymentsIndexRoute: typeof AuthenticatedAdminFinancialsPaymentsIndexRoute
@@ -661,6 +682,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminFinancialsPaymentsPaymentIdRoute,
     AuthenticatedAdminFinancialsReconciliationBatchIdRoute:
       AuthenticatedAdminFinancialsReconciliationBatchIdRoute,
+    AuthenticatedAdminFinancialsExpensesIndexRoute:
+      AuthenticatedAdminFinancialsExpensesIndexRoute,
     AuthenticatedAdminFinancialsFeesIndexRoute:
       AuthenticatedAdminFinancialsFeesIndexRoute,
     AuthenticatedAdminFinancialsInvoicesIndexRoute:

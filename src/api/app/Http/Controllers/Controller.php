@@ -38,4 +38,12 @@ abstract class Controller
     const _USER_STATUSES = ['active','inactive','suspended'];
     const _DEFAULT_PASSWORD = '12345678';
     const _FEE_STATUSES = ['active','terminated'];
+    /**
+     * @var list<string>
+     */
+    const _EXPENSE_STATUSES = ['unpaid', 'partially_paid', 'paid'];
+    /**
+     * System expense category code reserved for payroll-linked postings (Phase 2).
+     */
+    const _EXPENSE_CATEGORY_CODE_PAYROLL = 'payroll';
 }

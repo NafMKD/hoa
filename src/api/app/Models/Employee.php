@@ -20,7 +20,7 @@ class Employee extends Model
         'last_name',
         'role',
         'employment_type',
-        'base_salary',
+        'gross_salary',
         'bank_account_encrypted',
         'hired_at',
         'terminated_at',
@@ -34,7 +34,7 @@ class Employee extends Model
     protected function casts(): array
     {
         return [
-            'base_salary' => 'float',
+            'gross_salary' => 'float',
             'hired_at' => 'date',
             'terminated_at' => 'date',
         ];

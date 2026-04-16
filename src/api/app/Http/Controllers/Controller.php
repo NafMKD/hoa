@@ -46,4 +46,18 @@ abstract class Controller
      * System expense category code reserved for payroll-linked postings (Phase 2).
      */
     const _EXPENSE_CATEGORY_CODE_PAYROLL = 'payroll';
+    /**
+     * @var list<string>
+     */
+    const _PAYROLL_STATUSES = ['draft', 'pending', 'approved', 'paid'];
+    /**
+     * Outsourced staffing service lines (agency placements).
+     *
+     * @var list<string>
+     */
+    const _AGENCY_SERVICE_LINES = ['security', 'cleaning', 'maintenance', 'other'];
+    /**
+     * @var list<string>
+     */
+    const _AGENCY_MONTHLY_PAYMENT_STATUSES = ['draft', 'pending', 'approved', 'paid'];
 }

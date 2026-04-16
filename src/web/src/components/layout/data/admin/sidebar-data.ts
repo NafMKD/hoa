@@ -17,6 +17,7 @@ import {
   HelpCircle,
   FileArchive,
   UserCheck,
+  Briefcase,
 } from "lucide-react";
 import { type SidebarData } from "@/components/layout/types";
 
@@ -59,6 +60,16 @@ export const sidebarData: SidebarData = {
           title: "Employees",
           url: "/admin/employees",
           icon: UserCheck,
+        },
+        {
+          title: "Agencies",
+          url: "/admin/employees/agencies",
+          icon: Briefcase,
+        },
+        {
+          title: "Payroll rules",
+          url: "/admin/employees/payroll-rules",
+          icon: FileSignature,
         },
       ],
     },

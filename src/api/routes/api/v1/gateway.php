@@ -50,3 +50,21 @@ Route::prefix('vendors')->middleware('auth:sanctum')->name('api.v1.vendors.')->g
 Route::prefix('expenses')->middleware('auth:sanctum')->name('api.v1.expenses.')->group(function () { 
     require __DIR__.'/expense.php';
 });
+Route::prefix('employees')->middleware('auth:sanctum')->name('api.v1.employees.')->group(function () { 
+    require __DIR__.'/employee.php';
+});
+Route::prefix('payrolls')->middleware('auth:sanctum')->name('api.v1.payrolls.')->group(function () { 
+    require __DIR__.'/payroll.php';
+});
+Route::prefix('agencies')->middleware('auth:sanctum')->name('api.v1.agencies.')->group(function () { 
+    require __DIR__.'/agency.php';
+});
+Route::prefix('agency-monthly-payments')->middleware('auth:sanctum')->name('api.v1.agency_monthly_payments.')->group(function () {
+    require __DIR__.'/agency_monthly_payment.php';
+});
+Route::prefix('payroll-tax-brackets')->middleware('auth:sanctum')->name('api.v1.payroll_tax_brackets.')->group(function () {
+    require __DIR__.'/payroll_tax_bracket.php';
+});
+Route::prefix('payroll-settings')->middleware('auth:sanctum')->name('api.v1.payroll_settings.')->group(function () {
+    require __DIR__.'/payroll_settings.php';
+});

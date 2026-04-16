@@ -3,7 +3,9 @@
 namespace App\Repositories\Api\V1;
 
 use App\Exceptions\RepositoryException;
+use App\Http\Controllers\Controller;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -102,5 +104,36 @@ class ExpenseRepository
             DB::rollBack();
             throw new RepositoryException('Failed to delete expense: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Creates a paid expense under the system Payroll category (Phase 2 payroll ↔ ledger link).
+     *
+     * @throws RepositoryException
+     */
+    public function createPayrollLinkedExpense(
+        string $description,
+        float $amount,
+        string $expenseDateYmd,
+        int $createdByUserId
+    ): Expense {
+        $category = ExpenseCategory::query()
+            ->where('code', Controller::_EXPENSE_CATEGORY_CODE_PAYROLL)
+            ->first();
+
+        if (! $category) {
+            throw new RepositoryException('Payroll expense category is not configured.');
+        }
+
+        return $this->create([
+            'expense_category_id' => $category->id,
+            'vendor_id' => null,
+            'description' => $description,
+            'amount' => $amount,
+            'invoice_number' => null,
+            'status' => 'paid',
+            'expense_date' => $expenseDateYmd,
+            'created_by' => $createdByUserId,
+        ]);
     }
 }

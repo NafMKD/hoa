@@ -504,3 +504,175 @@ export interface VendorPaginatedResponse {
     last_page: number;
   };
 }
+
+/** In-house staff (payroll). */
+export interface Employee {
+  id: number;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  role: string;
+  employment_type: string;
+  gross_salary: number | string;
+  bank_account_encrypted?: string | null;
+  hired_at: string | null;
+  terminated_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PayrollStatus = "draft" | "pending" | "approved" | "paid";
+
+export interface Payroll {
+  id: number;
+  employee_id: number;
+  payroll_period_start: string;
+  payroll_period_end: string;
+  gross_salary: number | string;
+  taxes: number | string;
+  deductions: number | string;
+  net_salary: number | string;
+  pay_date: string | null;
+  status: PayrollStatus;
+  payslip_document_id: number | null;
+  expense_id: number | null;
+  created_by: number | null;
+  calculation_metadata?: Record<string, unknown> | null;
+  approved_by: number | null;
+  approved_at: string | null;
+  employee?: Employee;
+  payslip?: Document | null;
+  expense?: Expense | null;
+  creator?: User | null;
+  approver?: User | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PayrollPaginatedResponse {
+  data: Payroll[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export interface Agency {
+  id: number;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  notes: string | null;
+  default_worker_count: number | null;
+  default_monthly_amount: number | string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AgencyPaginatedResponse {
+  data: Agency[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export type AgencyServiceLine =
+  | "security"
+  | "cleaning"
+  | "maintenance"
+  | "other";
+
+export interface AgencyPlacement {
+  id: number;
+  agency_id: number;
+  line_of_work: AgencyServiceLine | string;
+  workers_count: number;
+  effective_from: string;
+  effective_to: string | null;
+  is_active: boolean;
+  agency?: Agency;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AgencyPlacementPaginatedResponse {
+  data: AgencyPlacement[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export type AgencyMonthlyPaymentStatus =
+  | "draft"
+  | "pending"
+  | "approved"
+  | "paid";
+
+export interface AgencyMonthlyPayment {
+  id: number;
+  agency_id: number;
+  calendar_month: string;
+  amount_paid: number | string;
+  worker_count: number;
+  placement_id: number | null;
+  reference: string | null;
+  notes: string | null;
+  status: AgencyMonthlyPaymentStatus;
+  expense_id: number | null;
+  pay_date: string | null;
+  created_by: number | null;
+  generation_metadata?: Record<string, unknown> | null;
+  approved_by: number | null;
+  approved_at: string | null;
+  agency?: Agency;
+  placement?: AgencyPlacement | null;
+  expense?: Expense | null;
+  creator?: User | null;
+  approver?: User | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AgencyMonthlyPaymentPaginatedResponse {
+  data: AgencyMonthlyPayment[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export interface EmployeePaginatedResponse {
+  data: Employee[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export interface PayrollTaxBracket {
+  id: number;
+  min_inclusive: number | string;
+  max_inclusive: number | string | null;
+  rate_percent: number | string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PayrollSettingsResponse {
+  deduction_fixed: number;
+  deduction_percent_of_gross: number;
+}

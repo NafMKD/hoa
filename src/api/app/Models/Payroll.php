@@ -26,6 +26,11 @@ class Payroll extends Model
         'pay_date',
         'status',
         'payslip_document_id',
+        'expense_id',
+        'created_by',
+        'calculation_metadata',
+        'approved_by',
+        'approved_at',
     ];
 
     /**
@@ -43,6 +48,8 @@ class Payroll extends Model
             'deductions' => 'float',
             'net_salary' => 'float',
             'pay_date' => 'date',
+            'calculation_metadata' => 'array',
+            'approved_at' => 'datetime',
         ];
     }
 
@@ -64,5 +71,20 @@ class Payroll extends Model
     public function payslip(): BelongsTo
     {
         return $this->belongsTo(Document::class, 'payslip_document_id');
+    }
+
+    public function expense(): BelongsTo
+    {
+        return $this->belongsTo(Expense::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 }

@@ -47,12 +47,4 @@ class DocumentTemplatePolicy
     {
         return $authUser->hasRole(Controller::_ROLES[0]);
     }
-
-    /**
-     * Only admin can generate new documents from templates.
-     */
-    public function generate(User $authUser, DocumentTemplate $template): bool
-    {
-        return $authUser->hasRole(Controller::_ROLES[0]);
-    }
 }

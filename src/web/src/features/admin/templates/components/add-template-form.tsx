@@ -12,17 +12,15 @@ import { toast } from "sonner";
 import type { ApiError } from "@/types/api-error";
 import { createDocumentTemplate } from "../lib/templates";
 
-// Expected categories from backend
-const allowedCategories = ["lease_agreement", "letter", "reminder", "other"];
+const allowedCategories = ["lease_agreement", "letter", "reminder", "other"] as const;
 
 const schema = z.object({
   category: z.enum(allowedCategories),
   sub_category: z.string().min(1, "Sub-category is required"),
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().or(z.literal("")),
-  version: z
-    .number("Version must be a number")
-    .min(1, "Version must be at least 1"),
+  /** Empty = server picks next version for this category + sub-category */
+  version: z.string().optional(),
   file: z
     .instanceof(File, { message: "File is required" })
     .refine(
@@ -45,7 +43,7 @@ export function AddDocumentTemplateForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      version: 1,
+      version: "",
     },
   });
 
@@ -57,14 +55,26 @@ export function AddDocumentTemplateForm({
 
       const formData = new FormData();
 
-      Object.entries(values).forEach(([key, value]) => {
-        if (key === "file") formData.append("file", value as File);
-        else formData.append(key, value?.toString() ?? "");
-      });
+      formData.append("category", values.category);
+      formData.append("sub_category", values.sub_category);
+      formData.append("name", values.name);
+      if (values.description) {
+        formData.append("description", values.description);
+      }
+
+      const v = values.version?.trim();
+      if (v !== undefined && v !== "") {
+        const n = parseInt(v, 10);
+        if (!Number.isNaN(n) && n >= 1) {
+          formData.append("version", String(n));
+        }
+      }
+
+      formData.append("file", values.file);
 
       await createDocumentTemplate(formData);
 
-      toast.success("Document Template created successfully!");
+      toast.success("Document template uploaded successfully.");
 
       onSuccess?.();
     } catch (error) {
@@ -93,7 +103,6 @@ export function AddDocumentTemplateForm({
     <Card>
       <CardContent className="pt-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Category */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="category">
               Category <span className="text-red-500">*</span>
@@ -117,7 +126,6 @@ export function AddDocumentTemplateForm({
             )}
           </div>
 
-          {/* Sub Category */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="sub_category">
               Sub Category <span className="text-red-500">*</span>
@@ -130,9 +138,10 @@ export function AddDocumentTemplateForm({
             )}
           </div>
 
-          {/* Name */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="name">Template Name <span className="text-red-500">*</span></Label>
+            <Label htmlFor="name">
+              Template Name <span className="text-red-500">*</span>
+            </Label>
             <Input id="name" {...form.register("name")} />
             {form.formState.errors.name && (
               <p className="text-sm text-red-500">
@@ -141,16 +150,19 @@ export function AddDocumentTemplateForm({
             )}
           </div>
 
-          {/* Version */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="version">
-              Version <span className="text-red-500">*</span>
-            </Label>
+            <Label htmlFor="version">Version</Label>
             <Input
               id="version"
               type="number"
-              {...form.register("version", { valueAsNumber: true })}
+              min={1}
+              placeholder="Leave blank for auto (next for this category / sub-category)"
+              {...form.register("version")}
             />
+            <p className="text-muted-foreground text-xs">
+              If you omit this, the server assigns the next version for the same
+              category and sub-category.
+            </p>
             {form.formState.errors.version && (
               <p className="text-sm text-red-500">
                 {form.formState.errors.version.message}
@@ -158,13 +170,11 @@ export function AddDocumentTemplateForm({
             )}
           </div>
 
-          {/* Description */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea id="description" {...form.register("description")} />
           </div>
 
-          {/* File */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="file">
               Upload File (.docx) <span className="text-red-500">*</span>
@@ -185,14 +195,13 @@ export function AddDocumentTemplateForm({
             )}
           </div>
 
-          {/* Submit */}
           <Button type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting ? (
               <>
                 <Spinner /> Submitting...
               </>
             ) : (
-              "Create Template"
+              "Upload"
             )}
           </Button>
         </form>

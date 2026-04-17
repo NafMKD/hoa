@@ -13,6 +13,13 @@ import { MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@tanstack/react-router";
+import { IconDownload } from "@tabler/icons-react";
+
+export type DocumentTemplatesTableMeta = {
+  isLoading: boolean;
+  onDownloadDocx?: (template: DocumentTemplate) => void | Promise<void>;
+  onDeleteRequest?: (template: DocumentTemplate) => void;
+};
 
 export const columns: ColumnDef<DocumentTemplate>[] = [
   {
@@ -40,16 +47,26 @@ export const columns: ColumnDef<DocumentTemplate>[] = [
   },
 
   {
-    accessorKey: "id",
+    accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} label="ID" />
+      <DataTableColumnHeader column={column} label="Name" />
+    ),
+    cell: ({ row }) => (
+      <div className="max-w-[220px] truncate font-medium">
+        {row.getValue("name")}
+      </div>
     ),
   },
 
   {
-    accessorKey: "name",
+    accessorKey: "sub_category",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} label="Template Name" />
+      <DataTableColumnHeader column={column} label="Sub-category" />
+    ),
+    cell: ({ row }) => (
+      <span className="text-muted-foreground text-sm">
+        {String(row.getValue("sub_category") ?? "—")}
+      </span>
     ),
   },
 
@@ -61,16 +78,28 @@ export const columns: ColumnDef<DocumentTemplate>[] = [
   },
 
   {
-    accessorKey: "created_at",
+    accessorKey: "version",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} label="Created At" />
+      <DataTableColumnHeader column={column} label="Version" />
+    ),
+    cell: ({ row }) => (
+      <span className="tabular-nums">{String(row.getValue("version"))}</span>
     ),
   },
+
+  {
+    accessorKey: "created_at",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} label="Created" />
+    ),
+  },
+
   {
     id: "actions",
     enableSorting: false,
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const template = row.original;
+      const meta = table.options.meta as DocumentTemplatesTableMeta;
 
       return (
         <DropdownMenu>
@@ -85,26 +114,30 @@ export const columns: ColumnDef<DocumentTemplate>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            {/* View Template */}
             <DropdownMenuItem asChild>
               <Link
                 to="/admin/templates/$templateId"
                 params={{ templateId: String(template.id) }}
                 className="w-full cursor-pointer"
               >
-                View Template
+                View details
               </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => void meta.onDownloadDocx?.(template)}
+            >
+              <IconDownload className="mr-2 h-4 w-4" />
+              Download .docx
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
-            {/* Edit Template */}
             <DropdownMenuItem
-              onClick={() => {
-                return -1
-              }}
+              className="text-destructive focus:text-destructive"
+              onClick={() => meta.onDeleteRequest?.(template)}
             >
-              Delete Template
+              Delete template
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

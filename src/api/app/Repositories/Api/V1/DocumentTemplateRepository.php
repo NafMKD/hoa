@@ -23,16 +23,36 @@ class DocumentTemplateRepository
     {
         $query = DocumentTemplate::query();
 
-        // Filter by search (name or address)
-        if (!empty($filters['search'])) {
-            $search = $filters['search'];
-            $query->where('name', 'like', "%{$search}%");
+        if (! empty($filters['category'])) {
+            $query->where('category', $filters['category']);
         }
 
-        // Order by creation date descending
-        $query->orderBy('created_at', 'desc');
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sub_category', 'like', "%{$search}%");
+            });
+        }
+
+        $order = isset($filters['order']) && strtolower((string) $filters['order']) === 'asc' ? 'asc' : 'desc';
+        $query->orderBy('created_at', $order)->orderBy('id', $order);
 
         return $perPage ? $query->paginate($perPage) : $query->get();
+    }
+
+    /**
+     * Next version number for a (category, sub_category) pair, including soft-deleted rows.
+     */
+    public function nextVersionForPair(string $category, string $subCategory): int
+    {
+        $max = DocumentTemplate::query()
+            ->withTrashed()
+            ->where('category', $category)
+            ->where('sub_category', $subCategory)
+            ->max('version');
+
+        return $max !== null ? (int) $max + 1 : 1;
     }
 
     /**
@@ -237,6 +257,12 @@ class DocumentTemplateRepository
      */
     public function generate(DocumentTemplate $template, array $data): string
     {
+        if ($template->category !== 'lease_agreement') {
+            throw new RepositoryException(
+                'In-app PDF generation is only supported for lease_agreement templates. For other categories, download the .docx and edit offline.'
+            );
+        }
+
         $source = storage_path('app/public/' . $template->path);
         $pdfOutputName = "{$template->sub_category}_v{$template->version}_filled_" . now()->timestamp . ".pdf";
         $pdfOutputPath = "generated_documents/{$template->category}/{$pdfOutputName}";

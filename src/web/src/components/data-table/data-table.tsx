@@ -16,6 +16,7 @@ interface DataTableProps<TData> {
   table: TanstackTable<TData>;
   onChange?: (value: string) => void;
   searchValue: string;
+  searchPlaceholder?: string;
   filterSlot?: React.ReactNode;
 }
 
@@ -23,6 +24,7 @@ export function DataTable<TData>({
   table,
   onChange,
   searchValue,
+  searchPlaceholder = "Search here...",
   filterSlot
 }: DataTableProps<TData>) {
   const { isLoading } = table.options.meta as { isLoading: boolean };
@@ -31,7 +33,7 @@ export function DataTable<TData>({
       <div className="flex items-center gap-2 py-4 flex-wrap">
         <Input
           type="text"
-          placeholder="Search here..."
+          placeholder={searchPlaceholder}
           value={searchValue}
           onChange={(e) => {
             onChange?.(e.target.value);

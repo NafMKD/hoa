@@ -9,9 +9,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchDocumentTemplateDetail } from "./lib/templates";
+import {
+  fetchDocumentTemplateDetail,
+  downloadDocumentTemplateFile,
+} from "./lib/templates";
 import type { DocumentTemplate } from "@/types/types";
 import { Link, useParams } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 import {
   IconArrowLeft,
@@ -85,16 +89,37 @@ export function DocumentTemplateDetail() {
     );
   }
 
+  const handleDownloadDocx = async () => {
+    try {
+      await downloadDocumentTemplateFile(
+        template.id,
+        `${template.sub_category}_v${template.version}`
+      );
+      toast.success("Download started.");
+    } catch (e) {
+      toast.error((e as Error).message || "Could not download file.");
+    }
+  };
+
   return (
     <Main className="container mx-auto px-6 py-10 space-y-10">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-semibold">Document Template Details</h1>
-        <Button variant="outline" asChild>
-          <Link to="/admin/templates">
-            <IconArrowLeft size={16} className="mr-2" />
-            Back
-          </Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            onClick={() => void handleDownloadDocx()}
+          >
+            <IconDownload size={16} className="mr-2" />
+            Download .docx
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/admin/templates">
+              <IconArrowLeft size={16} className="mr-2" />
+              Back
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* --- Template Meta Card (Collapsible) --- */}
@@ -177,34 +202,37 @@ export function DocumentTemplateDetail() {
         </CollapsibleContent>
       </Collapsible>
 
-      {/* --- Document Preview Section with PDF iframe --- */}
       <Card className="shadow-lg border-muted mt-6 relative">
         <CardHeader>
-          <CardTitle>Document Preview</CardTitle>
-          <CardDescription>Preview the uploaded .pdf file</CardDescription>
-          {template.pdf_url && (
+          <CardTitle>Optional PDF preview</CardTitle>
+          <CardDescription>
+            The authoritative source is the Word file (.docx). A PDF preview
+            only appears if a derived PDF was generated for this template.
+          </CardDescription>
+          {template.pdf_url ? (
             <Button
               size="sm"
               variant="outline"
               className="absolute right-4 top-4"
               asChild
             >
-              <a href={template.url} target="_blank">
-                <IconDownload className="mr-1" /> Download PDF
+              <a href={template.pdf_url} target="_blank" rel="noreferrer">
+                <IconDownload className="mr-1" /> Open PDF
               </a>
             </Button>
-          )}
+          ) : null}
         </CardHeader>
         <CardContent className="h-[80vh] overflow-auto p-8">
           {template.pdf_url ? (
             <iframe
               src={template.pdf_url}
               className="h-full w-full rounded-md border bg-muted"
-              title="Document Preview"
+              title="PDF preview"
             />
           ) : (
             <p className="text-muted-foreground">
-              No document content available.
+              No PDF preview. Use <strong>Download .docx</strong> to edit the
+              template offline.
             </p>
           )}
         </CardContent>

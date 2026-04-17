@@ -15,6 +15,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -45,9 +46,31 @@ class DocumentTemplateController extends Controller
             $this->authorize('viewAny', DocumentTemplate::class);
 
             $perPage = (int) ($request->query('per_page', self::_DEFAULT_PAGINATION));
-            $search = $request->query('search', null);
+            $search = $request->query('search');
+            $category = $request->query('category');
+            $category = ($category === '' || $category === null) ? null : $category;
+            if ($category !== null && ! in_array($category, self::_DOCUMENT_TEMPLATE_CATEGORIES, true)) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'Invalid category filter.',
+                ], 422);
+            }
 
-            $filters = compact('search');
+            $order = $request->query('order', 'desc');
+            if (! in_array(strtolower((string) $order), ['asc', 'desc'], true)) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'Invalid order. Use asc or desc.',
+                ], 422);
+            }
+
+            $filters = array_filter([
+                'search' => $search,
+                'category' => $category,
+            ], fn ($v) => $v !== null && $v !== '');
+
+            $filters['order'] = strtolower((string) $order) === 'asc' ? 'asc' : 'desc';
+
             $templates = $this->templates->all($perPage, $filters);
 
             return DocumentTemplateResource::collection($templates);
@@ -123,9 +146,17 @@ class DocumentTemplateController extends Controller
                 'sub_category' => ['required', 'string', 'max:255'],
                 'name'         => ['required', 'string', 'max:255'],
                 'description'  => ['nullable', 'string'],
-                'version'      => ['required', 'integer', 'min:1', new UniqueTemplateVersion()],
+                'version'      => ['nullable', 'integer', 'min:1'],
                 'file'         => ['required', 'file', 'mimes:docx', 'max:' . self::_MAX_FILE_SIZE],
             ]);
+
+            if (($validated['version'] ?? null) === null) {
+                $validated['version'] = $this->templates->nextVersionForPair($validated['category'], $validated['sub_category']);
+            }
+
+            Validator::make($validated, [
+                'version' => ['required', 'integer', 'min:1', new UniqueTemplateVersion()],
+            ])->validate();
 
             $validated['created_by'] = Auth::id();
             $template = $this->templates->create($validated);
@@ -198,7 +229,7 @@ class DocumentTemplateController extends Controller
     public function download(DocumentTemplate $template): BinaryFileResponse|JsonResponse
     {
         try {
-            $this->authorize('viewAny', $template);
+            $this->authorize('view', $template);
 
             // check if the file exist
             if(!$template->path || !Storage::disk('public')->exists($template->path)) {
@@ -355,47 +386,4 @@ class DocumentTemplateController extends Controller
         }
     }
 
-    /**
-     * Generate a document from a template using placeholders.
-     * 
-     * @param Request $request
-     * @param DocumentTemplate $template
-     * @return JsonResponse
-     */
-    public function generate(Request $request, DocumentTemplate $template): JsonResponse
-    {
-        try {
-            $this->authorize('generate', $template);
-
-            $data = $request->validate([
-                'placeholders' => ['required', 'array'],
-                'placeholders.*' => ['string'],
-            ]);
-
-            $filePath = $this->templates->generate($template, $data['placeholders']);
-
-            return response()->json([
-                'status' => self::_SUCCESS,
-                'message' => 'Document generated successfully.',
-                'path' => $filePath,
-            ]);
-        } catch (AuthorizationException) {
-            return response()->json([
-                'status' => self::_ERROR,
-                'message' => self::_UNAUTHORIZED,
-            ], 403);
-        } catch (RepositoryException $e) {
-            return response()->json([
-                'status' => self::_ERROR,
-                'message' => $e->getMessage(),
-            ], 400);
-        } catch (\Exception $e) {
-            // Log the exception 
-            Log::error('Error generating document from template: ' . $e->getMessage());
-            return response()->json([
-                'status' => self::_ERROR,
-                'message' => self::_UNKNOWN_ERROR,
-            ], 400);
-        }
-    }
 }

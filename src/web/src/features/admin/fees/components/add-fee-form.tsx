@@ -151,7 +151,7 @@ export function AddFeeForm({ onSuccess }: AddFeeFormProps) {
                         <SelectItem value={"monthly"}>Monthly</SelectItem>
                         <SelectItem value={"administrational"}>Administrational</SelectItem>
                         <SelectItem value={"special_assessment"}>Special Assessment</SelectItem>
-                        <SelectItem value={"fine"}>Fine</SelectItem>
+                        <SelectItem value={"penalty"}>Penalty</SelectItem>
                         <SelectItem value={"other"}>Other</SelectItem>
                     </SelectContent>
                   </Select>

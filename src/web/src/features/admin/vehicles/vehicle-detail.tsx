@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchVehicleDetail, deleteVehicle } from "./lib/vehicles";
+import { deleteVehicle, fetchVehicleDetail } from "./lib/vehicles";
+import { VehicleStickersPanel } from "./components/vehicle-stickers-panel";
 import type { Vehicle } from "@/types/types";
 import { Link, useParams } from "@tanstack/react-router";
 import {
@@ -21,6 +22,7 @@ import {
   IconFileText,
   IconCar,
   IconBuilding,
+  IconSticker,
 } from "@tabler/icons-react";
 import {
   AlertDialog,
@@ -44,6 +46,16 @@ export function VehicleDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const reloadVehicle = async () => {
+    try {
+      const data = await fetchVehicleDetail(vehicleId as string);
+      setVehicle(data);
+    } catch (error) {
+      const err = error as ApiError;
+      toast.error(err.data?.message || "Failed to refresh vehicle.");
+    }
+  };
 
   useEffect(() => {
     const loadVehicle = async () => {
@@ -296,6 +308,10 @@ export function VehicleDetail() {
         <TabsList className="flex flex-wrap gap-2 w-full">
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="document">Document</TabsTrigger>
+          <TabsTrigger value="stickers" className="gap-1.5">
+            <IconSticker className="h-4 w-4" />
+            Stickers
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="details" className="mt-6 space-y-8">
@@ -379,6 +395,14 @@ export function VehicleDetail() {
               No document available.
             </p>
           )}
+        </TabsContent>
+
+        <TabsContent value="stickers" className="mt-6 space-y-4">
+          <VehicleStickersPanel
+            vehicles={[vehicle]}
+            onRefresh={reloadVehicle}
+            showVehicleColumn={false}
+          />
         </TabsContent>
       </Tabs>
     </Main>

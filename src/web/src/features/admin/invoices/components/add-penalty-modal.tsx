@@ -121,7 +121,7 @@ export function AddPenaltyModal({ onSuccess, invoiceId }: AddPenaltyModalProps) 
     ;(async () => {
       setIsLoadingFees(true)
       try {
-        const list = await fetchAllFees('fine', 'active')
+        const list = await fetchAllFees('penalty', 'active')
         if (mounted) setFees(list)          
       } catch {
         toast.error("Failed to load fees")

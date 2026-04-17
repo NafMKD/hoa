@@ -24,12 +24,16 @@ class VehicleResource extends JsonResource
             'year'              => $this->year,
             'license_plate'     => $this->license_plate,
             'color'             => $this->color,
+            'lost_sticker_fee_id' => $this->lost_sticker_fee_id,
+            'lost_sticker_fee' => $this->whenLoaded('lostStickerFee', function () {
+                return new FeeResource($this->lostStickerFee);
+            }),
             'document'          => $this->whenLoaded('document', function () {
                 return new DocumentResource($this->document);
             }),
-            // 'stickers'          => $this->whenLoaded('stickers', function () {
-            //     return StickerIssueResource::collection($this->stickers);
-            // }),
+            'stickers'          => $this->whenLoaded('stickers', function () {
+                return StickerIssueResource::collection($this->stickers);
+            }),
             'created_at'        => \Carbon\Carbon::parse($this->created_at)->toFormattedDateString(),
             'updated_at'        => \Carbon\Carbon::parse($this->updated_at)->toFormattedDateString(),
         ];

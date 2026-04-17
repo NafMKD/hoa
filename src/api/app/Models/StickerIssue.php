@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StickerIssue extends Model
@@ -17,12 +18,16 @@ class StickerIssue extends Model
      */
     protected $fillable = [
         'vehicle_id',
+        'replaces_sticker_issue_id',
         'sticker_code',
+        'lookup_token',
         'issued_by',
         'issued_at',
         'expires_at',
         'status',
         'qr_code_file_id',
+        'replacement_invoice_id',
+        'lost_penalty_invoice_id',
     ];
 
     /**
@@ -66,5 +71,31 @@ class StickerIssue extends Model
     public function qrCode(): BelongsTo
     {
         return $this->belongsTo(Document::class, 'qr_code_file_id');
+    }
+
+    public function replaces(): BelongsTo
+    {
+        return $this->belongsTo(StickerIssue::class, 'replaces_sticker_issue_id');
+    }
+
+    /**
+     * Newer sticker that replaced this one (if any).
+     */
+    public function replacedBy(): HasOne
+    {
+        return $this->hasOne(StickerIssue::class, 'replaces_sticker_issue_id');
+    }
+
+    public function replacementInvoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'replacement_invoice_id');
+    }
+
+    /**
+     * Penalty invoice created when this sticker was marked lost (must be paid before replacement issue).
+     */
+    public function lostPenaltyInvoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'lost_penalty_invoice_id');
     }
 }

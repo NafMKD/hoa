@@ -24,6 +24,7 @@ class Vehicle extends Model
         'license_plate',
         'color',
         'vehicle_document_id',
+        'lost_sticker_fee_id',
     ];
 
     /**
@@ -59,12 +60,20 @@ class Vehicle extends Model
     }
 
     /**
+     * Default penalty fee when a sticker is marked lost (invoice created at mark-lost).
+     */
+    public function lostStickerFee(): BelongsTo
+    {
+        return $this->belongsTo(Fee::class, 'lost_sticker_fee_id');
+    }
+
+    /**
      * Get sticker issues for this vehicle.
      *
      * @return HasMany
      */
     public function stickers(): HasMany
     {
-        return $this->hasMany(StickerIssue::class);
+        return $this->hasMany(StickerIssue::class)->orderByDesc('issued_at');
     }
 }

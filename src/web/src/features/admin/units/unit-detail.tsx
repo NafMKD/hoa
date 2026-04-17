@@ -18,6 +18,7 @@ import {
   IconArrowLeftCircle,
   IconFileText,
   IconEye,
+  IconSticker,
 } from "@tabler/icons-react";
 import {
   Table,
@@ -39,6 +40,7 @@ import { toast } from "sonner";
 import type { ApiError } from "@/types/api-error";
 import { InvoiceList } from "./components/invoices/invoice-list";
 import { AddInvoiceModal } from "../invoices/components/add-invoice-modal";
+import { VehicleStickersPanel } from "../vehicles/components/vehicle-stickers-panel";
 
 function getFileType(url?: string | null): "image" | "pdf" | "unknown" {
   if (!url) return "unknown";
@@ -94,6 +96,12 @@ export function UnitDetail() {
   const leases = unit?.leases ?? [];
 
   const invoices = unit?.invoices ?? [];
+
+  const vehicles = unit?.vehicles ?? [];
+  const stickersCount = vehicles.reduce(
+    (n, v) => n + (v.stickers?.length ?? 0),
+    0
+  );
 
   const ownersCount = owners?.length ?? 0;
   const leasesCount = leases?.length ?? 0;
@@ -310,14 +318,14 @@ export function UnitDetail() {
               Relationships
             </CardTitle>
             <CardDescription>
-              Owners and lease history for this unit.
+              Invoices, owners, leases, and parking stickers for this unit.
             </CardDescription>
           </CardHeader>
 
           <CardContent className="pt-0">
             <Tabs defaultValue="invoices" className="w-full">
               <div className="flex flex-col gap-3 border-b pb-3 sm:flex-row sm:items-center sm:justify-between">
-                <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:inline-flex bg-muted/50">
+                <TabsList className="w-full sm:w-auto grid grid-cols-2 md:grid-cols-4 sm:inline-flex bg-muted/50">
                   <TabsTrigger
                     value="invoices"
                     className="flex items-center gap-2"
@@ -343,6 +351,16 @@ export function UnitDetail() {
                     <span>Leases</span>
                     <span className="inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-background text-xs font-semibold border">
                       {leasesCount}
+                    </span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="stickers"
+                    className="flex items-center gap-2"
+                  >
+                    <IconSticker className="h-4 w-4" />
+                    <span>Stickers</span>
+                    <span className="inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-background text-xs font-semibold border">
+                      {stickersCount}
                     </span>
                   </TabsTrigger>
                 </TabsList>
@@ -540,6 +558,14 @@ export function UnitDetail() {
                     </div>
                   </div>
                 )}
+              </TabsContent>
+
+              <TabsContent value="stickers" className="mt-4">
+                <VehicleStickersPanel
+                  vehicles={vehicles}
+                  onRefresh={refreshData}
+                  showVehicleColumn={vehicles.length > 1}
+                />
               </TabsContent>
             </Tabs>
           </CardContent>

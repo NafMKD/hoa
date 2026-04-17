@@ -1,16 +1,24 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { updateVehicle } from "../lib/vehicles";
 import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { ApiError } from "@/types/api-error";
-import type { Vehicle } from "@/types/types";
+import type { Fee, Vehicle } from "@/types/types";
+import { fetchAllFees } from "@/features/admin/fees/lib/fees";
 
 const vehicleSchema = z.object({
   unit_id: z.number().optional(), 
@@ -25,7 +33,8 @@ const vehicleSchema = z.object({
     .min(8, "License plate must be at least 8 characters")
     .max(9, "License plate must be at most 9 characters"),
   color: z.string().max(255).optional().or(z.literal("")),
-  vehicle_document: z.any().optional(), 
+  vehicle_document: z.any().optional(),
+  lost_sticker_fee_id: z.number().nullable().optional(),
 });
 
 type FormValues = z.infer<typeof vehicleSchema>;
@@ -47,10 +56,16 @@ export function EditVehicleForm({ vehicle, unitName, onSuccess }: EditVehicleFor
       license_plate: vehicle.license_plate,
       color: vehicle.color ?? "",
       vehicle_document: undefined,
+      lost_sticker_fee_id: vehicle.lost_sticker_fee_id ?? null,
     },
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [penaltyFees, setPenaltyFees] = useState<Fee[]>([]);
+
+  useEffect(() => {
+    fetchAllFees("penalty", "active").then(setPenaltyFees);
+  }, []);
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -70,6 +85,12 @@ export function EditVehicleForm({ vehicle, unitName, onSuccess }: EditVehicleFor
 
       if (values.vehicle_document instanceof File) {
         formData.append("vehicle_document", values.vehicle_document);
+      }
+
+      if (values.lost_sticker_fee_id != null) {
+        formData.append("lost_sticker_fee_id", String(values.lost_sticker_fee_id));
+      } else {
+        formData.append("lost_sticker_fee_id", "");
       }
 
       await updateVehicle(vehicle.id, formData);
@@ -168,6 +189,39 @@ export function EditVehicleForm({ vehicle, unitName, onSuccess }: EditVehicleFor
             {form.formState.errors.color && (
               <p className="text-sm text-red-500">{form.formState.errors.color.message}</p>
             )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Default lost sticker fee</Label>
+            <Controller
+              name="lost_sticker_fee_id"
+              control={form.control}
+              render={({ field }) => (
+                <Select
+                  value={
+                    field.value != null ? String(field.value) : "__none__"
+                  }
+                  onValueChange={(v) =>
+                    field.onChange(v === "__none__" ? null : parseInt(v, 10))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="None (choose fee when marking lost)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">None</SelectItem>
+                    {penaltyFees.map((f) => (
+                      <SelectItem key={f.id} value={String(f.id)}>
+                        {f.name} — {Number(f.amount).toLocaleString()} ETB
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <p className="text-xs text-muted-foreground">
+              Used when marking a sticker lost; you can still override in that dialog.
+            </p>
           </div>
 
           {/* Replace Document (optional) */}

@@ -33,6 +33,9 @@ Route::prefix('payments')->middleware('auth:sanctum')->name('api.v1.payments.')-
 Route::prefix('vehicles')->middleware('auth:sanctum')->name('api.v1.vehicles.')->group(function () { 
     require __DIR__.'/vehicle.php';
 });
+Route::prefix('sticker-issues')->middleware('auth:sanctum')->name('api.v1.sticker_issues.')->group(function () {
+    require __DIR__.'/sticker_issue.php';
+});
 Route::prefix('import')->middleware('auth:sanctum')->name('api.v1.import.')->group(function () { 
     Route::post('/users', [ImportController::class, 'importUsers'])->name('users');
     Route::post('/buildings', [ImportController::class, 'importBuildings'])->name('buildings');

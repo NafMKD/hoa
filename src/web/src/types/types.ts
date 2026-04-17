@@ -192,6 +192,7 @@ export type Unit = {
   currentLease?: UnitLeaseResource;
   leases?: UnitLeaseResource[];
   invoices?: Invoice[];
+  vehicles?: Vehicle[];
   created_at: string;
   updated_at: string;
 };
@@ -253,6 +254,41 @@ export interface FeePaginatedResponse {
   };
 }
 
+export type StickerIssueStatus =
+  | "active"
+  | "lost"
+  | "revoked"
+  | "expired"
+  | "replaced"
+  | "returned";
+
+export interface StickerIssue {
+  id: number;
+  vehicle_id: number;
+  replaces_sticker_issue_id: number | null;
+  sticker_code: string;
+  lookup_token: string | null;
+  status: StickerIssueStatus | string;
+  issued_at: string | null;
+  expires_at: string | null;
+  replacement_invoice_id?: number | null;
+  replacement_invoice?: {
+    id: number;
+    invoice_number: string;
+  } | null;
+  lost_penalty_invoice_id?: number | null;
+  lost_penalty_invoice?: Invoice | null;
+  issuer?: User | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StickerPrintData {
+  sticker_code: string;
+  lookup_token: string | null;
+  sticker_line: string;
+}
+
 export interface Vehicle {
   id: string | number;
   unit?: Unit;
@@ -262,6 +298,9 @@ export interface Vehicle {
   license_plate: string;
   color: string | null;
   document?: Document;
+  lost_sticker_fee_id?: number | null;
+  lost_sticker_fee?: Fee | null;
+  stickers?: StickerIssue[];
   created_at: string;
   updated_at: string;
 }

@@ -154,8 +154,10 @@ export function EditFeeForm({ fee, onSuccess }: EditFeeFormProps) {
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
+                        <SelectItem value={"monthly"}>Monthly</SelectItem>
                         <SelectItem value={"administrational"}>Administrational</SelectItem>
                         <SelectItem value={"special_assessment"}>Special Assessment</SelectItem>
+                        <SelectItem value={"penalty"}>Penalty</SelectItem>
                         <SelectItem value={"other"}>Other</SelectItem>
                     </SelectContent>
                   </Select>

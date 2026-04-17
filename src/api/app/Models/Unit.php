@@ -150,6 +150,14 @@ class Unit extends Model
     }
 
     /**
+     * Vehicles registered to this unit (parking stickers are per vehicle).
+     */
+    public function vehicles(): HasMany
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
+    /**
      * Unit issue (check if the unit have any issue)
      * 
      * @return bool

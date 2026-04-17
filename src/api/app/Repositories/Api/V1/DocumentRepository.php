@@ -104,4 +104,45 @@ class DocumentRepository
             throw new RepositoryException("Failed to create document from path");
         }
     }
+
+    /**
+     * Store raw bytes on the public disk and create a document (e.g. tiny placeholder PNG).
+     *
+     * @param string $contents Binary file contents
+     * @param string $relativePath Path under storage/app/public (no leading slash)
+     * @param string $fileName Original file name for display
+     * @param string $category Document category (see Controller::_DOCUMENT_TYPES)
+     */
+    public function createFromBinary(string $contents, string $relativePath, string $fileName, string $category): Document
+    {
+        $inParentTransaction = DB::transactionLevel() > 0;
+
+        try {
+            if (! $inParentTransaction) {
+                DB::beginTransaction();
+            }
+
+            Storage::disk('public')->put($relativePath, $contents);
+
+            $document = Document::create([
+                'file_path' => $relativePath,
+                'file_name' => $fileName,
+                'mime_type' => 'image/png',
+                'file_size' => strlen($contents),
+                'category' => $category,
+            ]);
+
+            if (! $inParentTransaction) {
+                DB::commit();
+            }
+
+            return $document;
+        } catch (Throwable $e) {
+            if (! $inParentTransaction) {
+                DB::rollBack();
+            }
+            Log::error('Document createFromBinary failed: '.$e->getMessage(), ['exception' => $e]);
+            throw new RepositoryException('Failed to create document');
+        }
+    }
 }

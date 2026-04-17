@@ -66,6 +66,10 @@ class VehicleController extends Controller
         try {
             $this->authorize('create', Vehicle::class);
 
+            if ($request->has('lost_sticker_fee_id') && $request->input('lost_sticker_fee_id') === '') {
+                $request->merge(['lost_sticker_fee_id' => null]);
+            }
+
             $validated = $request->validate([
                 'unit_id'             => ['required', 'integer', 'exists:units,id'],
                 'make'                => ['required', 'string', 'max:255'],
@@ -74,6 +78,7 @@ class VehicleController extends Controller
                 'license_plate'       => ['required', 'string', 'min:8', 'max:9', new UniqueVehiclePlateNumber()],
                 'color'               => ['nullable', 'string', 'max:255'],
                 'vehicle_document'    => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
+                'lost_sticker_fee_id' => ['nullable', 'integer', 'exists:fees,id'],
             ]);
 
             $vehicle = $this->vehicles->create($validated);
@@ -106,7 +111,7 @@ class VehicleController extends Controller
         try {
             $this->authorize('view', $vehicle);
 
-            $vehicle->load('stickers', 'unit', 'document');
+            $vehicle->load(['stickers.issuer', 'stickers.replacementInvoice', 'stickers.lostPenaltyInvoice', 'unit', 'document', 'lostStickerFee']);
 
             return response()->json(new VehicleResource($vehicle));
         } catch (AuthorizationException) {
@@ -131,6 +136,10 @@ class VehicleController extends Controller
         try {
             $this->authorize('update', $vehicle);
 
+            if ($request->has('lost_sticker_fee_id') && $request->input('lost_sticker_fee_id') === '') {
+                $request->merge(['lost_sticker_fee_id' => null]);
+            }
+
             $validated = $request->validate([
                 'unit_id'             => ['sometimes', 'nullable', 'integer', 'exists:units,id'],
                 'make'                => ['sometimes', 'string', 'max:255'],
@@ -139,6 +148,7 @@ class VehicleController extends Controller
                 'license_plate'       => ['sometimes', 'string', 'min:8', 'max:9', new UniqueVehiclePlateNumber()],
                 'color'               => ['sometimes', 'nullable', 'string', 'max:255'],
                 'vehicle_document'    => ['sometimes', 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
+                'lost_sticker_fee_id' => ['sometimes', 'nullable', 'integer', 'exists:fees,id'],
             ]);
 
             $vehicle = $this->vehicles->update($vehicle, $validated);

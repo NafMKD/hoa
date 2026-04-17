@@ -201,6 +201,12 @@ class UnitController extends Controller
                 'currentLease.signedAgreementDocument',
                 'invoices',
                 'invoices.source',
+                'vehicles',
+                'vehicles.unit',
+                'vehicles.lostStickerFee',
+                'vehicles.stickers.issuer',
+                'vehicles.stickers.replacementInvoice',
+                'vehicles.stickers.lostPenaltyInvoice',
             ]);
 
             return response()->json(new UnitResource($unit));

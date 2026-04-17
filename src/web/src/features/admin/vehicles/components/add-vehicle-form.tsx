@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { createVehicle } from "../lib/vehicles";
 import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { ApiError } from "@/types/api-error";
+import type { Fee } from "@/types/types";
+import { fetchAllFees } from "@/features/admin/fees/lib/fees";
 import { UnitSelect } from "../../units/components/unit-select";
 
 const vehicleSchema = z.object({
@@ -27,6 +36,7 @@ const vehicleSchema = z.object({
     .min(8, "License plate must be at least 8 characters")
     .max(9, "License plate must be at most 9 characters"),
   color: z.string().max(255).optional().or(z.literal("")),
+  lost_sticker_fee_id: z.number().nullable().optional(),
   vehicle_document: z
     .any()
     .refine((file) => file instanceof File, "Vehicle document is required")
@@ -56,11 +66,17 @@ export function AddVehicleForm({ onSuccess}: AddVehicleFormProps) {
       year: new Date().getFullYear(),
       license_plate: "",
       color: "",
+      lost_sticker_fee_id: null,
       vehicle_document: undefined,
     },
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [penaltyFees, setPenaltyFees] = useState<Fee[]>([]);
+
+  useEffect(() => {
+    fetchAllFees("penalty", "active").then(setPenaltyFees);
+  }, []);
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -77,6 +93,10 @@ export function AddVehicleForm({ onSuccess}: AddVehicleFormProps) {
 
       // required file
       formData.append("vehicle_document", values.vehicle_document as File);
+
+      if (values.lost_sticker_fee_id != null) {
+        formData.append("lost_sticker_fee_id", String(values.lost_sticker_fee_id));
+      }
 
       await createVehicle(formData);
       toast.success("Vehicle added successfully!");
@@ -215,6 +235,39 @@ export function AddVehicleForm({ onSuccess}: AddVehicleFormProps) {
                 {form.formState.errors.color.message}
               </p>
             )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Default lost sticker fee (optional)</Label>
+            <Controller
+              name="lost_sticker_fee_id"
+              control={form.control}
+              render={({ field }) => (
+                <Select
+                  value={
+                    field.value != null ? String(field.value) : "__none__"
+                  }
+                  onValueChange={(v) =>
+                    field.onChange(v === "__none__" ? null : parseInt(v, 10))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="None" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">None</SelectItem>
+                    {penaltyFees.map((f) => (
+                      <SelectItem key={f.id} value={String(f.id)}>
+                        {f.name} — {Number(f.amount).toLocaleString()} ETB
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <p className="text-xs text-muted-foreground">
+              Used when marking a sticker lost for this vehicle.
+            </p>
           </div>
 
           {/* Document Upload */}

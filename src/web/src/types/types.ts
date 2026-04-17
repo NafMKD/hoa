@@ -254,6 +254,54 @@ export interface FeePaginatedResponse {
   };
 }
 
+export type PollStatus = "draft" | "open" | "closed";
+
+/** Mirrors backend PollRepository::validateEligibleScope. */
+export type PollEligibleScope =
+  | { type: "all" }
+  | { type: "buildings"; building_ids: number[] }
+  | { type: "units"; unit_ids: number[] };
+
+export interface PollOption {
+  id: number;
+  poll_id: number;
+  option_text: string;
+  order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Poll {
+  id: number;
+  title: string;
+  description: string | null;
+  eligible_scope: PollEligibleScope | null;
+  start_at: string;
+  end_at: string;
+  status: PollStatus | string;
+  votes_count?: number;
+  options?: PollOption[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PollPaginatedResponse {
+  data: Poll[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export type PollResultsResponse = {
+  poll_id: number;
+  status: string;
+  options: { option_id: number; option_text: string; vote_count: number }[];
+  total_votes: number;
+};
+
 export type StickerIssueStatus =
   | "active"
   | "lost"

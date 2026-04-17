@@ -16,6 +16,7 @@ class Vote extends Model
         'poll_id',
         'option_id',
         'user_id',
+        'unit_id',
     ];
 
     /**
@@ -46,5 +47,10 @@ class Vote extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

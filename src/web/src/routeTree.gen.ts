@@ -22,6 +22,7 @@ import { Route as AuthenticatedAdminVehiclesIndexRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminUsersIndexRouteImport } from './routes/_authenticated/admin/users/index'
 import { Route as AuthenticatedAdminUnitsIndexRouteImport } from './routes/_authenticated/admin/units/index'
 import { Route as AuthenticatedAdminTemplatesIndexRouteImport } from './routes/_authenticated/admin/templates/index'
+import { Route as AuthenticatedAdminPollsIndexRouteImport } from './routes/_authenticated/admin/polls/index'
 import { Route as AuthenticatedAdminPayrollRulesIndexRouteImport } from './routes/_authenticated/admin/payroll-rules/index'
 import { Route as AuthenticatedAdminEmployeesIndexRouteImport } from './routes/_authenticated/admin/employees/index'
 import { Route as AuthenticatedAdminBuildingsIndexRouteImport } from './routes/_authenticated/admin/buildings/index'
@@ -112,6 +113,12 @@ const AuthenticatedAdminTemplatesIndexRoute =
   AuthenticatedAdminTemplatesIndexRouteImport.update({
     id: '/templates/',
     path: '/templates/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminPollsIndexRoute =
+  AuthenticatedAdminPollsIndexRouteImport.update({
+    id: '/polls/',
+    path: '/polls/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminPayrollRulesIndexRoute =
@@ -265,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesIndexRoute
   '/admin/payroll-rules': typeof AuthenticatedAdminPayrollRulesIndexRoute
+  '/admin/polls': typeof AuthenticatedAdminPollsIndexRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
@@ -301,6 +309,7 @@ export interface FileRoutesByTo {
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesIndexRoute
   '/admin/payroll-rules': typeof AuthenticatedAdminPayrollRulesIndexRoute
+  '/admin/polls': typeof AuthenticatedAdminPollsIndexRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
   '/admin/units': typeof AuthenticatedAdminUnitsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
@@ -339,6 +348,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/buildings/': typeof AuthenticatedAdminBuildingsIndexRoute
   '/_authenticated/admin/employees/': typeof AuthenticatedAdminEmployeesIndexRoute
   '/_authenticated/admin/payroll-rules/': typeof AuthenticatedAdminPayrollRulesIndexRoute
+  '/_authenticated/admin/polls/': typeof AuthenticatedAdminPollsIndexRoute
   '/_authenticated/admin/templates/': typeof AuthenticatedAdminTemplatesIndexRoute
   '/_authenticated/admin/units/': typeof AuthenticatedAdminUnitsIndexRoute
   '/_authenticated/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
@@ -378,6 +388,7 @@ export interface FileRouteTypes {
     | '/admin/buildings'
     | '/admin/employees'
     | '/admin/payroll-rules'
+    | '/admin/polls'
     | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
@@ -414,6 +425,7 @@ export interface FileRouteTypes {
     | '/admin/buildings'
     | '/admin/employees'
     | '/admin/payroll-rules'
+    | '/admin/polls'
     | '/admin/templates'
     | '/admin/units'
     | '/admin/users'
@@ -451,6 +463,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/buildings/'
     | '/_authenticated/admin/employees/'
     | '/_authenticated/admin/payroll-rules/'
+    | '/_authenticated/admin/polls/'
     | '/_authenticated/admin/templates/'
     | '/_authenticated/admin/units/'
     | '/_authenticated/admin/users/'
@@ -573,6 +586,13 @@ declare module '@tanstack/react-router' {
       path: '/templates'
       fullPath: '/admin/templates'
       preLoaderRoute: typeof AuthenticatedAdminTemplatesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/polls/': {
+      id: '/_authenticated/admin/polls/'
+      path: '/polls'
+      fullPath: '/admin/polls'
+      preLoaderRoute: typeof AuthenticatedAdminPollsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/payroll-rules/': {
@@ -742,6 +762,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminBuildingsIndexRoute: typeof AuthenticatedAdminBuildingsIndexRoute
   AuthenticatedAdminEmployeesIndexRoute: typeof AuthenticatedAdminEmployeesIndexRoute
   AuthenticatedAdminPayrollRulesIndexRoute: typeof AuthenticatedAdminPayrollRulesIndexRoute
+  AuthenticatedAdminPollsIndexRoute: typeof AuthenticatedAdminPollsIndexRoute
   AuthenticatedAdminTemplatesIndexRoute: typeof AuthenticatedAdminTemplatesIndexRoute
   AuthenticatedAdminUnitsIndexRoute: typeof AuthenticatedAdminUnitsIndexRoute
   AuthenticatedAdminUsersIndexRoute: typeof AuthenticatedAdminUsersIndexRoute
@@ -779,6 +800,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminEmployeesIndexRoute,
     AuthenticatedAdminPayrollRulesIndexRoute:
       AuthenticatedAdminPayrollRulesIndexRoute,
+    AuthenticatedAdminPollsIndexRoute: AuthenticatedAdminPollsIndexRoute,
     AuthenticatedAdminTemplatesIndexRoute:
       AuthenticatedAdminTemplatesIndexRoute,
     AuthenticatedAdminUnitsIndexRoute: AuthenticatedAdminUnitsIndexRoute,

@@ -13,6 +13,7 @@ use App\Models\Employee;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\Fee;
+use App\Models\Poll;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Payroll;
@@ -43,6 +44,7 @@ use App\Policies\Api\V1\PayrollTaxBracketPolicy;
 use App\Policies\Api\V1\InvoicePolicy;
 use App\Policies\Api\V1\ReconciliationEscalationPolicy;
 use App\Policies\Api\V1\PaymentPolicy;
+use App\Policies\Api\V1\PollPolicy;
 use App\Policies\Api\V1\StickerIssuePolicy;
 use App\Policies\Api\V1\UnitLeasePolicy;
 use App\Policies\Api\V1\UnitPolicy;
@@ -92,6 +94,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(UnitOwner::class, UnitOwnerPolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
         Gate::policy(Vehicle::class, VehiclePolicy::class);
+        Gate::policy(Poll::class, PollPolicy::class);
 
         Gate::define('viewFinancialReports', function (User $user): bool {
             return $user->hasRole(['admin', 'accountant', 'secretary', 'representative']);
@@ -119,5 +122,6 @@ class AppServiceProvider extends ServiceProvider
         Agency::observe(AuditLogObserver::class);
         AgencyPlacement::observe(AuditLogObserver::class);
         AgencyMonthlyPayment::observe(AuditLogObserver::class);
+        Poll::observe(AuditLogObserver::class);
     }
 }

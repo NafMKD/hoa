@@ -74,3 +74,6 @@ Route::prefix('payroll-settings')->middleware('auth:sanctum')->name('api.v1.payr
 Route::prefix('financial-reports')->middleware('auth:sanctum')->name('api.v1.financial_reports.')->group(function () {
     require __DIR__.'/financial_report.php';
 });
+Route::prefix('polls')->middleware('auth:sanctum')->name('api.v1.polls.')->group(function () {
+    require __DIR__.'/poll.php';
+});

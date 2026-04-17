@@ -4,25 +4,21 @@ namespace App\Repositories\Api\V1;
 
 use App\Exceptions\RepositoryException;
 use App\Http\Controllers\Controller;
+use App\Models\Unit;
 use App\Models\UnitLease;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Document;
-use App\Models\Unit;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class UnitLeaseRepository
 {
-    protected DocumentTemplateRepository $templates;
     protected UserRepository $user;
     protected DocumentRepository $documentRepository;
 
-    public function __construct(DocumentTemplateRepository $templates, UserRepository $user, DocumentRepository $documentRepository)
+    public function __construct(UserRepository $user, DocumentRepository $documentRepository)
     {
-        $this->templates = $templates;
         $this->user = $user;
         $this->documentRepository = $documentRepository;
     }
@@ -77,7 +73,7 @@ class UnitLeaseRepository
             $leaseCommon = [
                 'agreement_type'                => $data['leasing_by'],
                 'agreement_amount'              => $data['agreement_amount'],
-                'lease_template_id'             => $data['lease_template_id'],
+                'lease_template_id'             => null,
                 'lease_start_date'              => $data['lease_start_date'],
                 'lease_end_date'                => $data['lease_end_date'] ?? null,
                 'status'                        => 'draft',
@@ -213,9 +209,6 @@ class UnitLeaseRepository
                 throw new RepositoryException('Invalid leasing_by or renter_type value.');
             }
 
-            // TODO: generate lease document
-            // $unitLease = $this->generateLeaseDocument($unitLease);
-
             DB::commit();
             return $unitLease;
         } catch (\Throwable $e) {
@@ -234,101 +227,56 @@ class UnitLeaseRepository
     public function delete(UnitLease $lease): ?bool
     {
         return DB::transaction(function () use ($lease) {
+            $lease->load(['representativeDocument', 'signedAgreementDocument']);
+
             // Delete representative document if exists
             if ($lease->representativeDocument && Storage::disk('public')->exists($lease->representativeDocument->file_path)) {
                 Storage::disk('public')->delete($lease->representativeDocument->file_path);
                 $lease->representativeDocument->delete();
             }
-            // Note: Lease document is not deleted to preserve records
+            if ($lease->signedAgreementDocument && Storage::disk('public')->exists($lease->signedAgreementDocument->file_path)) {
+                Storage::disk('public')->delete($lease->signedAgreementDocument->file_path);
+                $lease->signedAgreementDocument->delete();
+            }
+            // Note: Legacy generated lease_document is not deleted to preserve records
 
             return $lease->delete();
         });
     }
 
     /**
-     * Generate the lease document from the template and save it as a Document.
+     * Attach or replace the scanned copy of the signed lease agreement.
      *
      * @param UnitLease $lease
+     * @param UploadedFile $file
      * @return UnitLease
      * @throws RepositoryException
      */
-    private function generateLeaseDocument(UnitLease $lease): UnitLease
+    public function attachSignedAgreement(UnitLease $lease, UploadedFile $file): UnitLease
     {
-        if (!$lease->leaseTemplate) {
-            throw new RepositoryException('Lease template not assigned.');
+        DB::beginTransaction();
+
+        try {
+            $lease->load('signedAgreementDocument');
+
+            if ($lease->signedAgreementDocument) {
+                $this->documentRepository->delete($lease->signedAgreementDocument);
+            }
+
+            $document = $this->documentRepository->create($file, Controller::_DOCUMENT_TYPES[4]);
+
+            $lease->signed_agreement_document_id = $document->id;
+            $lease->updated_by = Auth::id();
+            $lease->save();
+
+            DB::commit();
+
+            return $lease->fresh(['signedAgreementDocument']);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Attach signed agreement failed: ' . $e->getMessage());
+            throw new RepositoryException('Failed to attach signed agreement.');
         }
-
-        // Prepare data for placeholders
-        $data = [
-            // Owner Info
-            'unit.owner.full_name' => $lease->unit->currentOwner->full_name ?? '',
-            // Representative Info
-            'representative.full_name' => $lease->representative->full_name ? "( {$lease->representative->full_name} )" : '',
-
-            // Tenant Info
-            'tenant.full_name' => $lease->tenant->full_name ?? '',
-            'tenant.city' => $lease->tenant->city ?? '',
-            'tenant.sub_city' => $lease->tenant->sub_city ?? '',
-            'tenant.woreda' => $lease->tenant->woreda ?? '',
-            'tenant.house_number' => $lease->tenant->house_number ?? '',
-            'tenant.phone' => $lease->tenant->phone ?? '',
-
-            // Unit / House Info
-            'unit.building.name' => $lease->unit->building->name ?? '',
-            'unit.name' => $lease->unit->name ?? '',
-            'unit.unit_type' => $lease->unit->unit_type ?? '',
-
-            // Lease Info
-            'agreement_amount' => $lease->agreement_amount ?? '',
-            'amount_in_words' => $lease->amount_in_words,
-            'lease_term_in_years' => $lease->lease_term_in_years ?? '',
-
-            // Date
-            'today_date' => now()->format('Y-m-d'),
-
-            // Witnesses
-            'witness_1_full_name' => $lease->witness_1_full_name ?? '',
-            'witness_2_full_name' => $lease->witness_2_full_name ?? '',
-        ];
-
-        // check if the type is owner
-        if ($lease->agreement_type === 'owner') {
-            $data['unit.lessor.name'] = $lease->unit->currentOwner->full_name ?? '';
-            $data['unit.owner.city'] = $lease->unit->currentOwner->city ?? '';
-            $data['unit.owner.sub_city'] = $lease->unit->currentOwner->sub_city ?? '';
-            $data['unit.owner.woreda'] = $lease->unit->currentOwner->woreda ?? '';
-            $data['unit.owner.house_number'] = $lease->unit->currentOwner->house_number ?? '';
-            $data['unit.owner.phone'] = $lease->unit->currentOwner->phone ?? '';
-        } elseif ($lease->agreement_type === 'representative') {
-            $data['unit.lessor.name'] = $lease->representative->full_name ?? '';
-            $data['unit.owner.city'] = $lease->representative->city ?? '';
-            $data['unit.owner.sub_city'] = $lease->representative->sub_city ?? '';
-            $data['unit.owner.woreda'] = $lease->representative->woreda ?? '';
-            $data['unit.owner.house_number'] = $lease->representative->house_number ?? '';
-            $data['unit.owner.phone'] = $lease->representative->phone ?? '';
-        }
-
-        // Only keep allowed placeholders
-        $allowedPlaceholders = $lease->leaseTemplate->placeholders;
-        $filteredData = [];
-        foreach ($allowedPlaceholders as $key) {
-            $filteredData[$key] = $data[$key] ?? '';
-        }
-
-        // Generate PDF via template repository
-        $path = $this->templates->generate($lease->leaseTemplate, $filteredData);
-
-        // Save generated document
-        $document = $this->documentRepository->createFromPath(
-            $path,
-            Controller::_DOCUMENT_TYPES[4] 
-        );
-
-        // Update lease with generated document
-        $lease->lease_document_id = $document->id;
-        $lease->save();
-
-        return $lease->fresh();
     }
 
     /**

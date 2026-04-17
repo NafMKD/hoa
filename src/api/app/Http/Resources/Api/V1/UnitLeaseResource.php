@@ -36,6 +36,9 @@ class UnitLeaseResource extends JsonResource
             'lease_document'            => $this->whenLoaded('document', function () {
                 return new DocumentResource($this->document);
             }),
+            'signed_agreement'          => $this->whenLoaded('signedAgreementDocument', function () {
+                return new DocumentResource($this->signedAgreementDocument);
+            }),
             'lease_start_date'          => \Carbon\Carbon::parse($this->lease_start_date)->toFormattedDateString(),
             'lease_end_date'            => \Carbon\Carbon::parse($this->lease_end_date)->toFormattedDateString(),
             'status'                    => $this->status,

@@ -189,7 +189,16 @@ class UnitController extends Controller
                 'currentOwner.document',
                 'leases',
                 'leases.tenant',
+                'leases.document',
+                'leases.leaseTemplate',
+                'leases.representativeDocument',
+                'leases.signedAgreementDocument',
                 'currentLease',
+                'currentLease.tenant',
+                'currentLease.document',
+                'currentLease.leaseTemplate',
+                'currentLease.representativeDocument',
+                'currentLease.signedAgreementDocument',
                 'invoices',
                 'invoices.source',
             ]);
@@ -374,7 +383,6 @@ class UnitController extends Controller
                 // Lease Fields
                 // -------------------------
                 'agreement_amount'   => ['required', 'numeric', 'min:0'],
-                'lease_template_id'  => ['required', 'integer', 'exists:document_templates,id'],
                 'lease_start_date'   => ['required', 'date'],
                 'lease_end_date'     => ['nullable', 'date', 'after_or_equal:lease_start_date'],
                 'lease_representative_document' => [
@@ -487,6 +495,7 @@ class UnitController extends Controller
                 'document',
                 'leaseTemplate',
                 'representativeDocument',
+                'signedAgreementDocument',
             ]);
 
             return response()->json(new UnitLeaseResource($lease));
@@ -607,6 +616,75 @@ class UnitController extends Controller
             ], 400);
         } catch (\Exception $e) {
             Log::error('Error activating unit lease: ' . $e->getMessage());
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNKNOWN_ERROR,
+            ], 400);
+        }
+    }
+
+    /**
+     * Upload or replace the scanned copy of the physically signed lease agreement.
+     *
+     * @param Request $request
+     * @param Unit $unit
+     * @param UnitLease $lease
+     * @return JsonResponse
+     */
+    public function uploadSignedLeaseAgreement(Request $request, Unit $unit, UnitLease $lease): JsonResponse
+    {
+        try {
+            $this->authorize('update', $lease);
+            $this->authorize('view', $unit);
+
+            if ($lease->unit_id !== $unit->id) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'Lease does not belong to this unit.',
+                ], 404);
+            }
+
+            $validated = $request->validate([
+                'signed_agreement' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:' . self::_MAX_FILE_SIZE],
+            ]);
+
+            $updated = $this->leases->attachSignedAgreement($lease, $validated['signed_agreement']);
+
+            $updated->load([
+                'unit',
+                'unit.building',
+                'unit.currentOwner',
+                'unit.currentOwner.owner',
+                'unit.currentOwner.document',
+                'tenant',
+                'representative',
+                'creator',
+                'updater',
+                'document',
+                'leaseTemplate',
+                'representativeDocument',
+                'signedAgreementDocument',
+            ]);
+
+            return response()->json(new UnitLeaseResource($updated));
+        } catch (AuthorizationException) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => self::_UNAUTHORIZED,
+            ], 403);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (RepositoryException $e) {
+            return response()->json([
+                'status' => self::_ERROR,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Error uploading signed lease agreement: ' . $e->getMessage());
             return response()->json([
                 'status' => self::_ERROR,
                 'message' => self::_UNKNOWN_ERROR,

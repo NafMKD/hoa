@@ -66,8 +66,16 @@ export const StepRepresentativeExistingSchema = z.object({
 
 /* Lease details */
 export const StepLeaseSchema = z.object({
-  agreement_amount: z.number().min(0),
-  lease_template_id: z.string().trim().min(1, "Lease template is required"),
+  agreement_amount: z
+    .string()
+    .trim()
+    .min(1, "Agreement amount is required")
+    .refine((s) => {
+      const n = parseFloat(String(s).replace(/,/g, ""));
+      return !Number.isNaN(n);
+    }, "Enter a valid number")
+    .transform((s) => parseFloat(String(s).replace(/,/g, "")))
+    .pipe(z.number().min(0, "Must be at least 0")),
   lease_start_date: z.string().min(1),
   lease_end_date: z.string().optional().nullable(),
   representative_document: z.instanceof(File).optional().nullable(),

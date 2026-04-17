@@ -98,6 +98,8 @@ export type UnitLeaseResource = {
   agreement_amount: number | string | null;
   lease_template?: DocumentTemplate | null;
   lease_document?: Document | null;
+  /** Scanned copy of the physically signed agreement */
+  signed_agreement?: Document | null;
   lease_start_date: string | null;
   lease_end_date: string | null;
   status: string;

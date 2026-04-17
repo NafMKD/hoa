@@ -20,6 +20,7 @@ Route::get('/{unit}/leases/{lease}', [UnitController::class,  'showUnitLease'])-
 Route::delete('/{unit}/leases/{lease}', [UnitController::class,  'destroyUnitLease'])->name('leases.store');
 Route::post('/{unit}/leases/{lease}/activate', [UnitController::class,  'activateUnitLease'])->name('leases.activate');
 Route::post('/{unit}/leases/{lease}/terminate', [UnitController::class,  'terminateUnitLease'])->name('leases.terminate');
+Route::post('/{unit}/leases/{lease}/signed-agreement', [UnitController::class,  'uploadSignedLeaseAgreement'])->name('leases.signed-agreement');
 
 // unit owner
 Route::post('/{unit}/owners', [UnitController::class,  'storeUnitOwner'])->name('owners.store');

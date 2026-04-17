@@ -108,6 +108,27 @@ export const terminateUnitLease = (unitId: string, leaseId: string) =>
   );
 
 /**
+ * Upload or replace the scanned signed lease agreement document.
+ */
+export const uploadSignedLeaseAgreement = (
+  unitId: string,
+  leaseId: string,
+  file: File,
+) => {
+  const formData = new FormData();
+  formData.append("signed_agreement", file);
+  return handleApi<UnitLeaseResource>(
+    api.post(
+      `/v1/units/${unitId}/leases/${leaseId}/signed-agreement`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      },
+    ),
+  );
+};
+
+/**
  * Import units from file
  */
 export const importUnits = (file: File) => {

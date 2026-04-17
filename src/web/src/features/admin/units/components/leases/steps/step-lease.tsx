@@ -15,12 +15,11 @@ import {
 } from "@/components/ui/form";
 
 import { StepLeaseSchema } from "../schemas";
-import type { StepLeaseValues, StepTypeValues } from "../types";
-import { useEffect, useState } from "react";
-import { fetchLeaseTemplates } from "../../../lib/lease";
-import type { DocumentTemplate } from "@/types/types";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import type {
+  StepLeaseFormInput,
+  StepLeaseValues,
+  StepTypeValues,
+} from "../types";
 // --- Props & Component Definition ---
 interface StepLeaseProps {
   typeValues: StepTypeValues | null;
@@ -39,30 +38,13 @@ export function StepLease({
   goNext,
   goPrev,
 }: StepLeaseProps) {
-  const [isTemplateLoading, setIsTemplateLoading] = useState(true);
-  const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
-
-  useEffect(() => {
-    const loadTemplates = async () => {
-      setIsTemplateLoading(true);
-      try {
-        const data = await fetchLeaseTemplates();
-        setTemplates(data.data);
-      } catch (error) {
-        console.error("Error fetching lease templates:", error);
-      } finally {
-        setIsTemplateLoading(false);
-      }
-    };
-
-    loadTemplates();
-  }, []);
-
-  const form = useForm<StepLeaseValues>({
+  const form = useForm<StepLeaseFormInput>({
     resolver: zodResolver(StepLeaseSchema),
     defaultValues: {
-      agreement_amount: leaseValues?.agreement_amount,
-      lease_template_id: leaseValues?.lease_template_id,
+      agreement_amount:
+        leaseValues?.agreement_amount != null
+          ? String(leaseValues.agreement_amount)
+          : "",
       lease_start_date: leaseValues?.lease_start_date ? leaseValues.lease_start_date : new Date().toISOString().split("T")[0],
       lease_end_date: leaseValues?.lease_end_date ? leaseValues.lease_end_date : new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split("T")[0],
       representative_document: leaseValues?.representative_document,
@@ -88,7 +70,7 @@ export function StepLease({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Agreement Amount (Number) */}
+              {/* Agreement Amount (text + Zod) */}
               <FormField
                 control={form.control}
                 name="agreement_amount"
@@ -99,12 +81,12 @@ export function StepLease({
                     </FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
+                        autoComplete="off"
+                        placeholder="e.g. 15000"
                         {...field}
-                        // Convert number field value back to number type for RHF
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value) || 0)
-                        }
+                        value={field.value ?? ""}
                         className="pl-7"
                       />
                     </FormControl>
@@ -144,49 +126,6 @@ export function StepLease({
                   </FormItem>
                 )}
               />
-
-              {/* Lease Template ID (Optional) */}
-              {isTemplateLoading ? (
-                <div className="md:col-span-2 lg:col-span-3 flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                </div>
-              ) : (
-                <FormField
-                  control={form.control}
-                  name="lease_template_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Lease Template <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Lease Template" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value=" ">
-                              Select Lease Template
-                            </SelectItem>
-                            {templates.map((template) => (
-                              <SelectItem
-                                key={template.id}
-                                value={template.id.toString()}
-                              >
-                                {template.name} - V{template.version}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
 
               {/* Representative Document (File Input) */}
               {typeValues?.leasingBy === "representative" && (

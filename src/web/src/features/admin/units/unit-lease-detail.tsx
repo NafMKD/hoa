@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Main } from "@/components/layout/main"
 import { Button } from "@/components/ui/button"
 import {
@@ -45,7 +45,8 @@ import { toast } from "sonner"
 import {
   fetchUnitLeaseDetail,
   activateUnitLease,
-  terminateUnitLease
+  terminateUnitLease,
+  uploadSignedLeaseAgreement,
 } from "./lib/units"
 import type { UnitLeaseResource } from "@/types/types"
 
@@ -111,6 +112,8 @@ export function UnitLeaseDetail() {
   const [isSaving, setIsSaving] = useState(false)
 
   const [previewFile, setPreviewFile] = useState<PreviewFile | null>(null)
+  const [isUploadingSigned, setIsUploadingSigned] = useState(false)
+  const signedAgreementInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const loadLease = async () => {
@@ -132,17 +135,24 @@ export function UnitLeaseDetail() {
   const currentOwner = useMemo(() => unit?.currentOwner ?? null, [unit])
 
   const docs = useMemo(() => {
-    const list: Array<{ label: string; file?: FileRef | null; fallbackName?: string }> = [
-      { label: "Lease document", file: lease?.lease_document, fallbackName: "Lease document" },
-      { label: "Lease template", file: lease?.lease_template, fallbackName: "Lease template" },
+    const list: Array<{
+      label: string
+      file?: FileRef | null
+      fallbackName?: string
+    }> = [
+      {
+        label: "Signed agreement (scan)",
+        file: lease?.signed_agreement,
+        fallbackName: "Signed agreement",
+      },
       {
         label: "Representative document",
         file: lease?.representative_document,
         fallbackName: "Representative document",
-      }
+      },
     ]
     return list
-  }, [lease, currentOwner])
+  }, [lease])
 
   const documentsCount = useMemo(() => {
     return docs.filter((d) => d.file?.url).length
@@ -178,6 +188,31 @@ export function UnitLeaseDetail() {
       setIsSaving(false);
     }
   };
+
+  const handleSignedAgreementChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file || !lease) return
+    try {
+      setIsUploadingSigned(true)
+      const updated = await uploadSignedLeaseAgreement(
+        unitId as string,
+        String(lease.id),
+        file,
+      )
+      setLease(updated)
+      toast.success("Signed agreement uploaded.")
+    } catch (err: unknown) {
+      const anyErr = err as { status?: number; data?: { message?: string } }
+      toast.error(
+        anyErr?.data?.message ?? "Failed to upload signed agreement.",
+      )
+    } finally {
+      setIsUploadingSigned(false)
+      e.target.value = ""
+    }
+  }
 
   const handleTerminate = async (leaseId: number) => {
     if (!lease) return;
@@ -737,77 +772,106 @@ export function UnitLeaseDetail() {
               </TabsContent>
 
               {/* DOCUMENTS TAB */}
-              <TabsContent value="documents" className="mt-4">
-                {documentsCount === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No documents were attached to this lease.
-                  </p>
-                ) : (
-                  <div className="rounded-lg border bg-muted/10 overflow-hidden">
-                    <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/60">
-                      <p className="text-sm font-medium">
-                        Documents
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          ({documentsCount} available)
-                        </span>
-                      </p>
-                    </div>
-
-                    <Table>
-                      <TableHeader className="bg-muted/40">
-                        <TableRow>
-                          <TableHead className="w-[35%]">Type</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead className="w-[15%] text-center">
-                            Preview
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {docs.map((d, i) => {
-                          const url = d.file?.url || null;
-                          const name = d.file?.file_name;
-
-                          return (
-                            <TableRow
-                              key={`${d.label}-${i}`}
-                              className="hover:bg-muted/40"
-                            >
-                              <TableCell className="font-medium">
-                                {d.label}
-                              </TableCell>
-                              <TableCell className="text-sm text-muted-foreground">
-                                {name || "—"}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                {url ? (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="inline-flex items-center gap-1 text-xs"
-                                    onClick={() =>
-                                      handleOpenPreview({
-                                        title: name as string,
-                                        url: url,
-                                      })
-                                    }
-                                  >
-                                    <IconEye size={14} />
-                                    <span>View</span>
-                                  </Button>
-                                ) : (
-                                  <span className="text-xs text-muted-foreground">
-                                    —
-                                  </span>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+              <TabsContent value="documents" className="mt-4 space-y-4">
+                <div className="rounded-lg border bg-muted/10 px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Signed agreement</p>
+                    <p className="text-xs text-muted-foreground">
+                      Upload a scan or photo of the agreement after it has been
+                      signed offline. PDF or image (max 5&nbsp;MB).
+                    </p>
                   </div>
-                )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <input
+                      ref={signedAgreementInputRef}
+                      type="file"
+                      accept="application/pdf,image/jpeg,image/png,image/webp"
+                      className="sr-only"
+                      onChange={handleSignedAgreementChange}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={isUploadingSigned}
+                      onClick={() =>
+                        signedAgreementInputRef.current?.click()
+                      }
+                    >
+                      {isUploadingSigned
+                        ? "Uploading…"
+                        : lease?.signed_agreement
+                          ? "Replace signed agreement"
+                          : "Upload signed agreement"}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border bg-muted/10 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/60">
+                    <p className="text-sm font-medium">
+                      All attachments
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        ({documentsCount} file
+                        {documentsCount === 1 ? "" : "s"} on record)
+                      </span>
+                    </p>
+                  </div>
+
+                  <Table>
+                    <TableHeader className="bg-muted/40">
+                      <TableRow>
+                        <TableHead className="w-[35%]">Type</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="w-[15%] text-center">
+                          Preview
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {docs.map((d, i) => {
+                        const file = d.file
+                        const url = file?.url || null
+                        const name = file?.file_name
+
+                        return (
+                          <TableRow
+                            key={`${d.label}-${i}`}
+                            className="hover:bg-muted/40"
+                          >
+                            <TableCell className="font-medium">
+                              {d.label}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {name || "—"}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {url ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="inline-flex items-center gap-1 text-xs"
+                                  onClick={() =>
+                                    handleOpenPreview({
+                                      title: name ?? d.fallbackName ?? "File",
+                                      url: url,
+                                    })
+                                  }
+                                >
+                                  <IconEye size={14} />
+                                  <span>View</span>
+                                </Button>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">
+                                  —
+                                </span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
               </TabsContent>
 
               {/* NOTES TAB */}
@@ -906,21 +970,21 @@ export function UnitLeaseDetail() {
                           </Link>
                         </Button>
                       )}
-                      {lease.lease_document?.url && (
+                      {lease.signed_agreement?.url && (
                         <Button
                           variant="outline"
                           className="w-full justify-start"
                           onClick={() =>
                             handleOpenPreview({
                               title:
-                                lease.lease_document?.file_name ||
-                                "Lease document",
-                              url: lease.lease_document?.url as string,
+                                lease.signed_agreement?.file_name ||
+                                "Signed agreement",
+                              url: lease.signed_agreement?.url as string,
                             })
                           }
                         >
                           <IconFileText size={16} className="mr-2" />
-                          Open Lease Document
+                          Open signed agreement
                         </Button>
                       )}
                     </CardContent>

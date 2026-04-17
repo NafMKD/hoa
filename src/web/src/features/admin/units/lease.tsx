@@ -210,8 +210,6 @@ export function Leases() {
 
       // Lease fields
       fd.append("agreement_amount", String(leaseValues.agreement_amount));
-      if (leaseValues.lease_template_id)
-        fd.append("lease_template_id", leaseValues.lease_template_id);
       fd.append("lease_start_date", leaseValues.lease_start_date);
       if (leaseValues.lease_end_date)
         fd.append("lease_end_date", leaseValues.lease_end_date);

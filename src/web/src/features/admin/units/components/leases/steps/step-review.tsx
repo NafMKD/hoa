@@ -103,7 +103,6 @@ const getSectionData = (
         "Start Date": props.leaseValues.lease_start_date,
         "End Date": props.leaseValues.lease_end_date || "Open-ended",
         Notes: props.leaseValues.notes || "None",
-        "Document Template ID": props.leaseValues.lease_template_id ? <Link to={`/admin/templates/$templateId`} params={{templateId: props.leaseValues.lease_template_id}} target="_blank"> {props.leaseValues.lease_template_id} </Link> : "Default Template", 
         "Representative Document": props.leaseValues.representative_document ? "Yes" : "No",
         "Witness 1 Name": props.leaseValues.witness_1_full_name || "N/A",
         "Witness 2 Name": props.leaseValues.witness_2_full_name || "N/A",

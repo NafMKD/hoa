@@ -25,6 +25,7 @@ class UnitLease extends Model
         'agreement_amount',
         'lease_template_id',
         'lease_document_id',
+        'signed_agreement_document_id',
         'lease_start_date',
         'lease_end_date',
         'status',
@@ -78,6 +79,16 @@ class UnitLease extends Model
     public function document(): BelongsTo
     {
         return $this->belongsTo(Document::class, 'lease_document_id');
+    }
+
+    /**
+     * Uploaded scan of the physically signed lease agreement (optional).
+     *
+     * @return BelongsTo
+     */
+    public function signedAgreementDocument(): BelongsTo
+    {
+        return $this->belongsTo(Document::class, 'signed_agreement_document_id');
     }
 
     /**

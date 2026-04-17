@@ -22,7 +22,10 @@ export type StepTenantExistingValues = z.infer<typeof StepTenantExistingSchema>;
 export type StepTenantNewValues = z.infer<typeof StepTenantNewSchema>;
 export type StepRepresentativeValues = z.infer<typeof StepRepresentativeSchema>;
 export type StepRepresentativeExistingValues = z.infer<typeof StepRepresentativeExistingSchema>;
+/** Parsed lease step values (after Zod transforms), e.g. numeric agreement_amount */
 export type StepLeaseValues = z.infer<typeof StepLeaseSchema>;
+/** RHF + Zod input shape (e.g. agreement_amount as string while typing) */
+export type StepLeaseFormInput = z.input<typeof StepLeaseSchema>;
 
 // Global state values type for the Leases component
 export interface LeaseFormState {

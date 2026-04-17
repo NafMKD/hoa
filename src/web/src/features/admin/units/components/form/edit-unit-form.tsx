@@ -67,7 +67,11 @@ export function EditUnitForm({ unit, onSuccess }: EditUnitFormProps) {
           : ([""] as any)
       )
       .refine((val) => val !== "", { message: "Unit type is required" }),
-    size_m2: z.coerce.number().min(0).optional().nullable(),
+    size_m2: z.preprocess(
+      (val) =>
+        val === "" || val === null || val === undefined ? undefined : val,
+      z.coerce.number().min(0).optional().nullable(),
+    ),
     status: z
       .enum(
         unitStatuses.length > 0
@@ -256,9 +260,10 @@ export function EditUnitForm({ unit, onSuccess }: EditUnitFormProps) {
               </Label>
               <Input
                 id="floor_number"
-                type="number"
-                min="0"
-                {...form.register("floor_number", { valueAsNumber: true })}
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                {...form.register("floor_number")}
               />
               {form.formState.errors.floor_number && (
                 <p className="text-sm text-red-500">
@@ -303,10 +308,11 @@ export function EditUnitForm({ unit, onSuccess }: EditUnitFormProps) {
               <Label htmlFor="size_m2">Size (m²)</Label>
               <Input
                 id="size_m2"
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
                 placeholder="e.g. 85.5"
-                {...form.register("size_m2", { valueAsNumber: true })}
+                {...form.register("size_m2")}
               />
               {form.formState.errors.size_m2 && (
                 <p className="text-sm text-red-500">

@@ -38,11 +38,15 @@ abstract class Controller
     /**
      * @var list<string>
      */
-    const _DOCUMENT_TYPES = ['id_files', 'ownership_files', 'payslip', 'payments', 'lease_document', 'vehicles', 'stickers', 'representative_document', 'complaint_attachment'];
+    const _DOCUMENT_TYPES = ['id_files', 'ownership_files', 'payslip', 'payments', 'lease_document', 'vehicles', 'stickers', 'representative_document', 'complaint_attachment', 'outgoing_letter_scan'];
     /**
      * Uploaded files linked to complaints (storage category / documents.category).
      */
     const _DOCUMENT_CATEGORY_COMPLAINT_ATTACHMENT = 'complaint_attachment';
+    /**
+     * Scanned copy linked to outgoing letters archive.
+     */
+    const _DOCUMENT_CATEGORY_OUTGOING_LETTER_SCAN = 'outgoing_letter_scan';
     /**
      * @var list<string>
      */

@@ -6,6 +6,7 @@ use App\Models\BankStatementBatch;
 use App\Models\BankTransaction;
 use App\Models\Building;
 use App\Models\Complaint;
+use App\Models\OutgoingLetter;
 use App\Models\DocumentTemplate;
 use App\Models\Agency;
 use App\Models\AgencyMonthlyPayment;
@@ -44,6 +45,7 @@ use App\Policies\Api\V1\PayrollPolicy;
 use App\Policies\Api\V1\PayrollSettingPolicy;
 use App\Policies\Api\V1\PayrollTaxBracketPolicy;
 use App\Policies\Api\V1\InvoicePolicy;
+use App\Policies\Api\V1\OutgoingLetterPolicy;
 use App\Policies\Api\V1\ReconciliationEscalationPolicy;
 use App\Policies\Api\V1\PaymentPolicy;
 use App\Policies\Api\V1\PollPolicy;
@@ -98,6 +100,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Vehicle::class, VehiclePolicy::class);
         Gate::policy(Poll::class, PollPolicy::class);
         Gate::policy(Complaint::class, ComplaintPolicy::class);
+        Gate::policy(OutgoingLetter::class, OutgoingLetterPolicy::class);
 
         Gate::define('viewFinancialReports', function (User $user): bool {
             return $user->hasRole(['admin', 'accountant', 'secretary', 'representative']);
@@ -127,5 +130,6 @@ class AppServiceProvider extends ServiceProvider
         AgencyMonthlyPayment::observe(AuditLogObserver::class);
         Poll::observe(AuditLogObserver::class);
         Complaint::observe(AuditLogObserver::class);
+        OutgoingLetter::observe(AuditLogObserver::class);
     }
 }

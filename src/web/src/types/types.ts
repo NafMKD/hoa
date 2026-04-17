@@ -348,6 +348,32 @@ export interface ComplaintPaginatedResponse {
   };
 }
 
+export interface OutgoingLetter {
+  id: number;
+  letter_number: string;
+  title: string;
+  description: string | null;
+  unit_id: number | null;
+  recipient_name: string | null;
+  scanned_document_id: number | null;
+  unit?: Unit | null;
+  creator?: User | null;
+  scan?: Document | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null;
+}
+
+export interface OutgoingLetterPaginatedResponse {
+  data: OutgoingLetter[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
 export type StickerIssueStatus =
   | "active"
   | "lost"

@@ -17,6 +17,11 @@ api.interceptors.request.use((config) => {
   // Ensure headers exist as AxiosHeaders
   config.headers = config.headers ?? new axios.AxiosHeaders();
 
+  if (config.data instanceof FormData) {
+    // Let the runtime set multipart/form-data with the correct boundary (default JSON breaks uploads).
+    config.headers.delete("Content-Type");
+  }
+
   if (token) {
     config.headers.set("Authorization", `Bearer ${token}`);
   }

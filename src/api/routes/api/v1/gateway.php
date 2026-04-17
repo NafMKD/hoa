@@ -80,3 +80,6 @@ Route::prefix('polls')->middleware('auth:sanctum')->name('api.v1.polls.')->group
 Route::prefix('complaints')->middleware('auth:sanctum')->name('api.v1.complaints.')->group(function () {
     require __DIR__.'/complaint.php';
 });
+Route::prefix('outgoing-letters')->middleware('auth:sanctum')->name('api.v1.outgoing_letters.')->group(function () {
+    require __DIR__.'/outgoing_letter.php';
+});

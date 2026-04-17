@@ -24,6 +24,7 @@ import { Route as AuthenticatedAdminUnitsIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminTemplatesIndexRouteImport } from './routes/_authenticated/admin/templates/index'
 import { Route as AuthenticatedAdminPollsIndexRouteImport } from './routes/_authenticated/admin/polls/index'
 import { Route as AuthenticatedAdminPayrollRulesIndexRouteImport } from './routes/_authenticated/admin/payroll-rules/index'
+import { Route as AuthenticatedAdminLettersIndexRouteImport } from './routes/_authenticated/admin/letters/index'
 import { Route as AuthenticatedAdminEmployeesIndexRouteImport } from './routes/_authenticated/admin/employees/index'
 import { Route as AuthenticatedAdminComplaintsIndexRouteImport } from './routes/_authenticated/admin/complaints/index'
 import { Route as AuthenticatedAdminBuildingsIndexRouteImport } from './routes/_authenticated/admin/buildings/index'
@@ -31,6 +32,7 @@ import { Route as AuthenticatedAdminAgenciesIndexRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminVehiclesVehicleIdRouteImport } from './routes/_authenticated/admin/vehicles/$vehicleId'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin/users/$userId'
 import { Route as AuthenticatedAdminTemplatesTemplateIdRouteImport } from './routes/_authenticated/admin/templates/$templateId'
+import { Route as AuthenticatedAdminLettersLetterIdRouteImport } from './routes/_authenticated/admin/letters/$letterId'
 import { Route as AuthenticatedAdminBuildingsBuildingIdRouteImport } from './routes/_authenticated/admin/buildings/$buildingId'
 import { Route as AuthenticatedAdminUnitsUnitIdIndexRouteImport } from './routes/_authenticated/admin/units/$unitId/index'
 import { Route as AuthenticatedAdminFinancialsReportsIndexRouteImport } from './routes/_authenticated/admin/financials/reports/index'
@@ -128,6 +130,12 @@ const AuthenticatedAdminPayrollRulesIndexRoute =
     path: '/payroll-rules/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminLettersIndexRoute =
+  AuthenticatedAdminLettersIndexRouteImport.update({
+    id: '/letters/',
+    path: '/letters/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminEmployeesIndexRoute =
   AuthenticatedAdminEmployeesIndexRouteImport.update({
     id: '/employees/',
@@ -168,6 +176,12 @@ const AuthenticatedAdminTemplatesTemplateIdRoute =
   AuthenticatedAdminTemplatesTemplateIdRouteImport.update({
     id: '/templates/$templateId',
     path: '/templates/$templateId',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminLettersLetterIdRoute =
+  AuthenticatedAdminLettersLetterIdRouteImport.update({
+    id: '/letters/$letterId',
+    path: '/letters/$letterId',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminBuildingsBuildingIdRoute =
@@ -272,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503Route
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  '/admin/letters/$letterId': typeof AuthenticatedAdminLettersLetterIdRoute
   '/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
@@ -279,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
   '/admin/complaints': typeof AuthenticatedAdminComplaintsIndexRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesIndexRoute
+  '/admin/letters': typeof AuthenticatedAdminLettersIndexRoute
   '/admin/payroll-rules': typeof AuthenticatedAdminPayrollRulesIndexRoute
   '/admin/polls': typeof AuthenticatedAdminPollsIndexRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
@@ -310,6 +326,7 @@ export interface FileRoutesByTo {
   '/503': typeof errors503Route
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  '/admin/letters/$letterId': typeof AuthenticatedAdminLettersLetterIdRoute
   '/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
@@ -317,6 +334,7 @@ export interface FileRoutesByTo {
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
   '/admin/complaints': typeof AuthenticatedAdminComplaintsIndexRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesIndexRoute
+  '/admin/letters': typeof AuthenticatedAdminLettersIndexRoute
   '/admin/payroll-rules': typeof AuthenticatedAdminPayrollRulesIndexRoute
   '/admin/polls': typeof AuthenticatedAdminPollsIndexRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesIndexRoute
@@ -350,6 +368,7 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503Route
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  '/_authenticated/admin/letters/$letterId': typeof AuthenticatedAdminLettersLetterIdRoute
   '/_authenticated/admin/templates/$templateId': typeof AuthenticatedAdminTemplatesTemplateIdRoute
   '/_authenticated/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/_authenticated/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
@@ -357,6 +376,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/buildings/': typeof AuthenticatedAdminBuildingsIndexRoute
   '/_authenticated/admin/complaints/': typeof AuthenticatedAdminComplaintsIndexRoute
   '/_authenticated/admin/employees/': typeof AuthenticatedAdminEmployeesIndexRoute
+  '/_authenticated/admin/letters/': typeof AuthenticatedAdminLettersIndexRoute
   '/_authenticated/admin/payroll-rules/': typeof AuthenticatedAdminPayrollRulesIndexRoute
   '/_authenticated/admin/polls/': typeof AuthenticatedAdminPollsIndexRoute
   '/_authenticated/admin/templates/': typeof AuthenticatedAdminTemplatesIndexRoute
@@ -391,6 +411,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/admin/'
     | '/admin/buildings/$buildingId'
+    | '/admin/letters/$letterId'
     | '/admin/templates/$templateId'
     | '/admin/users/$userId'
     | '/admin/vehicles/$vehicleId'
@@ -398,6 +419,7 @@ export interface FileRouteTypes {
     | '/admin/buildings'
     | '/admin/complaints'
     | '/admin/employees'
+    | '/admin/letters'
     | '/admin/payroll-rules'
     | '/admin/polls'
     | '/admin/templates'
@@ -429,6 +451,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/admin'
     | '/admin/buildings/$buildingId'
+    | '/admin/letters/$letterId'
     | '/admin/templates/$templateId'
     | '/admin/users/$userId'
     | '/admin/vehicles/$vehicleId'
@@ -436,6 +459,7 @@ export interface FileRouteTypes {
     | '/admin/buildings'
     | '/admin/complaints'
     | '/admin/employees'
+    | '/admin/letters'
     | '/admin/payroll-rules'
     | '/admin/polls'
     | '/admin/templates'
@@ -468,6 +492,7 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/buildings/$buildingId'
+    | '/_authenticated/admin/letters/$letterId'
     | '/_authenticated/admin/templates/$templateId'
     | '/_authenticated/admin/users/$userId'
     | '/_authenticated/admin/vehicles/$vehicleId'
@@ -475,6 +500,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/buildings/'
     | '/_authenticated/admin/complaints/'
     | '/_authenticated/admin/employees/'
+    | '/_authenticated/admin/letters/'
     | '/_authenticated/admin/payroll-rules/'
     | '/_authenticated/admin/polls/'
     | '/_authenticated/admin/templates/'
@@ -615,6 +641,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPayrollRulesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/letters/': {
+      id: '/_authenticated/admin/letters/'
+      path: '/letters'
+      fullPath: '/admin/letters'
+      preLoaderRoute: typeof AuthenticatedAdminLettersIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/employees/': {
       id: '/_authenticated/admin/employees/'
       path: '/employees'
@@ -662,6 +695,13 @@ declare module '@tanstack/react-router' {
       path: '/templates/$templateId'
       fullPath: '/admin/templates/$templateId'
       preLoaderRoute: typeof AuthenticatedAdminTemplatesTemplateIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/letters/$letterId': {
+      id: '/_authenticated/admin/letters/$letterId'
+      path: '/letters/$letterId'
+      fullPath: '/admin/letters/$letterId'
+      preLoaderRoute: typeof AuthenticatedAdminLettersLetterIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/buildings/$buildingId': {
@@ -775,6 +815,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminBuildingsBuildingIdRoute: typeof AuthenticatedAdminBuildingsBuildingIdRoute
+  AuthenticatedAdminLettersLetterIdRoute: typeof AuthenticatedAdminLettersLetterIdRoute
   AuthenticatedAdminTemplatesTemplateIdRoute: typeof AuthenticatedAdminTemplatesTemplateIdRoute
   AuthenticatedAdminUsersUserIdRoute: typeof AuthenticatedAdminUsersUserIdRoute
   AuthenticatedAdminVehiclesVehicleIdRoute: typeof AuthenticatedAdminVehiclesVehicleIdRoute
@@ -782,6 +823,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminBuildingsIndexRoute: typeof AuthenticatedAdminBuildingsIndexRoute
   AuthenticatedAdminComplaintsIndexRoute: typeof AuthenticatedAdminComplaintsIndexRoute
   AuthenticatedAdminEmployeesIndexRoute: typeof AuthenticatedAdminEmployeesIndexRoute
+  AuthenticatedAdminLettersIndexRoute: typeof AuthenticatedAdminLettersIndexRoute
   AuthenticatedAdminPayrollRulesIndexRoute: typeof AuthenticatedAdminPayrollRulesIndexRoute
   AuthenticatedAdminPollsIndexRoute: typeof AuthenticatedAdminPollsIndexRoute
   AuthenticatedAdminTemplatesIndexRoute: typeof AuthenticatedAdminTemplatesIndexRoute
@@ -809,6 +851,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdminBuildingsBuildingIdRoute:
       AuthenticatedAdminBuildingsBuildingIdRoute,
+    AuthenticatedAdminLettersLetterIdRoute:
+      AuthenticatedAdminLettersLetterIdRoute,
     AuthenticatedAdminTemplatesTemplateIdRoute:
       AuthenticatedAdminTemplatesTemplateIdRoute,
     AuthenticatedAdminUsersUserIdRoute: AuthenticatedAdminUsersUserIdRoute,
@@ -821,6 +865,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminComplaintsIndexRoute,
     AuthenticatedAdminEmployeesIndexRoute:
       AuthenticatedAdminEmployeesIndexRoute,
+    AuthenticatedAdminLettersIndexRoute: AuthenticatedAdminLettersIndexRoute,
     AuthenticatedAdminPayrollRulesIndexRoute:
       AuthenticatedAdminPayrollRulesIndexRoute,
     AuthenticatedAdminPollsIndexRoute: AuthenticatedAdminPollsIndexRoute,

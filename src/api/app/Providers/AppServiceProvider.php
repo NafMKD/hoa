@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\BankStatementBatch;
 use App\Models\BankTransaction;
 use App\Models\Building;
+use App\Models\Complaint;
 use App\Models\DocumentTemplate;
 use App\Models\Agency;
 use App\Models\AgencyMonthlyPayment;
@@ -30,6 +31,7 @@ use App\Observers\AuditLogObserver;
 use App\Models\ReconciliationEscalation;
 use App\Policies\Api\V1\BankStatementBatchPolicy;
 use App\Policies\Api\V1\BuildingPolicy;
+use App\Policies\Api\V1\ComplaintPolicy;
 use App\Policies\Api\V1\DocumentTemplatePolicy;
 use App\Policies\Api\V1\AgencyMonthlyPaymentPolicy;
 use App\Policies\Api\V1\AgencyPlacementPolicy;
@@ -95,6 +97,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Payment::class, PaymentPolicy::class);
         Gate::policy(Vehicle::class, VehiclePolicy::class);
         Gate::policy(Poll::class, PollPolicy::class);
+        Gate::policy(Complaint::class, ComplaintPolicy::class);
 
         Gate::define('viewFinancialReports', function (User $user): bool {
             return $user->hasRole(['admin', 'accountant', 'secretary', 'representative']);
@@ -123,5 +126,6 @@ class AppServiceProvider extends ServiceProvider
         AgencyPlacement::observe(AuditLogObserver::class);
         AgencyMonthlyPayment::observe(AuditLogObserver::class);
         Poll::observe(AuditLogObserver::class);
+        Complaint::observe(AuditLogObserver::class);
     }
 }

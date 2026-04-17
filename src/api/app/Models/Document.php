@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Document extends Model
@@ -42,5 +42,12 @@ class Document extends Model
     {
         return asset('storage/' . $this->file_path);
     }
-    
+
+    /**
+     * @return BelongsToMany<Complaint, Document>
+     */
+    public function complaints(): BelongsToMany
+    {
+        return $this->belongsToMany(Complaint::class, 'complaint_document')->withTimestamps();
+    }
 }

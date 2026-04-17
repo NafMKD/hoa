@@ -22,6 +22,10 @@ interface UnitSelectProps {
   onChange: (value: number | null) => void;
   error?: string;
   status?: string;
+  /** When `value` is set but the unit is not in search results yet (e.g. edit form). */
+  selectedDisplayName?: string | null;
+  /** Show clear when a unit is selected (optional unit field). */
+  allowClear?: boolean;
   disabledIds?: number[];
 }
 
@@ -30,6 +34,8 @@ export function UnitSelect({
   onChange,
   error,
   status,
+  selectedDisplayName,
+  allowClear,
   disabledIds,
 }: UnitSelectProps) {
   const [open, setOpen] = useState(false);
@@ -66,9 +72,12 @@ export function UnitSelect({
     }
     const found = options.find((u) => u.id === value);
     if (found) {
-      setSelectedLabel(found.name);
+      const extra = found.building?.name ? ` — ${found.building.name}` : "";
+      setSelectedLabel(`${found.name}${extra}`);
+    } else if (selectedDisplayName) {
+      setSelectedLabel(selectedDisplayName);
     }
-  }, [value, options]);
+  }, [value, options, selectedDisplayName]);
 
   const handleSelect = (unit: Unit) => {
     onChange(unit.id as number);
@@ -152,6 +161,19 @@ export function UnitSelect({
           </Command>
         </PopoverContent>
       </Popover>
+      {allowClear && value ? (
+        <Button
+          type="button"
+          variant="link"
+          className="h-auto justify-start px-0 py-0 text-xs text-muted-foreground"
+          onClick={() => {
+            onChange(null);
+            setSelectedLabel("");
+          }}
+        >
+          No unit
+        </Button>
+      ) : null}
 
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>

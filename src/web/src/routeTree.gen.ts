@@ -25,6 +25,7 @@ import { Route as AuthenticatedAdminTemplatesIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminPollsIndexRouteImport } from './routes/_authenticated/admin/polls/index'
 import { Route as AuthenticatedAdminPayrollRulesIndexRouteImport } from './routes/_authenticated/admin/payroll-rules/index'
 import { Route as AuthenticatedAdminEmployeesIndexRouteImport } from './routes/_authenticated/admin/employees/index'
+import { Route as AuthenticatedAdminComplaintsIndexRouteImport } from './routes/_authenticated/admin/complaints/index'
 import { Route as AuthenticatedAdminBuildingsIndexRouteImport } from './routes/_authenticated/admin/buildings/index'
 import { Route as AuthenticatedAdminAgenciesIndexRouteImport } from './routes/_authenticated/admin/agencies/index'
 import { Route as AuthenticatedAdminVehiclesVehicleIdRouteImport } from './routes/_authenticated/admin/vehicles/$vehicleId'
@@ -131,6 +132,12 @@ const AuthenticatedAdminEmployeesIndexRoute =
   AuthenticatedAdminEmployeesIndexRouteImport.update({
     id: '/employees/',
     path: '/employees/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminComplaintsIndexRoute =
+  AuthenticatedAdminComplaintsIndexRouteImport.update({
+    id: '/complaints/',
+    path: '/complaints/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminBuildingsIndexRoute =
@@ -270,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
   '/admin/agencies': typeof AuthenticatedAdminAgenciesIndexRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
+  '/admin/complaints': typeof AuthenticatedAdminComplaintsIndexRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesIndexRoute
   '/admin/payroll-rules': typeof AuthenticatedAdminPayrollRulesIndexRoute
   '/admin/polls': typeof AuthenticatedAdminPollsIndexRoute
@@ -307,6 +315,7 @@ export interface FileRoutesByTo {
   '/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
   '/admin/agencies': typeof AuthenticatedAdminAgenciesIndexRoute
   '/admin/buildings': typeof AuthenticatedAdminBuildingsIndexRoute
+  '/admin/complaints': typeof AuthenticatedAdminComplaintsIndexRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesIndexRoute
   '/admin/payroll-rules': typeof AuthenticatedAdminPayrollRulesIndexRoute
   '/admin/polls': typeof AuthenticatedAdminPollsIndexRoute
@@ -346,6 +355,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/vehicles/$vehicleId': typeof AuthenticatedAdminVehiclesVehicleIdRoute
   '/_authenticated/admin/agencies/': typeof AuthenticatedAdminAgenciesIndexRoute
   '/_authenticated/admin/buildings/': typeof AuthenticatedAdminBuildingsIndexRoute
+  '/_authenticated/admin/complaints/': typeof AuthenticatedAdminComplaintsIndexRoute
   '/_authenticated/admin/employees/': typeof AuthenticatedAdminEmployeesIndexRoute
   '/_authenticated/admin/payroll-rules/': typeof AuthenticatedAdminPayrollRulesIndexRoute
   '/_authenticated/admin/polls/': typeof AuthenticatedAdminPollsIndexRoute
@@ -386,6 +396,7 @@ export interface FileRouteTypes {
     | '/admin/vehicles/$vehicleId'
     | '/admin/agencies'
     | '/admin/buildings'
+    | '/admin/complaints'
     | '/admin/employees'
     | '/admin/payroll-rules'
     | '/admin/polls'
@@ -423,6 +434,7 @@ export interface FileRouteTypes {
     | '/admin/vehicles/$vehicleId'
     | '/admin/agencies'
     | '/admin/buildings'
+    | '/admin/complaints'
     | '/admin/employees'
     | '/admin/payroll-rules'
     | '/admin/polls'
@@ -461,6 +473,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/vehicles/$vehicleId'
     | '/_authenticated/admin/agencies/'
     | '/_authenticated/admin/buildings/'
+    | '/_authenticated/admin/complaints/'
     | '/_authenticated/admin/employees/'
     | '/_authenticated/admin/payroll-rules/'
     | '/_authenticated/admin/polls/'
@@ -607,6 +620,13 @@ declare module '@tanstack/react-router' {
       path: '/employees'
       fullPath: '/admin/employees'
       preLoaderRoute: typeof AuthenticatedAdminEmployeesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/complaints/': {
+      id: '/_authenticated/admin/complaints/'
+      path: '/complaints'
+      fullPath: '/admin/complaints'
+      preLoaderRoute: typeof AuthenticatedAdminComplaintsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/buildings/': {
@@ -760,6 +780,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminVehiclesVehicleIdRoute: typeof AuthenticatedAdminVehiclesVehicleIdRoute
   AuthenticatedAdminAgenciesIndexRoute: typeof AuthenticatedAdminAgenciesIndexRoute
   AuthenticatedAdminBuildingsIndexRoute: typeof AuthenticatedAdminBuildingsIndexRoute
+  AuthenticatedAdminComplaintsIndexRoute: typeof AuthenticatedAdminComplaintsIndexRoute
   AuthenticatedAdminEmployeesIndexRoute: typeof AuthenticatedAdminEmployeesIndexRoute
   AuthenticatedAdminPayrollRulesIndexRoute: typeof AuthenticatedAdminPayrollRulesIndexRoute
   AuthenticatedAdminPollsIndexRoute: typeof AuthenticatedAdminPollsIndexRoute
@@ -796,6 +817,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminAgenciesIndexRoute: AuthenticatedAdminAgenciesIndexRoute,
     AuthenticatedAdminBuildingsIndexRoute:
       AuthenticatedAdminBuildingsIndexRoute,
+    AuthenticatedAdminComplaintsIndexRoute:
+      AuthenticatedAdminComplaintsIndexRoute,
     AuthenticatedAdminEmployeesIndexRoute:
       AuthenticatedAdminEmployeesIndexRoute,
     AuthenticatedAdminPayrollRulesIndexRoute:

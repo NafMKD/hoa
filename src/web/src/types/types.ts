@@ -302,6 +302,52 @@ export type PollResultsResponse = {
   total_votes: number;
 };
 
+export type ComplaintStatus =
+  | "open"
+  | "in_progress"
+  | "resolved"
+  | "closed";
+
+export type ComplaintPriority = "low" | "normal" | "high" | "urgent";
+
+export type ComplaintCategory =
+  | "maintenance"
+  | "noise"
+  | "parking"
+  | "security"
+  | "billing"
+  | "common_areas"
+  | "other";
+
+export interface Complaint {
+  id: number;
+  user_id: number;
+  unit_id: number | null;
+  category: ComplaintCategory | string;
+  subject: string;
+  body: string;
+  status: ComplaintStatus | string;
+  priority: ComplaintPriority | string;
+  assigned_to: number | null;
+  submitter?: User;
+  assignee?: User | null;
+  unit?: Unit | null;
+  documents?: Document[];
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null;
+}
+
+export interface ComplaintPaginatedResponse {
+  data: Complaint[];
+  meta: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
 export type StickerIssueStatus =
   | "active"
   | "lost"

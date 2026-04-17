@@ -77,3 +77,6 @@ Route::prefix('financial-reports')->middleware('auth:sanctum')->name('api.v1.fin
 Route::prefix('polls')->middleware('auth:sanctum')->name('api.v1.polls.')->group(function () {
     require __DIR__.'/poll.php';
 });
+Route::prefix('complaints')->middleware('auth:sanctum')->name('api.v1.complaints.')->group(function () {
+    require __DIR__.'/complaint.php';
+});

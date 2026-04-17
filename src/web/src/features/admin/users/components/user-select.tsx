@@ -23,10 +23,29 @@ interface UserSelectProps {
   error?: string;
   role?: string;
   status?: string;
+  /** Limit search to residents (default) or HOA staff (admin, accountant, secretary). */
+  scope?: "residents" | "staff";
+  /**
+   * When `value` is set but the user is not in the current search results (e.g. edit form),
+   * show this label until they search again.
+   */
+  selectedDisplayName?: string | null;
+  /** Show a clear control when a user is selected (e.g. optional assignee). */
+  allowClear?: boolean;
   disabledIds?: number[];
 }
 
-export function UserSelect({ value, onChange, error, role, status, disabledIds }: UserSelectProps) {
+export function UserSelect({
+  value,
+  onChange,
+  error,
+  role,
+  status,
+  scope = "residents",
+  selectedDisplayName,
+  allowClear,
+  disabledIds,
+}: UserSelectProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState<User[]>([]);
@@ -44,15 +63,15 @@ export function UserSelect({ value, onChange, error, role, status, disabledIds }
     const timeout = setTimeout(async () => {
       try {
         setLoading(true);
-        const users = await searchUsers(query, role, status);
-        setOptions(users.data);          
+        const users = await searchUsers(query, role, status, scope);
+        setOptions(users.data);
       } finally {
         setLoading(false);
       }
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [query, open, role, status]);
+  }, [query, open, role, status, scope]);
 
   // Update selected label when value or options change
   useEffect(() => {
@@ -63,8 +82,10 @@ export function UserSelect({ value, onChange, error, role, status, disabledIds }
     const found = options.find((u) => u.id === value);
     if (found) {
       setSelectedLabel(found.full_name);
+    } else if (selectedDisplayName) {
+      setSelectedLabel(selectedDisplayName);
     }
-  }, [value, options]);
+  }, [value, options, selectedDisplayName]);
 
   const handleSelect = (user: User) => {
     onChange(user.id as number);
@@ -138,6 +159,19 @@ export function UserSelect({ value, onChange, error, role, status, disabledIds }
           </Command>
         </PopoverContent>
       </Popover>
+      {allowClear && value ? (
+        <Button
+          type="button"
+          variant="link"
+          className="h-auto justify-start px-0 py-0 text-xs text-muted-foreground"
+          onClick={() => {
+            onChange(null);
+            setSelectedLabel("");
+          }}
+        >
+          Clear selection
+        </Button>
+      ) : null}
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );

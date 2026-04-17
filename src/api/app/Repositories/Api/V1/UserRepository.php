@@ -66,16 +66,18 @@ class UserRepository
      */
     public function search(string $term, array $filers = []): Collection
     {
-        $allowedRoles = array_slice(
-            Controller::_ROLES, 
-            -3 
-        );
+        $scope = $filers['scope'] ?? 'residents';
+        $roles = match ($scope) {
+            'staff' => array_slice(Controller::_ROLES, 0, 3),
+            default => array_slice(Controller::_ROLES, -3),
+        };
 
         $query = User::query()
-            ->whereIn('role', $allowedRoles)
+            ->whereIn('role', $roles)
             ->where(function ($q) use ($term) {
                 $q->where('first_name', 'like', "%{$term}%")
                   ->orWhere('last_name', 'like', "%{$term}%")
+                  ->orWhere('email', 'like', "%{$term}%")
                   ->orWhere('phone', 'like', "%{$term}%")
                   ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$term}%"]);
             });

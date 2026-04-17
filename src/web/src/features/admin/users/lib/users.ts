@@ -60,10 +60,18 @@ export const updateUser = (userID: string | number, data: FormData) =>
 export const fetchUserNames = async (): Promise<IdNamePair[]> =>
   handleApi<IdNamePair[]>(api.get(`/v1/users/names/all`));
 
-export const searchUsers = async (query: string, role?: string, status?:string ): Promise<UserSelectOption> =>
-  handleApi<UserSelectOption>(api.get(`/v1/users/search`, {
-    params: { term: query, role: role, status: status },
-  }));
+export const searchUsers = async (
+  query: string,
+  role?: string,
+  status?: string,
+  /** residents (default): homeowner, tenant, representative — staff: admin, accountant, secretary */
+  scope: "residents" | "staff" = "residents"
+): Promise<UserSelectOption> =>
+  handleApi<UserSelectOption>(
+    api.get(`/v1/users/search`, {
+      params: { term: query, role: role, status: status, scope },
+    })
+  );
 
 export const importUsers = (file: File) => {
   const formData = new FormData();

@@ -38,7 +38,23 @@ abstract class Controller
     /**
      * @var list<string>
      */
-    const _DOCUMENT_TYPES = ['id_files', 'ownership_files', 'payslip', 'payments', 'lease_document', 'vehicles', 'stickers', 'representative_document'];
+    const _DOCUMENT_TYPES = ['id_files', 'ownership_files', 'payslip', 'payments', 'lease_document', 'vehicles', 'stickers', 'representative_document', 'complaint_attachment'];
+    /**
+     * Uploaded files linked to complaints (storage category / documents.category).
+     */
+    const _DOCUMENT_CATEGORY_COMPLAINT_ATTACHMENT = 'complaint_attachment';
+    /**
+     * @var list<string>
+     */
+    const _COMPLAINT_STATUSES = ['open', 'in_progress', 'resolved', 'closed'];
+    /**
+     * @var list<string>
+     */
+    const _COMPLAINT_PRIORITIES = ['low', 'normal', 'high', 'urgent'];
+    /**
+     * @var list<string>
+     */
+    const _COMPLAINT_CATEGORIES = ['maintenance', 'noise', 'parking', 'security', 'billing', 'common_areas', 'other'];
     const _DEFAULT_PAGINATION = 10;
     const _UNAUTHORIZED = 'Unauthorized action.';
     const _MAX_FILE_SIZE = 5120; // in KB

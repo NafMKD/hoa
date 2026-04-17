@@ -82,8 +82,17 @@ class UserController extends Controller
             $term = $request->query('term');
             $role = $request->query('role');
             $status = $request->query('status');
+            $scope = $request->query('scope', 'residents');
+
+            if (! in_array($scope, ['residents', 'staff'], true)) {
+                return response()->json([
+                    'status' => self::_ERROR,
+                    'message' => 'Invalid scope. Use residents or staff.',
+                ], 400);
+            }
 
             $filters = compact('role', 'status');
+            $filters['scope'] = $scope;
 
             $users = $this->users->search($term, $filters);
 

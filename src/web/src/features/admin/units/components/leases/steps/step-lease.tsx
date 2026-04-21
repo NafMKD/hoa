@@ -38,15 +38,21 @@ export function StepLease({
   goNext,
   goPrev,
 }: StepLeaseProps) {
-  const form = useForm<StepLeaseFormInput>({
+  const form = useForm<StepLeaseFormInput, undefined, StepLeaseValues>({
     resolver: zodResolver(StepLeaseSchema),
     defaultValues: {
       agreement_amount:
         leaseValues?.agreement_amount != null
           ? String(leaseValues.agreement_amount)
           : "",
-      lease_start_date: leaseValues?.lease_start_date ? leaseValues.lease_start_date : new Date().toISOString().split("T")[0],
-      lease_end_date: leaseValues?.lease_end_date ? leaseValues.lease_end_date : new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split("T")[0],
+      lease_start_date: leaseValues?.lease_start_date
+        ? leaseValues.lease_start_date
+        : new Date().toISOString().split("T")[0],
+      lease_end_date: leaseValues?.lease_end_date
+        ? leaseValues.lease_end_date
+        : new Date(new Date().setFullYear(new Date().getFullYear() + 2))
+            .toISOString()
+            .split("T")[0],
       representative_document: leaseValues?.representative_document,
       witness_1_full_name: leaseValues?.witness_1_full_name,
       witness_2_full_name: leaseValues?.witness_2_full_name,

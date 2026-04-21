@@ -231,7 +231,7 @@ export function CommunityPolls() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <DataTableSkeleton />
+            <DataTableSkeleton columnCount={5} />
           ) : (
             <>
               <div className="rounded-md border">

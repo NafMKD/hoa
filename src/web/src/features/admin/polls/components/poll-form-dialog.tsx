@@ -70,7 +70,7 @@ function buildScope(
   mode: ScopeMode,
   buildingIds: number[],
   unitIdsText: string
-): PollEligibleScope | null {
+): PollEligibleScope {
   if (mode === "all") {
     return { type: "all" };
   }

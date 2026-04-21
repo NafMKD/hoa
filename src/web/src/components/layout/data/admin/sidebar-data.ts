@@ -153,7 +153,7 @@ export const sidebarData: SidebarData = {
       items: [
         {
           title: "Help Center",
-          url: "/help-center",
+          url: "/admin/help-center",
           icon: HelpCircle,
         },
       ],

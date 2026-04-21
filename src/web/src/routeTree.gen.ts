@@ -18,6 +18,7 @@ import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminHelpCenterRouteImport } from './routes/_authenticated/admin/help-center'
 import { Route as AuthenticatedAdminVehiclesIndexRouteImport } from './routes/_authenticated/admin/vehicles/index'
 import { Route as AuthenticatedAdminUsersIndexRouteImport } from './routes/_authenticated/admin/users/index'
 import { Route as AuthenticatedAdminUnitsIndexRouteImport } from './routes/_authenticated/admin/units/index'
@@ -94,6 +95,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminHelpCenterRoute =
+  AuthenticatedAdminHelpCenterRouteImport.update({
+    id: '/help-center',
+    path: '/help-center',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminVehiclesIndexRoute =
   AuthenticatedAdminVehiclesIndexRouteImport.update({
     id: '/vehicles/',
@@ -284,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/admin/help-center': typeof AuthenticatedAdminHelpCenterRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
   '/admin/letters/$letterId': typeof AuthenticatedAdminLettersLetterIdRoute
@@ -324,6 +332,7 @@ export interface FileRoutesByTo {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/admin/help-center': typeof AuthenticatedAdminHelpCenterRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
   '/admin/letters/$letterId': typeof AuthenticatedAdminLettersLetterIdRoute
@@ -366,6 +375,7 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
+  '/_authenticated/admin/help-center': typeof AuthenticatedAdminHelpCenterRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/buildings/$buildingId': typeof AuthenticatedAdminBuildingsBuildingIdRoute
   '/_authenticated/admin/letters/$letterId': typeof AuthenticatedAdminLettersLetterIdRoute
@@ -409,6 +419,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/admin/help-center'
     | '/admin/'
     | '/admin/buildings/$buildingId'
     | '/admin/letters/$letterId'
@@ -449,6 +460,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/admin/help-center'
     | '/admin'
     | '/admin/buildings/$buildingId'
     | '/admin/letters/$letterId'
@@ -490,6 +502,7 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
+    | '/_authenticated/admin/help-center'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/buildings/$buildingId'
     | '/_authenticated/admin/letters/$letterId'
@@ -597,6 +610,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/help-center': {
+      id: '/_authenticated/admin/help-center'
+      path: '/help-center'
+      fullPath: '/admin/help-center'
+      preLoaderRoute: typeof AuthenticatedAdminHelpCenterRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/vehicles/': {
@@ -813,6 +833,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminHelpCenterRoute: typeof AuthenticatedAdminHelpCenterRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminBuildingsBuildingIdRoute: typeof AuthenticatedAdminBuildingsBuildingIdRoute
   AuthenticatedAdminLettersLetterIdRoute: typeof AuthenticatedAdminLettersLetterIdRoute
@@ -848,6 +869,7 @@ interface AuthenticatedAdminRouteRouteChildren {
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminHelpCenterRoute: AuthenticatedAdminHelpCenterRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdminBuildingsBuildingIdRoute:
       AuthenticatedAdminBuildingsBuildingIdRoute,
